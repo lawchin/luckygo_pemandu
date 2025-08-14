@@ -1,0 +1,18 @@
+{
+  "@@locale": "ms",
+  "appTitle": "Lucky Go Driver",
+  "phoneNumber": "Nombor Telefon",
+  "password": "Kata laluan",
+  "notMember": "Belum menjadi ahli?",
+  "registerHere": "Daftar di sini!",
+  "login": "Log Masuk",
+  "td": "Terma & Pendedahan",
+  "beforeUsing": "Sebelum menggunakan aplikasi ini, sila semak dan terima pendedahan penggunaan data kami. Kami mungkin mengumpul maklumat akaun anda, maklumat peranti, dan maklumat lokasi untuk menyediakan perkhidmatan kami kepada anda. Data anda akan dilindungi dengan baik dan tidak akan dikongsi dengan pihak ketiga kecuali jika dikehendaki oleh undang-undang. Dengan meneruskan, anda mengakui dan menerima terma ini.",
+  "iAccept": "Saya terima terma pendedahan",
+  "cont": "Teruskan",
+"welcome": "Selamat datang",
+"notProvided": "TIDAK DISEDIAKAN"
+
+
+
+}

@@ -1,0 +1,99 @@
+name: luckygo_pemandu
+description: A new Flutter project with Firebase integration.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  firebase_core: ^3.0.0
+  firebase_auth: ^5.0.0
+  cloud_firestore: ^5.6.12
+  shared_preferences: ^2.0.0
+  device_info_plus: ^10.1.0
+
+  geoflutterfire_plus: ^0.0.32
+  dart_geohash: ^2.1.0
+  google_maps_flutter: ^2.5.0
+  url_launcher: ^6.3.0
+
+
+
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  permission_handler: ^11.3.1
+  geolocator: ^11.1.0
+  http: ^1.2.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+
+
+
+
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/images/luckygo_logo.png
+    - assets/images/special2.png
+    - assets/images/wheelchair.png
+    - assets/images/blind_symbol.png
+    - assets/images/deaf_symbol.png
+    - assets/images/ind_supportstick.png
+    - assets/images/mute_symbol.png
+    - assets/images/stroller.png
+    - assets/images/ind_stroller.png
+    - assets/images/shopping_1.png
+    - assets/images/shopping_2.png
+    - assets/images/shopping_3.png
+    - assets/images/shopping_4.png
+    - assets/images/shopping_5.png
+    - assets/images/luggage_1.png
+    - assets/images/luggage_2.png
+    - assets/images/luggage_3.png
+    - assets/images/luggage_4.png
+    - assets/images/luggage_5.png
+    - assets/images/ind_adult.png
+    - assets/images/ind_baby.png
+    - assets/images/ind_wheelchair.png
+    - assets/images/ind_shopping1.png
+    - assets/images/ind_shopping2.png
+    - assets/images/ind_shopping3.png
+    - assets/images/ind_shopping4.png
+    - assets/images/ind_shopping5.png
+    - assets/images/ind_luggage1.png
+    - assets/images/ind_luggage2.png
+    - assets/images/ind_luggage3.png
+    - assets/images/ind_luggage4.png
+    - assets/images/ind_luggage5.png
+    - assets/images/ind_pets.png
+    - assets/images/ind_dog.png
+    - assets/images/ind_goat.png
+    - assets/images/ind_rooster.png
+    - assets/images/ind_snake.png
+    - assets/images/ind_durian.png
+    - assets/images/ind_odourfruits.png
+    - assets/images/ind_wetfood.png
+    - assets/images/ind_tupperware.png
+    - assets/images/ind_gastank.png
+    - assets/images/presenter.png
+    - assets/images/ind_passenger.png
+    - assets/images/destination_marker.png
+    - assets/images/earth.png
+    - assets/images/aim_1.png
+    - assets/images/d1.png
+    - assets/images/d2.png
+    - assets/images/d3.png
+    - assets/images/d4.png
+    - assets/images/d5.png
+    - assets/images/car.png
+    - assets/images/finish.png

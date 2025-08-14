@@ -1,0 +1,18 @@
+{
+  "@@locale": "en",
+  "appTitle": "Lucky Go Driver",
+  "phoneNumber": "Phone Number",
+  "password": "Password",
+  "notMember": "Not yet a member?",
+  "registerHere": "Register here!",
+  "login": "Login",
+  "td": "Terms & Disclosure",
+  "beforeUsing": "Before using this application, please review and accept our data usage disclosure.We may collect your account information, device information, and location information to provide you with our services.Your data will be properly protected and will not be shared with third parties unless required by law.By continuing, you acknowledge and accept these terms.",
+  "iAccept": "I accept the disclosure terms",
+  "cont": "Continue",
+  "welcome": "Welcome",
+  "notProvided": "NOT PROVIDED"
+
+
+
+}

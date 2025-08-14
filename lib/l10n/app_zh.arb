@@ -1,0 +1,18 @@
+{
+  "@@locale": "zh",
+  "appTitle": "Lucky Go Driver",
+  "phoneNumber": "手机号",
+  "password": "密码",
+  "notMember": "还不是会员？",
+  "registerHere": "在这里注册！",
+  "login": "登录",
+  "td": "条款与披露",
+  "beforeUsing": "在使用本应用程序之前，请阅读并接受我们的数据使用披露。我们可能会收集您的账户信息、设备信息和位置信息，以便为您提供服务。您的数据将被妥善保护，除非法律要求，否则不会与第三方共享。继续操作即表示您已知晓并接受这些条款。",
+  "iAccept": "我接受披露条款",
+  "cont": "继续",
+  "welcome": "欢迎",
+  "notProvided": "未提供"
+
+
+
+}
