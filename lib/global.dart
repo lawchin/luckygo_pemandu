@@ -1,8 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart'; // For GeoPoint
+import 'package:luckygo_pemandu/jobFilter/filter_jobs_helper.dart'; // exports class ShortJob
+
+
+
+// in global.dart
+class JobCalc {
+  final double roadKm;
+  final int etaMin;
+  const JobCalc({required this.roadKm, required this.etaMin});
+}
 
 // Global variables for user session and profile
 class Gv {
+
+  static Map<String, JobCalc> roadByJob = {};
+
   static String loggedUser = '';
   static String userName = '';
   static String negara = '';
@@ -10,7 +23,7 @@ class Gv {
   static String kawasan = '';
   static String bahasa = '';
 
-  // New variable to store current location
+  // Current location
   static GeoPoint? driverGp;
   static double driverLat = 0.0;
   static double driverLng = 0.0;
@@ -59,11 +72,30 @@ class Gv {
   static int gasTankCount        = 0;    // 32
 
   static int groupCapability     = 0;
-  
+
+  static double roadKm = 0.0;
+  static double flyKm = 0.0;
+
+  static int roadEta = 0;
+  // static int flyEta = 0;
 
   static ValueNotifier<bool> showPresenter = ValueNotifier(false);
-  static double distanceDriverToPickup = 0.0;  // 14
+  static double distanceDriverToPickup = 0.0;  // convenience distance holder
   static String googleApiKey = 'AIzaSyDa5S3_IbRkjAJsH53VIXca0ZPLm9WcSHw';
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Bucket 4 (5.1–7.5 km by AIR) shortlist, globally shareable
+  // Fill this from your filter page and read it from B123().
+  // Use the setter to update and notify listeners.
+  static List<ShortJob> bucket4Jobs = const [];
+  static ValueNotifier<int> bucket4Version = ValueNotifier<int>(0); // increments on set
+  static DateTime? bucket4LastBuiltAt;
+
+  static void setBucket4Jobs(List<ShortJob> jobs) {
+    bucket4Jobs = List<ShortJob>.unmodifiable(jobs);
+    bucket4LastBuiltAt = DateTime.now();
+    bucket4Version.value = bucket4Version.value + 1; // notify observers
+  }
 
 
 

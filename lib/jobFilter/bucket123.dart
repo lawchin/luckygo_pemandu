@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/job_details_page.dart';
 
-class ActiveJobsBucketsPage extends StatefulWidget {
-  const ActiveJobsBucketsPage({super.key, required this.bucketIndex});
+class Bucket123 extends StatefulWidget {
+  const Bucket123({super.key, required this.bucketIndex});
 
   /// 1..14  (b01..b14)
   final int bucketIndex;
 
   @override
-  State<ActiveJobsBucketsPage> createState() => _ActiveJobsBucketsPageState();
+  State<Bucket123> createState() => _Bucket123State();
 }
 
-class _ActiveJobsBucketsPageState extends State<ActiveJobsBucketsPage> {
+class _Bucket123State extends State<Bucket123> {
   late final DocumentReference<Map<String, dynamic>> _docRef;
 
   // ---------- bucket ranges & labels ----------
@@ -216,14 +216,23 @@ class _ActiveJobsBucketsPageState extends State<ActiveJobsBucketsPage> {
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
+                          // onTap: () {
+                          //   Gv.distanceDriverToPickup = dKm; // keep your behavior
+                          //   _applyPackedToGlobals(p);
+                          //   Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(builder: (_) => const JobDetailsPage()),
+                          //   );
+                          // },
                           onTap: () {
-                            Gv.distanceDriverToPickup = dKm; // keep your behavior
+                            Gv.distanceDriverToPickup = Gv.roadKm; // use the per-job ROAD distance
                             _applyPackedToGlobals(p);
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (_) => const JobDetailsPage()),
                             );
                           },
+
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
@@ -321,7 +330,11 @@ class _ActiveJobsBucketsPageState extends State<ActiveJobsBucketsPage> {
                                     );
                                   },
                                 ),
-
+                                Row(
+                                  children: [
+                                    Text('Eta ${Gv.roadEta} minutes', style: const TextStyle(height: 0.5, fontSize: 12)),
+                                  ],
+                                ),
                                 const SizedBox(height: 6),
                                 // CAR ROW + marker strip
                                 Row(
@@ -331,9 +344,9 @@ class _ActiveJobsBucketsPageState extends State<ActiveJobsBucketsPage> {
                                     const SizedBox(width: 6),
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: const [
-                                        Text('air distance', style: TextStyle(height: 0.6, fontSize: 12)),
-                                        Text('⟶', style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
+                                      children: [
+                                        Text('${Gv.roadKm} km', style: const TextStyle(height: 0.6, fontSize: 12)),
+                                        const Text('⟶', style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),                                        
                                       ],
                                     ),
                                     const SizedBox(width: 6),

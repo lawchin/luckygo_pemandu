@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/job_details_page.dart';
 
-class ActiveJobsBucketsPage extends StatefulWidget {
-  const ActiveJobsBucketsPage({super.key, required this.bucketIndex});
+class Bucket414 extends StatefulWidget {
+  const Bucket414({super.key, required this.bucketIndex});
 
   /// 1..14  (b01..b14)
   final int bucketIndex;
 
   @override
-  State<ActiveJobsBucketsPage> createState() => _ActiveJobsBucketsPageState();
+  State<Bucket414> createState() => _Bucket414State();
 }
 
-class _ActiveJobsBucketsPageState extends State<ActiveJobsBucketsPage> {
+class _Bucket414State extends State<Bucket414> {
   late final DocumentReference<Map<String, dynamic>> _docRef;
 
   // ---------- bucket ranges & labels ----------
@@ -321,6 +321,11 @@ class _ActiveJobsBucketsPageState extends State<ActiveJobsBucketsPage> {
                                     );
                                   },
                                 ),
+                                Row(
+                                  children: [
+                                    Text('Fly Distance', style: const TextStyle(height: 0.5, fontSize: 12)),
+                                  ],
+                                ),
 
                                 const SizedBox(height: 6),
                                 // CAR ROW + marker strip
@@ -331,9 +336,9 @@ class _ActiveJobsBucketsPageState extends State<ActiveJobsBucketsPage> {
                                     const SizedBox(width: 6),
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: const [
-                                        Text('air distance', style: TextStyle(height: 0.6, fontSize: 12)),
-                                        Text('⟶', style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
+                                      children: [
+                                        Text('${Gv.flyKm} km', style: const TextStyle(height: 0.6, fontSize: 12)),
+                                        const Text('⟶', style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
                                       ],
                                     ),
                                     const SizedBox(width: 6),

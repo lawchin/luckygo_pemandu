@@ -58,30 +58,27 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> fetchAndUpdateGroupCapability() async {
-    try {
-      final docRef = FirebaseFirestore.instance
-          .collection(Gv.negara)
-          .doc(Gv.negeri)
-          .collection('driver_account')
-          .doc(Gv.loggedUser);
+Future<void> fetchAndUpdateGroupCapability() async {
+  try {
+    final docRef = FirebaseFirestore.instance
+        .collection(Gv.negara)
+        .doc(Gv.negeri)
+        .collection('driver_account')
+        .doc(Gv.loggedUser);
 
-      final docSnapshot = await docRef.get();
+    final docSnapshot = await docRef.get();
 
-      if (docSnapshot.exists) {
-        final data = docSnapshot.data();
-        if (data != null && data.containsKey('group_capability')) {
-          Gv.groupCapability = data['group_capability'] ?? 0;
-        } else {
-          print('Field "group_capability" not found.');
-        }
-      } else {
-        print('Document does not exist.');
-      }
-    } catch (e) {
-      print('Error fetching user data: $e');
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data();
+      Gv.groupCapability = data?['group_capability'] as int? ?? 0;
+    } else {
+      print('Document does not exist.');
     }
+  } catch (e) {
+    print('Error fetching user data: $e');
   }
+}
+
 
   Future<void> _bootstrap() async {
     try {

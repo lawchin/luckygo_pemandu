@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 
 import 'package:luckygo_pemandu/global.dart';
-import 'package:luckygo_pemandu/landing%20page/active_job_lite_stream.dart';
 import 'package:luckygo_pemandu/landing%20page/landing_page.dart';
 import 'package:luckygo_pemandu/loginRegister/fill_form.dart';
 import 'package:luckygo_pemandu/loginRegister/register_page.dart';

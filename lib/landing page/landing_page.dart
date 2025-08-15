@@ -7,15 +7,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
-import 'package:luckygo_pemandu/jobFilter/lite_job_buckets.dart';
+import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
 import 'package:luckygo_pemandu/landing page/disclosure_accepted_page.dart';
-import 'package:luckygo_pemandu/landing%20page/buckets_launcher_page.dart';
 import 'package:luckygo_pemandu/landing%20page/presenter_page.dart';
 import 'package:luckygo_pemandu/loginRegister/login_page.dart';
 import 'package:luckygo_pemandu/main.dart';
 import 'package:luckygo_pemandu/translate_bahasa.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -109,7 +107,7 @@ class _LandingPageState extends State<LandingPage> {
         Gv.driverGp = GeoPoint(pos.latitude, pos.longitude);
         Gv.driverLat = pos.latitude;
         Gv.driverLng = pos.longitude;
-        print("📍🔴🔴🔴 Lat: ${pos.latitude}, Lng: ${pos.longitude}");
+        print("📍🔴 Driver LatLng: ${pos.latitude}, ${pos.longitude}");
         
         // 5️⃣ Fetch jobs now that location is ready
         // await fetchAllJobs();
@@ -300,53 +298,6 @@ class _LandingPageState extends State<LandingPage> {
     print("✅ Seeded ${jobsMap.length} jobs (≈70% within 1–50 km of driver)");
   }
 
-Future<void> debugBuckets() async {
-  final b = await loadAndBucketJobs(
-    negara: Gv.negara,
-    negeri: Gv.negeri,
-  );
-
-  // Buckets + labels aligned by index
-  final labels = <String>[
-    '≤ 1.5 km',
-    '1.51–2.5 km',
-    '2.51–5 km',
-    '5.1–7.5 km',
-    '7.51–10 km',
-    '10.1–20 km',
-    '20.1–30 km',
-    '30.1–50 km',
-    '50.1–100 km',
-    '100.1–200 km',
-    '200.1–500 km',
-    '500.1–1000 km',
-    '1000.1–2000 km',
-    '2000.1–5000 km',
-  ];
-
-  final lists = <List<JobLite>>[
-    b.bucket1, b.bucket2, b.bucket3, b.bucket4, b.bucket5, b.bucket6, b.bucket7,
-    b.bucket8, b.bucket9, b.bucket10, b.bucket11, b.bucket12, b.bucket13, b.bucket14,
-  ];
-
-  final cap = b.filledUpTo; // == Gv.groupCapability clamped to 1..14
-  print('--- Nearby buckets (cap=$cap) ---');
-
-  int total = 0;
-  for (var i = 0; i < cap; i++) {
-    final len = lists[i].length;
-    total += len;
-    print('${labels[i]}: $len');
-  }
-  print('TOTAL (≤ ${labels[cap - 1]}): $total');
-
-  // Optional: peek first 3 ids per bucket for quick sanity checking
-  for (var i = 0; i < cap; i++) {
-    final peek = lists[i].take(3).map((j) => '${j.id}(${j.airKm}km)').join(', ');
-    if (peek.isNotEmpty) print('  ↳ sample ${i + 1}: $peek');
-  }
-}
-
 @override
 void initState() {
   super.initState();
@@ -369,7 +320,7 @@ void initState() {
     // Request GPS ONCE (gated). Do not also call another request function.
     await requestDriverPermissionAndFetchJobs();
     
-    await debugBuckets();
+
   });
 }
 
@@ -530,7 +481,8 @@ body: Stack(
                   ),
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const BucketsLauncherPage()),
+                      // MaterialPageRoute(builder: (_) => const BucketsLauncherPage()),
+                      MaterialPageRoute(builder: (_) => const FilterJobsOneStream()),
                     );
                   },
                 ),
