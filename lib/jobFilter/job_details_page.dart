@@ -575,8 +575,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
     if (l.contains('bag')) return 'assets/images/ind_shopping1.png';
     if (l.contains('luggage')) return 'assets/images/ind_luggage1.png';
     if (l.contains('tupperware')) return 'assets/images/ind_tupperware.png';
-    if (l.contains('gas')) return 'assets/images/ind_gastank.png';
-    if (l.contains('wet food')) return 'assets/images/ind_wetfood.png';
+    if (l.contains('gas')) return 'assets/imqs/images/ind_wetfood.png';
     if (l.contains('odour')) return 'assets/images/ind_odourfruits.png';
     if (l.contains('durian')) return 'assets/images/ind_durian.png';
     if (l.contains('pets')) return 'assets/images/ind_pets.png';

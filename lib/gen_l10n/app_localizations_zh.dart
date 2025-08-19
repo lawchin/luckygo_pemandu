@@ -44,4 +44,82 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notProvided => '未提供';
+
+  @override
+  String get icNo => '请输入身份证号码';
+
+  @override
+  String get driverLicenseExDate => '请输入驾驶证到期日期';
+
+  @override
+  String get roadTaxExDate => '请输入路税到期日期';
+
+  @override
+  String get psvExDate => '请输入PSV到期日期';
+
+  @override
+  String get eInsExDate => '请输入网约车保险到期日期';
+
+  @override
+  String get imgSelfie => '自拍照片';
+
+  @override
+  String get carFront => '汽车前部';
+
+  @override
+  String get carBack => '汽车后部';
+
+  @override
+  String get upload => '上传';
+
+  @override
+  String get completeReg => '完成注册';
+
+  @override
+  String get submit => '提交';
+
+  @override
+  String get vePlateNo => '车辆牌照号码';
+
+  @override
+  String get veBrand => '车辆品牌';
+
+  @override
+  String get veModel => '车辆型号';
+
+  @override
+  String get veColor => '车辆颜色';
+
+  @override
+  String get veCapacity => '车辆载客量';
+
+  @override
+  String get pendingReviewText => '管理员正在审核您的文件。\n审核通过后，您将收到通知并可继续使用应用程序。';
+
+  @override
+  String get pendingReview => '待审核';
+
+  @override
+  String get fullName => '全名';
+
+  @override
+  String get phoneNo => '手机号';
+
+  @override
+  String get pwd => '密码';
+
+  @override
+  String get rePwd => '请重新输入密码';
+
+  @override
+  String get phone2 => '第二个手机号（可选）';
+
+  @override
+  String get country => '国家';
+
+  @override
+  String get state => '州/省';
+
+  @override
+  String get area => '地区';
 }

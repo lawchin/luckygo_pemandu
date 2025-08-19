@@ -198,7 +198,7 @@ class _Bucket414State extends State<Bucket414> {
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, i) {
                       final p   = parsed[i].parts;
-                      final dKm = parsed[i].dKm;
+                      final dKm = parsed[i].dKm; // AIR distance for this card
 
                       final name   = p[2].isEmpty ? p[1] : p[2];
                       final price  = _toDbl(p, 5);
@@ -217,7 +217,9 @@ class _Bucket414State extends State<Bucket414> {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
                           onTap: () {
-                            Gv.distanceDriverToPickup = dKm; // keep your behavior
+                            // keep using AIR for 4–14; publish to globals for details page if needed
+                            Gv.flyKm = dKm;
+                            Gv.distanceDriverToPickup = dKm;
                             _applyPackedToGlobals(p);
                             Navigator.push(
                               context,
@@ -322,13 +324,13 @@ class _Bucket414State extends State<Bucket414> {
                                   },
                                 ),
                                 Row(
-                                  children: [
-                                    Text('Fly Distance', style: const TextStyle(height: 0.5, fontSize: 12)),
+                                  children: const [
+                                    Text('Fly Distance', style: TextStyle(height: 0.5, fontSize: 12)),
                                   ],
                                 ),
 
                                 const SizedBox(height: 6),
-                                // CAR ROW + marker strip
+                                // CAR ROW + marker strip (show this card's AIR km)
                                 Row(
                                   children: [
                                     Image.asset('assets/images/car.png',
@@ -337,8 +339,10 @@ class _Bucket414State extends State<Bucket414> {
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text('${Gv.flyKm} km', style: const TextStyle(height: 0.6, fontSize: 12)),
-                                        const Text('⟶', style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
+                                        Text('${dKm.toStringAsFixed(1)} km',
+                                            style: const TextStyle(height: 0.6, fontSize: 12)),
+                                        const Text('⟶',
+                                            style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
                                       ],
                                     ),
                                     const SizedBox(width: 6),
@@ -418,7 +422,7 @@ double _haversineKm(double lat1, double lon1, double lat2, double lon2) {
   const R = 6371.0088;
   double _rad(double d) => d * math.pi / 180.0;
   final dLat = _rad(lat2 - lat1);
-  final dLon = _rad(lon2 - lon1);
+  final dLon = _rad(lon2 - lon1); // ✅ fixed: use lon2 - lon1
   final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
       math.cos(_rad(lat1)) * math.cos(_rad(lat2)) *
           math.sin(dLon / 2) * math.sin(dLon / 2);

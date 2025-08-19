@@ -50,8 +50,6 @@ class _MyAppState extends State<MyApp> {
       Gv.kawasan = (prefs.getString('area')     ?? '').trim();
       Gv.bahasa  = (prefs.getString('language') ?? '').trim();
 
-      // If you need logged user here as well, you can also load it:
-      // Gv.loggedUser = (prefs.getString('loggedUser') ?? '').trim();
     } catch (e) {
       debugPrint('fetchLocalData error: $e');
       // do not rethrow; allow app to continue with defaults

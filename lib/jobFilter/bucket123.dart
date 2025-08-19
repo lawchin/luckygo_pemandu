@@ -1,13 +1,16 @@
 import 'dart:math' as math;
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/job_details_page.dart';
 
 class Bucket123 extends StatefulWidget {
   const Bucket123({super.key, required this.bucketIndex});
 
-  /// 1..14  (b01..b14)
+  /// This page is used for 1..3 (ROAD buckets). If used with >3 it will still work (AIR fallback).
   final int bucketIndex;
 
   @override
@@ -17,8 +20,11 @@ class Bucket123 extends StatefulWidget {
 class _Bucket123State extends State<Bucket123> {
   late final DocumentReference<Map<String, dynamic>> _docRef;
 
+  // For batching ROAD fetches within this page
+  final Set<String> _inFlightKeys = {};
+  bool _loadingRoad = false;
+
   // ---------- bucket ranges & labels ----------
-  // index is 1-based to match the button numbering (b01..b14)
   static const _labels = <int, String>{
     1:  '≤ 1.5 km',
     2:  '1.51–2.5 km',
@@ -53,10 +59,15 @@ class _Bucket123State extends State<Bucket123> {
     14: (2000.1, 5000.0),
   };
 
-  String get _title => 'Jobs – ${_labels[widget.bucketIndex] ?? 'Unknown'}';
+  String get _title {
+    final base = _labels[widget.bucketIndex] ?? 'Unknown';
+    return widget.bucketIndex <= 3 ? 'Jobs – ROAD $base' : 'Jobs – $base';
+  }
 
   (double? min, double? max) get _range =>
       _ranges[widget.bucketIndex] ?? (null, null);
+
+  bool get _useRoadForFilterAndSort => widget.bucketIndex <= 3;
 
   @override
   void initState() {
@@ -72,6 +83,7 @@ class _Bucket123State extends State<Bucket123> {
     try {
       await _docRef.get(const GetOptions(source: Source.server));
     } catch (_) {/* ignore */}
+    setState(() {}); // force rebuild to re-check road lookups
   }
 
   @override
@@ -88,9 +100,7 @@ class _Bucket123State extends State<Bucket123> {
     if (widget.bucketIndex > cap) {
       return Scaffold(
         appBar: AppBar(title: Text(_title)),
-        body: Center(
-          child: Text('This bucket is disabled (cap = $cap).'),
-        ),
+        body: Center(child: Text('This bucket is disabled (cap = $cap).')),
       );
     }
 
@@ -98,6 +108,13 @@ class _Bucket123State extends State<Bucket123> {
       appBar: AppBar(
         title: Text(_title),
         actions: [
+          if (_loadingRoad)
+            const Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: Center(
+                child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
+            ),
           IconButton(
             tooltip: 'Refresh',
             onPressed: _forceRefresh,
@@ -127,14 +144,23 @@ class _Bucket123State extends State<Bucket123> {
             }
 
             // ----- Build & filter into the active bucket -----
-            final parsed = <({List<String> parts, double dKm})>[];
+            final parsed = <({
+              List<String> parts,
+              double airKm,
+              double showKm, // ROAD if >0 (b1..b3) else AIR
+              int etaMin,    // from ROAD if available
+            })>[];
             int badRows = 0;
             final (min, max) = _range;
 
             final driverLat = Gv.driverLat;
             final driverLng = Gv.driverLng;
 
-            raw.forEach((_, v) {
+            // Use current driver location as this page's "road anchor"
+            final aLat = driverLat;
+            final aLng = driverLng;
+
+            raw.forEach((jobId, v) {
               if (v is! String) { badRows++; return; }
               final parts = v.split('·').map((x) => x.trim()).toList(growable: false);
               if (parts.length != 33) { badRows++; return; }
@@ -143,18 +169,37 @@ class _Bucket123State extends State<Bucket123> {
               final sLng = _toDbl(parts, 12);
               if (!_validCoord(sLat, sLng)) { badRows++; return; }
 
-              final dKmRaw = _haversineKm(driverLat, driverLng, sLat, sLng);
-              final dKm = double.parse(dKmRaw.toStringAsFixed(2));
+              // AIR (fallback display until ROAD available)
+              final airRaw = _haversineKm(driverLat, driverLng, sLat, sLng);
+              final airKm  = double.parse(airRaw.toStringAsFixed(2));
+
+              // ROAD lookup for this anchor
+              final jc = _roadCalcForPartsWithAnchor(parts, aLat, aLng);
+              double? roadKm = jc?.roadKm;
+              final etaMin = jc?.etaMin ?? 0;
+
+              // 🔒 NEVER show 0: if road is null or ≤ 0, display AIR (and we’ll queue a re-fetch)
+              final displayKm = (roadKm != null && roadKm > 0) ? roadKm : airKm;
+
+              // For filtering in b1..b3 prefer ROAD when valid, else AIR
+              final distForBucket = _useRoadForFilterAndSort && roadKm != null && roadKm > 0 ? roadKm! : airKm;
 
               // bucket predicate
-              final okMin = (min == null) ? true : dKm >= min;
-              final okMax = (max == null) ? true : dKm <= max;
-              if (okMin && okMax) parsed.add((parts: parts, dKm: dKm));
+              final okMin = (min == null) ? true : distForBucket >= min;
+              final okMax = (max == null) ? true : distForBucket <= max;
+              if (okMin && okMax) {
+                parsed.add((parts: parts, airKm: airKm, showKm: displayKm, etaMin: etaMin));
+              }
             });
 
-            // Sort by distance asc, then price desc
+            // After we know which rows we’ll show, ensure ROAD is computed for missing ones (b1..b3)
+            if (widget.bucketIndex <= 3 && parsed.isNotEmpty) {
+              _ensureRoadForParsed(parsed, aLat, aLng);
+            }
+
+            // Sort by the km shown (ROAD if present else AIR), asc; then by price desc
             parsed.sort((a, b) {
-              final c = a.dKm.compareTo(b.dKm);
+              final c = a.showKm.compareTo(b.showKm);
               if (c != 0) return c;
               final ap = _toDbl(a.parts, 5);
               final bp = _toDbl(b.parts, 5);
@@ -197,10 +242,11 @@ class _Bucket123State extends State<Bucket123> {
                     itemCount: parsed.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, i) {
-                      final p   = parsed[i].parts;
-                      final dKm = parsed[i].dKm;
+                      final e     = parsed[i];
+                      final p     = e.parts;
+                      final showKm   = e.showKm;   // ROAD (preferred) or AIR
+                      final roadEta  = e.etaMin;   // 0 if not yet available
 
-                      final name   = p[2].isEmpty ? p[1] : p[2];
                       final price  = _toDbl(p, 5);
                       final pax    = _toInt(p, 3);
                       final sAdd1  = p[7].trim().isEmpty ? 'NOT PROVIDED' : p[7];
@@ -216,23 +262,18 @@ class _Bucket123State extends State<Bucket123> {
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
-                          // onTap: () {
-                          //   Gv.distanceDriverToPickup = dKm; // keep your behavior
-                          //   _applyPackedToGlobals(p);
-                          //   Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(builder: (_) => const JobDetailsPage()),
-                          //   );
-                          // },
                           onTap: () {
-                            Gv.distanceDriverToPickup = Gv.roadKm; // use the per-job ROAD distance
+                            // Use the km/eta shown on the card (ROAD if present)
+                            Gv.roadKm  = showKm;
+                            Gv.roadEta = roadEta;
+                            Gv.distanceDriverToPickup = showKm;
+
                             _applyPackedToGlobals(p);
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (_) => const JobDetailsPage()),
                             );
                           },
-
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
@@ -250,7 +291,7 @@ class _Bucket123State extends State<Bucket123> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // TITLE ROW (icons + quoted km on left, price on right)
+                                // TITLE ROW (icons + quoted total km on left, price on right)
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -330,13 +371,18 @@ class _Bucket123State extends State<Bucket123> {
                                     );
                                   },
                                 ),
+
+                                const SizedBox(height: 6),
+                                // ETA (from ROAD if available)
                                 Row(
                                   children: [
-                                    Text('Eta ${Gv.roadEta} minutes', style: const TextStyle(height: 0.5, fontSize: 12)),
+                                    Text('Eta $roadEta minutes',
+                                        style: const TextStyle(height: 0.5, fontSize: 12)),
                                   ],
                                 ),
+
                                 const SizedBox(height: 6),
-                                // CAR ROW + marker strip
+                                // CAR ROW + marker strip — show ROAD/AIR distance to pickup (showKm)
                                 Row(
                                   children: [
                                     Image.asset('assets/images/car.png',
@@ -345,8 +391,10 @@ class _Bucket123State extends State<Bucket123> {
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text('${Gv.roadKm} km', style: const TextStyle(height: 0.6, fontSize: 12)),
-                                        const Text('⟶', style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),                                        
+                                        Text('${showKm.toStringAsFixed(1)} km',
+                                            style: const TextStyle(height: 0.6, fontSize: 12)),
+                                        const Text('⟶',
+                                            style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
                                       ],
                                     ),
                                     const SizedBox(width: 6),
@@ -369,6 +417,159 @@ class _Bucket123State extends State<Bucket123> {
         ),
       ),
     );
+  }
+
+  // Ensure ROAD results for visible rows (b1..b3) by calling Distance Matrix with driver→pickup
+  Future<void> _ensureRoadForParsed(
+    List<({
+      List<String> parts,
+      double airKm,
+      double showKm,
+      int etaMin,
+    })> parsed,
+    double anchorLat,
+    double anchorLng,
+  ) async {
+    // Publish anchor used for these ROAD lookups (so keys match when we read)
+    Gv.roadAnchorLat = anchorLat;
+    Gv.roadAnchorLng = anchorLng;
+
+    final apiKey = (Gv.googleApiKey).trim();
+    if (apiKey.isEmpty) return;
+    if (parsed.isEmpty) return;
+
+    // Find jobs missing ROAD for this anchor
+    final needing = <List<String>>[];
+    for (final e in parsed) {
+      final p = e.parts;
+      final jobId = p[0];
+      final sLat = _toDbl(p, 11);
+      final sLng = _toDbl(p, 12);
+      if (!_validCoord(sLat, sLng)) continue;
+
+      final key = Gv.roadKey(jobId, sLat, sLng, anchorLat, anchorLng);
+      if (Gv.roadByJob.containsKey(key)) continue; // already have
+      if (_inFlightKeys.contains(key)) continue;   // request already queued
+      _inFlightKeys.add(key);
+      needing.add(p);
+    }
+
+    if (needing.isEmpty) return;
+
+    if (mounted) setState(() => _loadingRoad = true);
+
+    try {
+      // Batch in chunks (Distance Matrix supports many destinations; keep it sane)
+      const batchSize = 25;
+      for (var i = 0; i < needing.length; i += batchSize) {
+        final batch = needing.sublist(i, math.min(i + batchSize, needing.length));
+
+        final origin = '${anchorLat.toStringAsFixed(6)},${anchorLng.toStringAsFixed(6)}';
+        final destinations = batch
+            .map((p) => '${_toDbl(p, 11).toStringAsFixed(6)},${_toDbl(p, 12).toStringAsFixed(6)}')
+            .join('|');
+
+        final uri = Uri.parse(
+          'https://maps.googleapis.com/maps/api/distancematrix/json'
+          '?origins=$origin'
+          '&destinations=$destinations'
+          '&mode=driving'
+          '&departure_time=now'
+          '&key=$apiKey',
+        );
+
+        try {
+          final resp = await http.get(uri);
+          if (resp.statusCode != 200) continue;
+
+          final map = jsonDecode(resp.body) as Map<String, dynamic>;
+          if (map['status'] != 'OK') continue;
+
+          final rows = (map['rows'] as List?) ?? const [];
+          if (rows.isEmpty) continue;
+          final elements = (rows.first['elements'] as List?) ?? const [];
+
+          final n = math.min(elements.length, batch.length);
+          for (var idx = 0; idx < n; idx++) {
+            final e = elements[idx] as Map<String, dynamic>?;
+            if (e?['status'] != 'OK') continue;
+
+            final p = batch[idx];
+            final jobId = p[0];
+            final sLat = _toDbl(p, 11);
+            final sLng = _toDbl(p, 12);
+            final key = Gv.roadKey(jobId, sLat, sLng, anchorLat, anchorLng);
+
+            // distance (km)
+            final distMeters = (e?['distance']?['value'] as num?)?.toDouble() ?? 0.0;
+            double km = double.parse((distMeters / 1000.0).toStringAsFixed(2));
+
+            // duration → eta
+            final dur = (e?['duration_in_traffic'] ?? e?['duration']) as Map<String, dynamic>?;
+            final secs = (dur?['value'] as num?)?.toInt() ?? 0;
+            final etaMin = (secs / 60).round();
+
+            // 🔁 If DM returns 0, retry once with a 1-destination call; if still 0, fallback to Haversine.
+            if (km <= 0) {
+              final retry = await _retrySingleRoad(anchorLat, anchorLng, sLat, sLng);
+              if (retry != null && retry > 0) {
+                km = retry;
+              } else {
+                km = double.parse(_haversineKm(anchorLat, anchorLng, sLat, sLng).toStringAsFixed(2));
+              }
+            }
+
+            // save
+            Gv.roadByJob[key] = JobCalc(roadKm: km, etaMin: etaMin);
+          }
+
+          // As soon as we populated some results, refresh the list
+          if (mounted) setState(() {});
+        } catch (_) {
+          // ignore batch failure; continue with others
+        } finally {
+          // remove from in-flight
+          for (final p in batch) {
+            final jobId = p[0];
+            final sLat = _toDbl(p, 11);
+            final sLng = _toDbl(p, 12);
+            final key = Gv.roadKey(jobId, sLat, sLng, anchorLat, anchorLng);
+            _inFlightKeys.remove(key);
+          }
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _loadingRoad = false);
+    }
+  }
+
+  /// Single-item retry (best-effort) if the batched Distance Matrix returns 0.
+  Future<double?> _retrySingleRoad(double aLat, double aLng, double sLat, double sLng) async {
+    final key = Gv.googleApiKey.trim();
+    if (key.isEmpty) return null;
+
+    final uri = Uri.parse(
+      'https://maps.googleapis.com/maps/api/distancematrix/json'
+      '?origins=${aLat.toStringAsFixed(6)},${aLng.toStringAsFixed(6)}'
+      '&destinations=${sLat.toStringAsFixed(6)},${sLng.toStringAsFixed(6)}'
+      '&mode=driving&departure_time=now&key=$key'
+    );
+
+    try {
+      final resp = await http.get(uri);
+      if (resp.statusCode != 200) return null;
+      final m = jsonDecode(resp.body) as Map<String, dynamic>;
+      if (m['status'] != 'OK') return null;
+
+      final elem = ((m['rows'] as List?)?.first?['elements'] as List?)?.first as Map<String, dynamic>?;
+      if (elem?['status'] != 'OK') return null;
+
+      final meters = (elem?['distance']?['value'] as num?)?.toDouble() ?? 0.0;
+      if (meters <= 0) return null;
+      return double.parse((meters / 1000.0).toStringAsFixed(2));
+    } catch (_) {
+      return null;
+    }
   }
 
   // ---------- UI bits ----------
@@ -452,7 +653,17 @@ void _applyPackedToGlobals(List<String> p) {
   Gv.dLng              = _toDbl(p, 14);
   // (15..32) keep as-is if needed later
 }
+
 bool _toBool(List<String> p, int i) => (i < p.length) && p[i].toLowerCase() == 'true';
+
+/// Lookup ROAD calc for *this* page’s anchor (driver’s live location)
+JobCalc? _roadCalcForPartsWithAnchor(List<String> p, double aLat, double aLng) {
+  final jobId = p[0];
+  final sLat  = _toDbl(p, 11);
+  final sLng  = _toDbl(p, 12);
+  final key = Gv.roadKey(jobId, sLat, sLng, aLat, aLng);
+  return Gv.roadByJob[key];
+}
 
 Widget _addrWithIcon(
   String iconPath, {

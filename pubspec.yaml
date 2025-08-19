@@ -21,6 +21,8 @@ dependencies:
   google_maps_flutter: ^2.5.0
   url_launcher: ^6.3.0
 
+  image_picker: ^1.1.2
+  firebase_storage: ^12.0.0
 
 
   flutter_localizations:
@@ -97,3 +99,13 @@ flutter:
     - assets/images/d5.png
     - assets/images/car.png
     - assets/images/finish.png
+
+    - assets/images/doc_front.png
+    - assets/images/doc_back.png
+    - assets/images/doc_ic.png
+    - assets/images/doc_insurance.png
+    - assets/images/doc_kad_kereta.png
+    - assets/images/doc_lesen_memandu.png
+    - assets/images/doc_psv.png
+    - assets/images/doc_selfie.png
+    - assets/images/doc_roadtax.png

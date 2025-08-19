@@ -171,6 +171,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'NOT PROVIDED'**
   String get notProvided;
+
+  /// No description provided for @icNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter IC number'**
+  String get icNo;
+
+  /// No description provided for @driverLicenseExDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter driver license expiry date'**
+  String get driverLicenseExDate;
+
+  /// No description provided for @roadTaxExDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter road tax expiry date'**
+  String get roadTaxExDate;
+
+  /// No description provided for @psvExDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PSV expiry date'**
+  String get psvExDate;
+
+  /// No description provided for @eInsExDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter e-hailing insurance expiry date'**
+  String get eInsExDate;
+
+  /// No description provided for @imgSelfie.
+  ///
+  /// In en, this message translates to:
+  /// **'Image Selfie'**
+  String get imgSelfie;
+
+  /// No description provided for @carFront.
+  ///
+  /// In en, this message translates to:
+  /// **'Car Infront'**
+  String get carFront;
+
+  /// No description provided for @carBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Car Back'**
+  String get carBack;
+
+  /// No description provided for @upload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get upload;
+
+  /// No description provided for @completeReg.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Registration'**
+  String get completeReg;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// No description provided for @vePlateNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle plate number'**
+  String get vePlateNo;
+
+  /// No description provided for @veBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle brand'**
+  String get veBrand;
+
+  /// No description provided for @veModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle model'**
+  String get veModel;
+
+  /// No description provided for @veColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle color'**
+  String get veColor;
+
+  /// No description provided for @veCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle capacity'**
+  String get veCapacity;
+
+  /// No description provided for @pendingReviewText.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for admin to review your documents.\nOnce approved, you will be notified and can proceed to use the app.'**
+  String get pendingReviewText;
+
+  /// No description provided for @pendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Review'**
+  String get pendingReview;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @phoneNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNo;
+
+  /// No description provided for @pwd.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get pwd;
+
+  /// No description provided for @rePwd.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-Type Password'**
+  String get rePwd;
+
+  /// No description provided for @phone2.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd Phone Number (Optional)'**
+  String get phone2;
+
+  /// No description provided for @country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get country;
+
+  /// No description provided for @state.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get state;
+
+  /// No description provided for @area.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get area;
 }
 
 class _AppLocalizationsDelegate

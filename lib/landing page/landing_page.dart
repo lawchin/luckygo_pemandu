@@ -9,7 +9,9 @@ import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
 import 'package:luckygo_pemandu/landing page/disclosure_accepted_page.dart';
+import 'package:luckygo_pemandu/landing%20page/pending_review_page.dart';
 import 'package:luckygo_pemandu/landing%20page/presenter_page.dart';
+import 'package:luckygo_pemandu/loginRegister/complete_registration_page.dart';
 import 'package:luckygo_pemandu/loginRegister/login_page.dart';
 import 'package:luckygo_pemandu/main.dart';
 import 'package:luckygo_pemandu/translate_bahasa.dart';
@@ -464,6 +466,18 @@ body: Stack(
             child: ValueListenableBuilder<bool>(
               valueListenable: Gv.showPresenter,
               builder: (context, isVisible, _) {
+                // if (Gv.form2Completed == false) {
+                //   // Navigate to CompleteRegistrationPage (CRP)
+                //   WidgetsBinding.instance.addPostFrameCallback((_) {
+                //     if (Navigator.canPop(context)) {
+                //       Navigator.pop(context);
+                //     }
+                //     Navigator.of(context).pushReplacement(
+                //       MaterialPageRoute(builder: (_) => const CompleteRegistrationPage()),
+                //     );
+                //   });
+                //   return const SizedBox.shrink();
+                // }
                 return isVisible ? const SizedBox.shrink() : const PresenterPage();
               },
             ),
@@ -489,6 +503,7 @@ body: Stack(
               ],
             ),
           ),
+        
         ],
       ),
     ),
@@ -549,6 +564,81 @@ body: Stack(
         return const SizedBox.shrink();
       },
     ),
+  
+
+
+StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+  stream: FirebaseFirestore.instance
+      .collection(Gv.negara)
+      .doc(Gv.negeri)
+      .collection('driver_account')
+      .doc(Gv.loggedUser)
+      .snapshots(),
+  builder: (context, snapshot) {
+    if (!snapshot.hasData || !snapshot.data!.exists) {
+      return const SizedBox.shrink();
+    }
+
+    final data = snapshot.data!.data()!;
+    Gv.form2Completed = (data['form2_completed'] as bool?) ?? false;
+    Gv.registrationApproved = (data['registration_approved'] as bool?) ?? false;
+
+if (!Gv.form2Completed && !Gv.registrationApproved) {
+  // Go to CompleteRegistrationPage
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!context.mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const CompleteRegistrationPage()),
+    );
+  });
+  return const SizedBox.shrink();
+}
+
+if (Gv.form2Completed && !Gv.registrationApproved) {
+  // Go to PendingReview (your class name is PandingReview)
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!context.mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const PandingReview()),
+    );
+  });
+  return const SizedBox.shrink();
+}
+
+    return const SizedBox.shrink();
+  },
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   ],
 ),
 

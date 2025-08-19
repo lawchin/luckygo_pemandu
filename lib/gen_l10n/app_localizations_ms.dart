@@ -44,4 +44,83 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get notProvided => 'TIDAK DISEDIAKAN';
+
+  @override
+  String get icNo => 'Masukkan nombor IC';
+
+  @override
+  String get driverLicenseExDate => 'Masukkan tarikh luput lesen memandu';
+
+  @override
+  String get roadTaxExDate => 'Masukkan tarikh luput cukai jalan';
+
+  @override
+  String get psvExDate => 'Masukkan tarikh luput PSV';
+
+  @override
+  String get eInsExDate => 'Masukkan tarikh luput insurans e-hailing';
+
+  @override
+  String get imgSelfie => 'Gambar Selfie';
+
+  @override
+  String get carFront => 'Bahagian hadapan kereta';
+
+  @override
+  String get carBack => 'Bahagian belakang kereta';
+
+  @override
+  String get upload => 'Muat naik';
+
+  @override
+  String get completeReg => 'Lengkapkan Pendaftaran';
+
+  @override
+  String get submit => 'Hantar';
+
+  @override
+  String get vePlateNo => 'Nombor plat kenderaan';
+
+  @override
+  String get veBrand => 'Jenama kenderaan';
+
+  @override
+  String get veModel => 'Model kenderaan';
+
+  @override
+  String get veColor => 'Warna kenderaan';
+
+  @override
+  String get veCapacity => 'Kapasiti kenderaan';
+
+  @override
+  String get pendingReviewText =>
+      'Menunggu pentadbir menyemak dokumen anda.\nSetelah diluluskan, anda akan dimaklumkan dan boleh meneruskan penggunaan aplikasi.';
+
+  @override
+  String get pendingReview => 'Menunggu Semakan';
+
+  @override
+  String get fullName => 'Nama Penuh';
+
+  @override
+  String get phoneNo => 'Nombor Telefon';
+
+  @override
+  String get pwd => 'Kata Laluan';
+
+  @override
+  String get rePwd => 'Taip Semula Kata Laluan';
+
+  @override
+  String get phone2 => 'Nombor Telefon Kedua (Pilihan)';
+
+  @override
+  String get country => 'Negara';
+
+  @override
+  String get state => 'Negeri';
+
+  @override
+  String get area => 'Kawasan';
 }

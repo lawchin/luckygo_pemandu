@@ -44,4 +44,83 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notProvided => 'NOT PROVIDED';
+
+  @override
+  String get icNo => 'Enter IC number';
+
+  @override
+  String get driverLicenseExDate => 'Enter driver license expiry date';
+
+  @override
+  String get roadTaxExDate => 'Enter road tax expiry date';
+
+  @override
+  String get psvExDate => 'Enter PSV expiry date';
+
+  @override
+  String get eInsExDate => 'Enter e-hailing insurance expiry date';
+
+  @override
+  String get imgSelfie => 'Image Selfie';
+
+  @override
+  String get carFront => 'Car Infront';
+
+  @override
+  String get carBack => 'Car Back';
+
+  @override
+  String get upload => 'Upload';
+
+  @override
+  String get completeReg => 'Complete Registration';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get vePlateNo => 'Vehicle plate number';
+
+  @override
+  String get veBrand => 'Vehicle brand';
+
+  @override
+  String get veModel => 'Vehicle model';
+
+  @override
+  String get veColor => 'Vehicle color';
+
+  @override
+  String get veCapacity => 'Vehicle capacity';
+
+  @override
+  String get pendingReviewText =>
+      'Waiting for admin to review your documents.\nOnce approved, you will be notified and can proceed to use the app.';
+
+  @override
+  String get pendingReview => 'Pending Review';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get phoneNo => 'Phone Number';
+
+  @override
+  String get pwd => 'Password';
+
+  @override
+  String get rePwd => 'Re-Type Password';
+
+  @override
+  String get phone2 => '2nd Phone Number (Optional)';
+
+  @override
+  String get country => 'Country';
+
+  @override
+  String get state => 'State';
+
+  @override
+  String get area => 'Area';
 }

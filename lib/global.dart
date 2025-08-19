@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart'; // For GeoPoint
 import 'package:luckygo_pemandu/jobFilter/filter_jobs_helper.dart'; // exports class ShortJob
 
-
-
 // in global.dart
 class JobCalc {
   final double roadKm;
@@ -13,8 +11,27 @@ class JobCalc {
 
 // Global variables for user session and profile
 class Gv {
-
+  // ───────────────────────────────────────────────────────────
+  // ROAD results cache (shared across pages; key is anchor-aware)
   static Map<String, JobCalc> roadByJob = {};
+
+  /// 🔔 Notifies listeners whenever new ROAD results are stored.
+  static ValueNotifier<int> roadVersion = ValueNotifier<int>(0);
+
+  /// Store a ROAD calc and publish the anchor used for that calc.
+  /// Use this from FilterJobsOneStream after each Distance Matrix response.
+  static void putRoadCalc({
+    required String key,
+    required double km,
+    required int etaMin,
+    required double anchorLat,
+    required double anchorLng,
+  }) {
+    roadByJob[key] = JobCalc(roadKm: km, etaMin: etaMin);
+    roadAnchorLat = anchorLat;
+    roadAnchorLng = anchorLng;
+    roadVersion.value++; // trigger UI (e.g., Bucket123) to rebuild
+  }
 
   static String loggedUser = '';
   static String userName = '';
@@ -72,21 +89,21 @@ class Gv {
   static int gasTankCount        = 0;    // 32
 
   static int groupCapability     = 0;
+  static bool form2Completed     = false;
+  static bool registrationApproved     = false;
 
-  static double roadKm = 0.0;
-  static double flyKm = 0.0;
-
-  static int roadEta = 0;
-  // static int flyEta = 0;
+  // Latest numbers for currently selected job / details page
+  static double roadKm = 0.0;  // driving distance to pickup for selected job
+  static double flyKm  = 0.0;  // straight-line distance (used by 4–14)
+  static int roadEta   = 0;    // minutes
 
   static ValueNotifier<bool> showPresenter = ValueNotifier(false);
   static double distanceDriverToPickup = 0.0;  // convenience distance holder
   static String googleApiKey = 'AIzaSyDa5S3_IbRkjAJsH53VIXca0ZPLm9WcSHw';
 
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ───────────────────────────────────────────────────────────
   // Bucket 4 (5.1–7.5 km by AIR) shortlist, globally shareable
-  // Fill this from your filter page and read it from B123().
-  // Use the setter to update and notify listeners.
+  // Fill this from your filter page and read it from B123(). Use the setter to update and notify listeners.
   static List<ShortJob> bucket4Jobs = const [];
   static ValueNotifier<int> bucket4Version = ValueNotifier<int>(0); // increments on set
   static DateTime? bucket4LastBuiltAt;
@@ -97,6 +114,19 @@ class Gv {
     bucket4Version.value = bucket4Version.value + 1; // notify observers
   }
 
+  // ───────────────────────────────────────────────────────────
+  // Anchor used when ROAD results were computed (so lookups are consistent)
+  static double roadAnchorLat = 0.0;
+  static double roadAnchorLng = 0.0;
 
+  // Canonical key used by FilterJobsOneStream and Bucket123
+  static String roadKey(String jobId, double sLat, double sLng, double aLat, double aLng) =>
+      '$jobId@$sLat,$sLng@$aLat,$aLng';
 
+  // Convenience getter to fetch ROAD calc for a job using the last published anchor
+  static JobCalc? getRoadCalcFor(String jobId, double sLat, double sLng) {
+    if (roadAnchorLat == 0.0 && roadAnchorLng == 0.0) return null;
+    final k = roadKey(jobId, sLat, sLng, roadAnchorLat, roadAnchorLng);
+    return roadByJob[k];
+  }
 }

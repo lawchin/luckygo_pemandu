@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/loginRegister/session_manager.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -104,6 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
       'area': area,
       'language': language,
       'created_at': DateTime.now().toIso8601String(),
+      'registration_approved': false
     };
     try {
       await FirebaseFirestore.instance
@@ -188,7 +190,8 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {    
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: const Text("Register")),
       body: Padding(
@@ -197,11 +200,11 @@ class _RegisterPageState extends State<RegisterPage> {
           key: _formKey,
           child: ListView(
             children: [
-              _buildTextField("Full Name", fullnameController),
-              _buildTextField("Phone Number", phoneController, keyboardType: TextInputType.phone),
-              _buildTextField("Password", passwordController, obscureText: true),
-              _buildTextField("Re-type Password", retypePasswordController, obscureText: true),
-              _buildTextField("2nd Phone Number (Optional)", secondPhoneController, keyboardType: TextInputType.phone, isOptional: true),
+              _buildTextField(loc.fullName, fullnameController),
+              _buildTextField(loc.phoneNo, phoneController, keyboardType: TextInputType.phone),
+              _buildTextField(loc.pwd, passwordController, obscureText: true),
+              _buildTextField(loc.rePwd, retypePasswordController, obscureText: true),
+              _buildTextField(loc.phone2, secondPhoneController, keyboardType: TextInputType.phone, isOptional: true),
               _buildCountryDropdown(),
               if (selectedCountry != null) _buildStateDropdown(),
               if (selectedState != null) _buildAreaDropdown(),
@@ -268,13 +271,14 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildCountryDropdown() {
+    final loc = AppLocalizations.of(context)!;
     final countries = ['Malaysia', 'Timor-Leste', 'Indonesia'];
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: DropdownButtonFormField<String>(
         value: selectedCountry,
-        decoration: const InputDecoration(
-          labelText: 'Country',
+        decoration: InputDecoration(
+          labelText: loc.country,
           border: OutlineInputBorder(),
         ),
         items: countries
@@ -302,6 +306,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildStateDropdown() {
+    final loc = AppLocalizations.of(context)!;
     List<String> states = [];
     if (selectedCountry == 'Malaysia') {
       states = malaysiaStateAreas.keys.toList();
@@ -314,8 +319,8 @@ class _RegisterPageState extends State<RegisterPage> {
       padding: const EdgeInsets.only(bottom: 12.0),
       child: DropdownButtonFormField<String>(
         value: selectedState,
-        decoration: const InputDecoration(
-          labelText: 'State',
+        decoration: InputDecoration(
+          labelText: loc.state,
           border: OutlineInputBorder(),
         ),
         items: states
@@ -342,6 +347,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildAreaDropdown() {
+    final loc = AppLocalizations.of(context)!;
     List<String> areas = [];
     if (selectedCountry == 'Malaysia' && selectedState != null) {
       areas = malaysiaStateAreas[selectedState!] ?? [];
@@ -354,8 +360,8 @@ class _RegisterPageState extends State<RegisterPage> {
       padding: const EdgeInsets.only(bottom: 12.0),
       child: DropdownButtonFormField<String>(
         value: selectedArea,
-        decoration: const InputDecoration(
-          labelText: 'Area',
+        decoration: InputDecoration(
+          labelText: loc.area,
           border: const OutlineInputBorder(),
         ),
         items: areas
