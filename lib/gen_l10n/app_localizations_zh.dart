@@ -122,4 +122,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get area => '地区';
+
+  @override
+  String get gender => '性别';
+
+  @override
+  String get male => '男';
+
+  @override
+  String get female => '女';
+
+  @override
+  String get register => '注册';
+
+  @override
+  String get member => '已经是会员？';
+
+  @override
+  String get loginHere => '在这里登录！';
 }

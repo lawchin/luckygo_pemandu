@@ -123,4 +123,22 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get area => 'Kawasan';
+
+  @override
+  String get gender => 'Jantina';
+
+  @override
+  String get male => 'Lelaki';
+
+  @override
+  String get female => 'Perempuan';
+
+  @override
+  String get register => 'Daftar';
+
+  @override
+  String get member => 'Sudah menjadi ahli?';
+
+  @override
+  String get loginHere => 'Log masuk di sini!';
 }

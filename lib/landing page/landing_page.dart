@@ -567,47 +567,47 @@ body: Stack(
   
 
 
-StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-  stream: FirebaseFirestore.instance
-      .collection(Gv.negara)
-      .doc(Gv.negeri)
-      .collection('driver_account')
-      .doc(Gv.loggedUser)
-      .snapshots(),
-  builder: (context, snapshot) {
-    if (!snapshot.hasData || !snapshot.data!.exists) {
+    StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection(Gv.negara)
+          .doc(Gv.negeri)
+          .collection('driver_account')
+          .doc(Gv.loggedUser)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const SizedBox.shrink();
+        }
+
+        final data = snapshot.data!.data()!;
+        Gv.form2Completed = (data['form2_completed'] as bool?) ?? false;
+        Gv.registrationApproved = (data['registration_approved'] as bool?) ?? false;
+
+    if (!Gv.form2Completed && !Gv.registrationApproved) {
+      // Go to CompleteRegistrationPage
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const CompleteRegistrationPage()),
+        );
+      });
       return const SizedBox.shrink();
     }
 
-    final data = snapshot.data!.data()!;
-    Gv.form2Completed = (data['form2_completed'] as bool?) ?? false;
-    Gv.registrationApproved = (data['registration_approved'] as bool?) ?? false;
+    if (Gv.form2Completed && !Gv.registrationApproved) {
+      // Go to PendingReview (your class name is PandingReview)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const PandingReview()),
+        );
+      });
+      return const SizedBox.shrink();
+    }
 
-if (!Gv.form2Completed && !Gv.registrationApproved) {
-  // Go to CompleteRegistrationPage
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (!context.mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const CompleteRegistrationPage()),
-    );
-  });
-  return const SizedBox.shrink();
-}
-
-if (Gv.form2Completed && !Gv.registrationApproved) {
-  // Go to PendingReview (your class name is PandingReview)
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (!context.mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const PandingReview()),
-    );
-  });
-  return const SizedBox.shrink();
-}
-
-    return const SizedBox.shrink();
-  },
-)
+        return const SizedBox.shrink();
+      },
+    )
 
 
 

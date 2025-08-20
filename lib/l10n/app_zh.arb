@@ -37,7 +37,13 @@
   "phone2" : "第二个手机号（可选）",
   "country" : "国家",
   "state" : "州/省",
-  "area" : "地区"
+  "area" : "地区",
+  "gender" : "性别",
+  "male" : "男",
+  "female" : "女",
+  "register" : "注册",
+  "member" : "已经是会员？",
+  "loginHere" : "在这里登录！"
 
 
 

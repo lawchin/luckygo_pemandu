@@ -327,6 +327,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Area'**
   String get area;
+
+  /// No description provided for @gender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get gender;
+
+  /// No description provided for @male.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get male;
+
+  /// No description provided for @female.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get female;
+
+  /// No description provided for @register.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get register;
+
+  /// No description provided for @member.
+  ///
+  /// In en, this message translates to:
+  /// **'Already a member?'**
+  String get member;
+
+  /// No description provided for @loginHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Login here!'**
+  String get loginHere;
 }
 
 class _AppLocalizationsDelegate

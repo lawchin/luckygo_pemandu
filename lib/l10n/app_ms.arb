@@ -37,7 +37,13 @@
   "phone2" : "Nombor Telefon Kedua (Pilihan)",
   "country" : "Negara",
   "state" : "Negeri",
-  "area" : "Kawasan"
+  "area" : "Kawasan",
+  "gender" : "Jantina",
+  "male" : "Lelaki",
+  "female" : "Perempuan",
+  "register" : "Daftar",
+  "member" : "Sudah menjadi ahli?",
+  "loginHere" : "Log masuk di sini!"
 
 
 

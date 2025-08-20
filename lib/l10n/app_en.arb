@@ -37,7 +37,13 @@
   "phone2" : "2nd Phone Number (Optional)",
   "country" : "Country",
   "state" : "State",
-  "area" : "Area"
+  "area" : "Area",
+  "gender" : "Gender",
+  "male" : "Male",
+  "female" : "Female",
+  "register" : "Register",
+  "member" : "Already a member?",
+  "loginHere" : "Login here!"
 
 
 

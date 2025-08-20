@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/job_details_page.dart';
+import 'package:luckygo_pemandu/jobFilter/view_15.dart';
 
 class Bucket123 extends StatefulWidget {
   const Bucket123({super.key, required this.bucketIndex});
@@ -241,174 +242,400 @@ class _Bucket123State extends State<Bucket123> {
                     padding: const EdgeInsets.all(12),
                     itemCount: parsed.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, i) {
-                      final e     = parsed[i];
-                      final p     = e.parts;
-                      final showKm   = e.showKm;   // ROAD (preferred) or AIR
-                      final roadEta  = e.etaMin;   // 0 if not yet available
 
-                      final price  = _toDbl(p, 5);
-                      final pax    = _toInt(p, 3);
-                      final sAdd1  = p[7].trim().isEmpty ? 'NOT PROVIDED' : p[7];
-                      final sAdd2  = p[8].trim().isEmpty ? '' : p[8];
-                      final dAdd1  = p[9].trim().isEmpty ? 'NOT PROVIDED' : p[9];
-                      final dAdd2  = p[10].trim().isEmpty ? '' : p[10];
-                      final marker = _toInt(p, 6);
 
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                            // Use the km/eta shown on the card (ROAD if present)
-                            Gv.roadKm  = showKm;
-                            Gv.roadEta = roadEta;
-                            Gv.distanceDriverToPickup = showKm;
+itemBuilder: (context, i) {
+  final e       = parsed[i];
+  final p       = e.parts;
+  final showKm  = e.showKm;   // ROAD (preferred) or AIR
+  final roadEta = e.etaMin;   // 0 if not yet available
 
-                            _applyPackedToGlobals(p);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const JobDetailsPage()),
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.blue.shade50,
-                                  Colors.blue.shade100,
-                                  Colors.blue.shade200,
-                                ],
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // TITLE ROW (icons + quoted total km on left, price on right)
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Image.asset('assets/images/ind_passenger.png',
-                                            width: 32, height: 32, fit: BoxFit.contain),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 4),
-                                          child: Icon(Icons.arrow_forward, size: 20, color: Colors.grey),
-                                        ),
-                                        Image.asset('assets/images/finish.png',
-                                            width: 32, height: 32, fit: BoxFit.contain),
-                                        const SizedBox(width: 8),
-                                        Text('${_toDbl(p, 4).toStringAsFixed(1)} km'),
-                                      ],
-                                    ),
-                                    Text('RM ${price.toStringAsFixed(2)}',
-                                        style: Theme.of(context).textTheme.titleMedium),
-                                  ],
-                                ),
+  final price   = _toDbl(p, 5);
+  final pax     = _toInt(p, 3);
+  final phone   = p[1].trim().isEmpty ? '0000000000' : p[1];
+  final name    = p[2].trim().isEmpty ? 'Chuck Norris' : p[2];
+  final sAdd1   = p[7].trim().isEmpty ? 'NOT PROVIDED' : p[7];
+  final sAdd2   = p[8].trim().isEmpty ? '' : p[8];
+  final dAdd1   = p[9].trim().isEmpty ? 'NOT PROVIDED' : p[9];
+  final dAdd2   = p[10].trim().isEmpty ? '' : p[10];
+  final marker  = _toInt(p, 6);
 
-                                const Divider(height: 14, thickness: 2),
+  return Card(
+    margin: const EdgeInsets.only(bottom: 12),
+    elevation: 2,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        // --- Use the distance/ETA shown on the card (ROAD if present) ---
+        Gv.roadKm                 = showKm;
+        Gv.roadEta                = roadEta;
+        Gv.distanceDriverToPickup = showKm;
 
-                                // From / To with icons + overlay pax
-                                _addrWithIcon(
-                                  'assets/images/ind_passenger.png',
-                                  overlayNumber: pax,
-                                  l1: sAdd1, l2: sAdd2, ctx: context,
-                                ),
-                                const SizedBox(height: 4),
-                                _addrWithIcon(
-                                  'assets/images/finish.png',
-                                  l1: dAdd1, l2: dAdd2, ctx: context,
-                                ),
+        // --- Core job details (0..6) ---
+        Gv.liteJobId       = p[0];
+        Gv.passengerPhone  = phone;            // p[1]
+        Gv.passengerName   = name;             // p[2]
+        Gv.passengerCount  = pax;              // p[3]
+        Gv.totalKm         = _toDbl(p, 4);     // p[4]
+        Gv.totalPrice      = price;            // p[5]
+        Gv.markerCount     = marker;           // p[6]
 
-                                const Divider(height: 14, thickness: 2),
+        // --- Addresses (7..10) ---
+        Gv.sAdd1 = sAdd1;                      // p[7]
+        Gv.sAdd2 = sAdd2;                      // p[8]
+        Gv.dAdd1 = dAdd1;                      // p[9]
+        Gv.dAdd2 = dAdd2;                      // p[10]
 
-                                // BADGES
-                                Builder(
-                                  builder: (_) {
-                                    final isBlind = _toBool(p, 15);
-                                    final isDeaf  = _toBool(p, 16);
-                                    final isMute  = _toBool(p, 17);
+        // --- Coordinates (11..14) ---
+        Gv.sLat = _toDbl(p, 11);
+        Gv.sLng = _toDbl(p, 12);
+        Gv.dLat = _toDbl(p, 13);
+        Gv.dLng = _toDbl(p, 14);
 
-                                    final chips = <String, int>{
-                                      'Wheelchair': _toInt(p, 18),
-                                      'Stick': _toInt(p, 19),
-                                      'Stroller': _toInt(p, 20),
-                                      'Bags': _toInt(p, 21),
-                                      'Luggage': _toInt(p, 22),
-                                      'Pets': _toInt(p, 23),
-                                      'Dog': _toInt(p, 24),
-                                      'Goat': _toInt(p, 25),
-                                      'Rooster': _toInt(p, 26),
-                                      'Snake': _toInt(p, 27),
-                                      'Durian': _toInt(p, 28),
-                                      'Odour fruit': _toInt(p, 29),
-                                      'Wet food': _toInt(p, 30),
-                                      'Tupperware': _toInt(p, 31),
-                                      'Gas tank': _toInt(p, 32),
-                                    }..removeWhere((_, v) => v <= 0);
+        // --- Passenger disabilities (15..17) ---
+        Gv.isBlind = _toBool(p, 15);
+        Gv.isDeaf  = _toBool(p, 16);
+        Gv.isMute  = _toBool(p, 17);
 
-                                    return SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children: [
-                                          if (isBlind) _badge('Blind', context),
-                                          if (isDeaf)  _badge('Deaf', context),
-                                          if (isMute)  _badge('Mute', context),
-                                          for (final e in chips.entries) _badge('${e.key} x${e.value}', context),
-                                        ].map((w) => Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: w,
-                                        )).toList(),
-                                      ),
-                                    );
-                                  },
-                                ),
+        // --- Item counts (18..32) ---
+        Gv.wheelchairCount   = _toInt(p, 18);
+        Gv.supportStickCount = _toInt(p, 19);
+        Gv.babyStrollerCount = _toInt(p, 20);
+        Gv.shoppingBagCount  = _toInt(p, 21);
+        Gv.luggageCount      = _toInt(p, 22);
+        Gv.petsCount         = _toInt(p, 23);
+        Gv.dogCount          = _toInt(p, 24);
+        Gv.goatCount         = _toInt(p, 25);
+        Gv.roosterCount      = _toInt(p, 26);
+        Gv.snakeCount        = _toInt(p, 27);
+        Gv.durianCount       = _toInt(p, 28);
+        Gv.odourFruitsCount  = _toInt(p, 29);
+        Gv.wetFoodCount      = _toInt(p, 30);
+        Gv.tupperwareCount   = _toInt(p, 31);
+        Gv.gasTankCount      = _toInt(p, 32);
 
-                                const SizedBox(height: 6),
-                                // ETA (from ROAD if available)
-                                Row(
-                                  children: [
-                                    Text('Eta $roadEta minutes',
-                                        style: const TextStyle(height: 0.5, fontSize: 12)),
-                                  ],
-                                ),
+        // Navigate to your debug/details view
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const View15()),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.blue.shade50,
+              Colors.blue.shade100,
+              Colors.blue.shade200,
+            ],
+          ),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // TITLE ROW (icons + quoted total km on left, price on right)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Image.asset('assets/images/ind_passenger.png',
+                        width: 32, height: 32, fit: BoxFit.contain),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: Icon(Icons.arrow_forward, size: 20, color: Colors.grey),
+                    ),
+                    Image.asset('assets/images/finish.png',
+                        width: 32, height: 32, fit: BoxFit.contain),
+                    const SizedBox(width: 8),
+                    Text('${_toDbl(p, 4).toStringAsFixed(1)} km'),
+                  ],
+                ),
+                Text('RM ${price.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.titleMedium),
+              ],
+            ),
 
-                                const SizedBox(height: 6),
-                                // CAR ROW + marker strip — show ROAD/AIR distance to pickup (showKm)
-                                Row(
-                                  children: [
-                                    Image.asset('assets/images/car.png',
-                                        width: 32, height: 32, fit: BoxFit.contain),
-                                    const SizedBox(width: 6),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('${showKm.toStringAsFixed(1)} km',
-                                            style: const TextStyle(height: 0.6, fontSize: 12)),
-                                        const Text('⟶',
-                                            style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 6),
-                                    if (marker >= 2) markerStrip(marker, size: 28, spacing: 1),
-                                  ],
-                                ),
+            const Divider(height: 14, thickness: 2),
 
-                                const SizedBox(height: 6),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+            // From / To with icons + overlay pax
+            _addrWithIcon(
+              'assets/images/ind_passenger.png',
+              overlayNumber: pax,
+              l1: sAdd1, l2: sAdd2, ctx: context,
+            ),
+            const SizedBox(height: 4),
+            _addrWithIcon(
+              'assets/images/finish.png',
+              l1: dAdd1, l2: dAdd2, ctx: context,
+            ),
+
+            const Divider(height: 14, thickness: 2),
+
+            // BADGES
+            Builder(
+              builder: (_) {
+                final isBlind = _toBool(p, 15);
+                final isDeaf  = _toBool(p, 16);
+                final isMute  = _toBool(p, 17);
+
+                final chips = <String, int>{
+                  'Wheelchair': _toInt(p, 18),
+                  'Stick': _toInt(p, 19),
+                  'Stroller': _toInt(p, 20),
+                  'Bags': _toInt(p, 21),
+                  'Luggage': _toInt(p, 22),
+                  'Pets': _toInt(p, 23),
+                  'Dog': _toInt(p, 24),
+                  'Goat': _toInt(p, 25),
+                  'Rooster': _toInt(p, 26),
+                  'Snake': _toInt(p, 27),
+                  'Durian': _toInt(p, 28),
+                  'Odour fruit': _toInt(p, 29),
+                  'Wet food': _toInt(p, 30),
+                  'Tupperware': _toInt(p, 31),
+                  'Gas tank': _toInt(p, 32),
+                }..removeWhere((_, v) => v <= 0);
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      if (isBlind) _badge('Blind', context),
+                      if (isDeaf)  _badge('Deaf', context),
+                      if (isMute)  _badge('Mute', context),
+                      for (final e in chips.entries) _badge('${e.key} x${e.value}', context),
+                    ].map((w) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: w,
+                    )).toList(),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 6),
+            // ETA (from ROAD if available)
+            Row(
+              children: [
+                Text('Eta $roadEta minutes',
+                    style: const TextStyle(height: 0.5, fontSize: 12)),
+              ],
+            ),
+
+            const SizedBox(height: 6),
+            // CAR ROW + marker strip — show ROAD/AIR distance to pickup (showKm)
+            Row(
+              children: [
+                Image.asset('assets/images/car.png',
+                    width: 32, height: 32, fit: BoxFit.contain),
+                const SizedBox(width: 6),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${showKm.toStringAsFixed(1)} km',
+                        style: const TextStyle(height: 0.6, fontSize: 12)),
+                    const Text('⟶',
+                        style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
+                  ],
+                ),
+                const SizedBox(width: 6),
+                if (marker >= 2) markerStrip(marker, size: 28, spacing: 1),
+              ],
+            ),
+            const SizedBox(height: 6),
+          ],
+        ),
+      ),
+    ),
+  );
+
+},
+
+
+
+
+
+
+                    // itemBuilder: (context, i) {
+                    //   final e     = parsed[i];
+                    //   final p     = e.parts;
+                    //   final showKm   = e.showKm;   // ROAD (preferred) or AIR
+                    //   final roadEta  = e.etaMin;   // 0 if not yet available
+
+                    //   final price  = _toDbl(p, 5);
+                    //   final pax    = _toInt(p, 3);
+                    //   final phone  = p[1].trim().isEmpty ? '0000000000' : p[1];
+                    //   final name  = p[2].trim().isEmpty ? 'Chuck Norris' : p[2];
+                    //   final sAdd1  = p[7].trim().isEmpty ? 'NOT PROVIDED' : p[7];
+                    //   final sAdd2  = p[8].trim().isEmpty ? '' : p[8];
+                    //   final dAdd1  = p[9].trim().isEmpty ? 'NOT PROVIDED' : p[9];
+                    //   final dAdd2  = p[10].trim().isEmpty ? '' : p[10];
+                    //   final marker = _toInt(p, 6);
+
+                    //   return Card(
+                    //     margin: const EdgeInsets.only(bottom: 12),
+                    //     elevation: 2,
+                    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    //     clipBehavior: Clip.antiAlias,
+                    //     child: InkWell(
+                    //       borderRadius: BorderRadius.circular(12),
+                    //       onTap: () {
+                    //         // Use the km/eta shown on the card (ROAD if present)
+                    //         Gv.roadKm  = showKm;
+                    //         Gv.roadEta = roadEta;
+                    //         Gv.distanceDriverToPickup = showKm;
+                    //         Gv.passengerPhone = phone;
+                    //         Gv.passengerName = name;
+
+                    //         _applyPackedToGlobals(p);
+                    //         Navigator.push(
+                    //           context,
+                    //           // MaterialPageRoute(builder: (_) => const JobDetailsPage()),
+                    //           MaterialPageRoute(builder: (_) => const View15()),
+                    //         );
+                    //       },
+                    //       child: Container(
+                    //         decoration: BoxDecoration(
+                    //           borderRadius: BorderRadius.circular(12),
+                    //           gradient: LinearGradient(
+                    //             begin: Alignment.topCenter,
+                    //             end: Alignment.bottomCenter,
+                    //             colors: [
+                    //               Colors.blue.shade50,
+                    //               Colors.blue.shade100,
+                    //               Colors.blue.shade200,
+                    //             ],
+                    //           ),
+                    //         ),
+                    //         padding: const EdgeInsets.all(12),
+                    //         child: Column(
+                    //           crossAxisAlignment: CrossAxisAlignment.start,
+                    //           children: [
+                    //             // TITLE ROW (icons + quoted total km on left, price on right)
+                    //             Row(
+                    //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //               children: [
+                    //                 Row(
+                    //                   children: [
+                    //                     Image.asset('assets/images/ind_passenger.png',
+                    //                         width: 32, height: 32, fit: BoxFit.contain),
+                    //                     const Padding(
+                    //                       padding: EdgeInsets.symmetric(horizontal: 4),
+                    //                       child: Icon(Icons.arrow_forward, size: 20, color: Colors.grey),
+                    //                     ),
+                    //                     Image.asset('assets/images/finish.png',
+                    //                         width: 32, height: 32, fit: BoxFit.contain),
+                    //                     const SizedBox(width: 8),
+                    //                     Text('${_toDbl(p, 4).toStringAsFixed(1)} km'),
+                    //                   ],
+                    //                 ),
+                    //                 Text('RM ${price.toStringAsFixed(2)}',
+                    //                     style: Theme.of(context).textTheme.titleMedium),
+                    //               ],
+                    //             ),
+
+                    //             const Divider(height: 14, thickness: 2),
+
+                    //             // From / To with icons + overlay pax
+                    //             _addrWithIcon(
+                    //               'assets/images/ind_passenger.png',
+                    //               overlayNumber: pax,
+                    //               l1: sAdd1, l2: sAdd2, ctx: context,
+                    //             ),
+                    //             const SizedBox(height: 4),
+                    //             _addrWithIcon(
+                    //               'assets/images/finish.png',
+                    //               l1: dAdd1, l2: dAdd2, ctx: context,
+                    //             ),
+
+                    //             const Divider(height: 14, thickness: 2),
+
+                    //             // BADGES
+                    //             Builder(
+                    //               builder: (_) {
+                    //                 final isBlind = _toBool(p, 15);
+                    //                 final isDeaf  = _toBool(p, 16);
+                    //                 final isMute  = _toBool(p, 17);
+
+                    //                 final chips = <String, int>{
+                    //                   'Wheelchair': _toInt(p, 18),
+                    //                   'Stick': _toInt(p, 19),
+                    //                   'Stroller': _toInt(p, 20),
+                    //                   'Bags': _toInt(p, 21),
+                    //                   'Luggage': _toInt(p, 22),
+                    //                   'Pets': _toInt(p, 23),
+                    //                   'Dog': _toInt(p, 24),
+                    //                   'Goat': _toInt(p, 25),
+                    //                   'Rooster': _toInt(p, 26),
+                    //                   'Snake': _toInt(p, 27),
+                    //                   'Durian': _toInt(p, 28),
+                    //                   'Odour fruit': _toInt(p, 29),
+                    //                   'Wet food': _toInt(p, 30),
+                    //                   'Tupperware': _toInt(p, 31),
+                    //                   'Gas tank': _toInt(p, 32),
+                    //                 }..removeWhere((_, v) => v <= 0);
+
+                    //                 return SingleChildScrollView(
+                    //                   scrollDirection: Axis.horizontal,
+                    //                   child: Row(
+                    //                     children: [
+                    //                       if (isBlind) _badge('Blind', context),
+                    //                       if (isDeaf)  _badge('Deaf', context),
+                    //                       if (isMute)  _badge('Mute', context),
+                    //                       for (final e in chips.entries) _badge('${e.key} x${e.value}', context),
+                    //                     ].map((w) => Padding(
+                    //                       padding: const EdgeInsets.only(right: 8),
+                    //                       child: w,
+                    //                     )).toList(),
+                    //                   ),
+                    //                 );
+                    //               },
+                    //             ),
+
+                    //             const SizedBox(height: 6),
+                    //             // ETA (from ROAD if available)
+                    //             Row(
+                    //               children: [
+                    //                 Text('Eta $roadEta minutes',
+                    //                     style: const TextStyle(height: 0.5, fontSize: 12)),
+                    //               ],
+                    //             ),
+
+                    //             const SizedBox(height: 6),
+                    //             // CAR ROW + marker strip — show ROAD/AIR distance to pickup (showKm)
+                    //             Row(
+                    //               children: [
+                    //                 Image.asset('assets/images/car.png',
+                    //                     width: 32, height: 32, fit: BoxFit.contain),
+                    //                 const SizedBox(width: 6),
+                    //                 Column(
+                    //                   crossAxisAlignment: CrossAxisAlignment.start,
+                    //                   children: [
+                    //                     Text('${showKm.toStringAsFixed(1)} km',
+                    //                         style: const TextStyle(height: 0.6, fontSize: 12)),
+                    //                     const Text('⟶',
+                    //                         style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
+                    //                   ],
+                    //                 ),
+                    //                 const SizedBox(width: 6),
+                    //                 if (marker >= 2) markerStrip(marker, size: 28, spacing: 1),
+                    //               ],
+                    //             ),
+
+                    //             const SizedBox(height: 6),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   );
+                    // },
                   ),
                 ),
               ],

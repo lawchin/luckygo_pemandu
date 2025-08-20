@@ -12,8 +12,6 @@ import 'malaysia_state_area.dart';
 import 'indonesia_state_area.dart';
 import 'timor_leste_state_area.dart';
 
- // keeps Gv.loggedUser & Gv.userName synced with Auth + SharedPreferences
-
 class RegisterPage extends StatefulWidget {
   // Ensure Firebase is initialized before using any Firebase service
   static Future<void> ensureFirebaseInitialized() async {
@@ -34,9 +32,11 @@ class _RegisterPageState extends State<RegisterPage> {
   // Register user: Auth, Firestore, and local storage, with error dialogs
   Future<void> registerUser() async {
     final country  = selectedCountry ?? 'unknown_country';
+    final loc = AppLocalizations.of(context)!;
     final state    = selectedState ?? 'unknown_state';
     final area     = selectedArea ?? 'unknown_area';
     final language = selectedLanguageDisplay ?? 'unknown_language';
+    final gender   = _gender ?? 'unknown'; // ← save gender
 
     final phone    = phoneController.text.isNotEmpty ? phoneController.text : 'unknown_phone';
     final email    = '$phone@driver.com';
@@ -52,19 +52,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
       // Save displayName to Auth
       await FirebaseAuth.instance.currentUser?.updateDisplayName(name);
-      // Make sure currentUser reflects latest profile
       await FirebaseAuth.instance.currentUser?.reload();
 
       // ✅ Update globals + persist to SharedPreferences via SessionManager
-      // (SessionManager maps email -> loggedUser and saves userName)
       await SessionManager.updateFromAuthCurrentUser();
-
-      // Also set immediately in Gv (useful if UI reads it before listener fires)
       Gv.userName   = name;
       Gv.loggedUser = phone;
 
     } catch (e) {
-      // If user already exists, try to sign in, then still set name + session
+      // If user already exists, try to sign in
       try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
@@ -100,12 +96,15 @@ class _RegisterPageState extends State<RegisterPage> {
     final data = {
       'email': email,
       'fullname': name,
+      'gender': gender, // ← store gender
       'country': country,
       'state': state,
       'area': area,
       'language': language,
       'created_at': DateTime.now().toIso8601String(),
-      'registration_approved': false
+      'registration_approved': false,
+      'disclosure_accepted': false,
+      'group_capability': 3
     };
     try {
       await FirebaseFirestore.instance
@@ -132,23 +131,21 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // Save region to local storage (SessionManager handles userName/loggedUser)
+    // Save region to local storage
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('country', country);
       await prefs.setString('state', state);
       await prefs.setString('area', area);
       await prefs.setString('language', language);
-    } catch (_) {
-      // Non-critical
-    }
+    } catch (_) {}
 
     // Success → go to Login
     if (!mounted) return;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Register'),
+        title: Text(loc.register),
         content: const Text('Registration successful!'),
         actions: [
           TextButton(
@@ -179,6 +176,8 @@ class _RegisterPageState extends State<RegisterPage> {
   String? selectedArea;
   String? selectedLanguageDisplay;
 
+  String? _gender; // 'male' or 'female'
+
   @override
   void dispose() {
     fullnameController.dispose();
@@ -190,10 +189,10 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   @override
-  Widget build(BuildContext context) {    
+  Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text("Register")),
+      appBar: AppBar(title: Text(loc.register)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -205,6 +204,10 @@ class _RegisterPageState extends State<RegisterPage> {
               _buildTextField(loc.pwd, passwordController, obscureText: true),
               _buildTextField(loc.rePwd, retypePasswordController, obscureText: true),
               _buildTextField(loc.phone2, secondPhoneController, keyboardType: TextInputType.phone, isOptional: true),
+
+              // === NEW: Gender selector (between 2nd phone and country) ===
+              _buildGenderSelector(),
+
               _buildCountryDropdown(),
               if (selectedCountry != null) _buildStateDropdown(),
               if (selectedState != null) _buildAreaDropdown(),
@@ -212,13 +215,13 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _onRegisterPressed,
-                child: const Text("Register"),
+                child: Text(loc.register),
               ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Already a member?"),
+                  Text(loc.member),
                   TextButton(
                     onPressed: () {
                       Navigator.pushReplacement(
@@ -226,8 +229,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         MaterialPageRoute(builder: (_) => const LoginPage()),
                       );
                     },
-                    child: const Text(
-                      "Login here!",
+                    child: Text(
+                      loc.loginHere,
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),
@@ -236,6 +239,43 @@ class _RegisterPageState extends State<RegisterPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // --- Gender UI ---
+  Widget _buildGenderSelector() {
+    final loc = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(loc.gender, style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: RadioListTile<String>(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(loc.male),
+                  value: 'male',
+                  groupValue: _gender,
+                  onChanged: (v) => setState(() => _gender = v),
+                ),
+              ),
+              Expanded(
+                child: RadioListTile<String>(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(loc.female),
+                  value: 'female',
+                  groupValue: _gender,
+                  onChanged: (v) => setState(() => _gender = v),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -279,7 +319,7 @@ class _RegisterPageState extends State<RegisterPage> {
         value: selectedCountry,
         decoration: InputDecoration(
           labelText: loc.country,
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
         ),
         items: countries
             .map((country) => DropdownMenuItem(
@@ -321,7 +361,7 @@ class _RegisterPageState extends State<RegisterPage> {
         value: selectedState,
         decoration: InputDecoration(
           labelText: loc.state,
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
         ),
         items: states
             .map((state) => DropdownMenuItem(
@@ -405,7 +445,7 @@ class _RegisterPageState extends State<RegisterPage> {
         value: selectedLanguageDisplay,
         decoration: const InputDecoration(
           labelText: 'Language',
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(),
         ),
         items: languages
             .map((lang) => DropdownMenuItem(
@@ -413,11 +453,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Text(lang),
                 ))
             .toList(),
-        onChanged: (value) {
-          setState(() {
-            selectedLanguageDisplay = value;
-          });
-        },
+        onChanged: (value) => setState(() => selectedLanguageDisplay = value),
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please select a language';
@@ -430,10 +466,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _onRegisterPressed() {
     if (_formKey.currentState?.validate() ?? false) {
-      RegisterPage.ensureFirebaseInitialized().then((_) {
-        registerUser();
-      });
+      if (_gender == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select gender')),
+        );
+        return;
+      }
+      RegisterPage.ensureFirebaseInitialized().then((_) => registerUser());
     }
   }
 }
-

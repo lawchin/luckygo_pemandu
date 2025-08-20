@@ -123,4 +123,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get area => 'Area';
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get male => 'Male';
+
+  @override
+  String get female => 'Female';
+
+  @override
+  String get register => 'Register';
+
+  @override
+  String get member => 'Already a member?';
+
+  @override
+  String get loginHere => 'Login here!';
 }
