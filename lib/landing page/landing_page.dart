@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
+import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
 import 'package:luckygo_pemandu/landing page/disclosure_accepted_page.dart';
 import 'package:luckygo_pemandu/landing%20page/pending_review_page.dart';
 import 'package:luckygo_pemandu/landing%20page/presenter_page.dart';
@@ -496,7 +497,7 @@ body: Stack(
                   onPressed: () {
                     Navigator.of(context).push(
                       // MaterialPageRoute(builder: (_) => const BucketsLauncherPage()),
-                      MaterialPageRoute(builder: (_) => const FilterJobsOneStream()),
+                      MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
                     );
                   },
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:luckygo_pemandu/global.dart';
+import 'package:luckygo_pemandu/view15/item_details.dart';
 
 class View15 extends StatelessWidget {
   const View15({super.key});
@@ -20,7 +21,9 @@ class View15 extends StatelessWidget {
         .get();
 
     // Same look/feel as Bucket123 card:
-    return Scaffold(
+    return 
+
+    Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(12),
@@ -49,59 +52,69 @@ class View15 extends StatelessWidget {
                   // ───────────────── Price breakdown (TOP, 200px scroll) ─────────────────
                   const Text('Price breakdown:', style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                    future: priceDocFuture,
-                    builder: (context, snap) {
-                      if (snap.connectionState == ConnectionState.waiting) {
-                        return const SizedBox(
-                          height: 200,
-                          child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                        );
-                      }
-                      if (snap.hasError) {
-                        return SizedBox(
-                          height: 200,
-                          child: Center(
-                            child: Text('Error: ${snap.error}', style: const TextStyle(color: Colors.red)),
-                          ),
-                        );
-                      }
-                      if (!snap.hasData || !snap.data!.exists) {
-                        return const SizedBox(
-                          height: 200,
-                          child: Center(child: Text('No price details found')),
-                        );
-                      }
+                  const ItemDetails(),
+                  // FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  //   future: priceDocFuture,
+                  //   builder: (context, snap) {
+                  //     if (snap.connectionState == ConnectionState.waiting) {
+                  //       return const SizedBox(
+                  //         height: 200,
+                  //         child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  //       );
+                  //     }
+                  //     if (snap.hasError) {
+                  //       return SizedBox(
+                  //         height: 200,
+                  //         child: Center(
+                  //           child: Text('Error: ${snap.error}', style: const TextStyle(color: Colors.red)),
+                  //         ),
+                  //       );
+                  //     }
+                  //     if (!snap.hasData || !snap.data!.exists) {
+                  //       return const SizedBox(
+                  //         height: 200,
+                  //         child: Center(child: Text('No price details found')),
+                  //       );
+                  //     }
 
-                      final data = snap.data!.data() ?? {};
-                      // Show ALL fields in doc (or you can whitelist certain keys if preferred)
-                      final entries = data.entries.toList()
-                        ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
+                  //     final data = snap.data!.data() ?? {};
+                  //     // Show ALL fields in doc (or you can whitelist certain keys if preferred)
+                  //     final entries = data.entries.toList()
+                  //       ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
 
-                      return SizedBox(
-                        height: 200,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: entries.map((e) {
-                              final valueStr = e.value == null ? 'null' : e.value.toString();
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // Keep it simple (no Expanded outside of Row/Flex issues)
-                                    Flexible(child: Text(e.key, style: t.bodyMedium)),
-                                    const SizedBox(width: 12),
-                                    Text(valueStr, style: t.bodyMedium),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                  //     return SizedBox(
+                  //       height: 200,
+                  //       child:
+                        
+                        
+                        
+                  //       SingleChildScrollView(
+                  //         child: Column(
+                  //           children: entries.map((e) {
+                  //             final valueStr = e.value == null ? 'null' : e.value.toString();
+                  //             return Padding(
+                  //               padding: const EdgeInsets.symmetric(vertical: 4),
+                  //               child: Row(
+                  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //                 children: [
+                  //                   // Keep it simple (no Expanded outside of Row/Flex issues)
+                  //                   Flexible(child: Text(e.key, style: t.bodyMedium)),
+                  //                   const SizedBox(width: 12),
+                  //                   Text(valueStr, style: t.bodyMedium),
+                  //                 ],
+                  //               ),
+                  //             );
+                  //           }).toList(),
+                  //         ),
+                  //       ),
+                      
+                      
+                      
+                      
+                      
+                  //     );
+                  //   },
+                  // ),
 
                   const Divider(height: 20, thickness: 2),
 
@@ -244,6 +257,7 @@ return Wrap(
         ),
       ),
     );
+  
   }
 }
 

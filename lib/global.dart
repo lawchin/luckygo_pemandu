@@ -87,6 +87,8 @@ class Gv {
   static int wetFoodCount        = 0;    // 30
   static int tupperwareCount     = 0;    // 31
   static int gasTankCount        = 0;    // 32
+  static int tips1Amount         = 0;    // 33
+  static int tips2Amount         = 0;    // 34
 
   static int groupCapability     = 0;
   static bool form2Completed     = false;
