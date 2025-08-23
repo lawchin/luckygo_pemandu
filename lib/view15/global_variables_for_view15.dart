@@ -85,3 +85,7 @@ ValueNotifier<double> km_d2d3 = ValueNotifier<double>(0);
 ValueNotifier<double> km_d3d4 = ValueNotifier<double>(0);
 ValueNotifier<double> km_d4d5 = ValueNotifier<double>(0);
 ValueNotifier<double> km_d5d6 = ValueNotifier<double>(0);
+
+ValueNotifier<String> passengerName = ValueNotifier<String>('');
+ValueNotifier<String> passengerPhone = ValueNotifier<String>('');
+ValueNotifier<String> passengerSelfie = ValueNotifier<String>('');

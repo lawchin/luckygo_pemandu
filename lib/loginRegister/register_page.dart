@@ -103,7 +103,7 @@ class _RegisterPageState extends State<RegisterPage> {
       'language': language,
       'created_at': DateTime.now().toIso8601String(),
       'registration_approved': false,
-      'disclosure_accepted': false,
+      'disclosureAccepted': false,
       'group_capability': 3
     };
     try {

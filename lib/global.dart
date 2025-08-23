@@ -47,7 +47,7 @@ class Gv {
 
   // Lite job core details
   static String liteJobId        = '';   // 0
-  static String passengerPhone   = '';   // 1
+  static dynamic passengerPhone = '';
   static String passengerName    = '';   // 2
   static int    passengerCount   = 0;    // 3
   static double totalKm          = 0.0;  // 4
@@ -131,4 +131,8 @@ class Gv {
     final k = roadKey(jobId, sLat, sLng, roadAnchorLat, roadAnchorLng);
     return roadByJob[k];
   }
+
+  static String liteJobData = '';
+  // static Map<String, dynamic>? liteJobData;
+  static String driverSelfie = '';
 }

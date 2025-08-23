@@ -110,7 +110,6 @@ class _LandingPageState extends State<LandingPage> {
         Gv.driverGp = GeoPoint(pos.latitude, pos.longitude);
         Gv.driverLat = pos.latitude;
         Gv.driverLng = pos.longitude;
-        print("📍🔴 Driver LatLng: ${pos.latitude}, ${pos.longitude}");
         
         // 5️⃣ Fetch jobs now that location is ready
         // await fetchAllJobs();
@@ -583,6 +582,7 @@ body: Stack(
         final data = snapshot.data!.data()!;
         Gv.form2Completed = (data['form2_completed'] as bool?) ?? false;
         Gv.registrationApproved = (data['registration_approved'] as bool?) ?? false;
+        Gv.driverSelfie = (data['reg_selfie_image_url'] as String?) ?? '';
 
     if (!Gv.form2Completed && !Gv.registrationApproved) {
       // Go to CompleteRegistrationPage
