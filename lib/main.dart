@@ -50,6 +50,16 @@ class _MyAppState extends State<MyApp> {
       Gv.kawasan = (prefs.getString('area')     ?? '').trim();
       Gv.bahasa  = (prefs.getString('language') ?? '').trim();
 
+      if (Gv.negara == 'Malaysia'){
+        Gv.currency = 'MYR';
+      } else if (Gv.negara == 'Timor-Leste'){
+        Gv.currency = 'USD';
+      } else if (Gv.negara == 'Indonesia'){
+        Gv.currency = 'IDR';
+      } else {
+        Gv.currency = 'RM';
+      }
+
     } catch (e) {
       debugPrint('fetchLocalData error: $e');
       // do not rethrow; allow app to continue with defaults

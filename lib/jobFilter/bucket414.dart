@@ -261,7 +261,7 @@ class _Bucket414State extends State<Bucket414> {
                                         Text('${_toDbl(p, 4).toStringAsFixed(1)} km'),
                                       ],
                                     ),
-                                    Text('RM ${price.toStringAsFixed(2)}',
+                                    Text('${Gv.currency} ${price.toStringAsFixed(2)}',
                                         style: Theme.of(context).textTheme.titleMedium),
                                   ],
                                 ),

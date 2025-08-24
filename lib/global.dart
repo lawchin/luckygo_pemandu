@@ -135,4 +135,6 @@ class Gv {
   static String liteJobData = '';
   // static Map<String, dynamic>? liteJobData;
   static String driverSelfie = '';
+  static String currency = '';
+  // static String orderStatus = '';
 }

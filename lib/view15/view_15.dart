@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:luckygo_pemandu/driver_accept_job/driver_accept_job.dart';
 import 'package:luckygo_pemandu/global.dart';
+import 'package:luckygo_pemandu/jobFilter/bucket123b.dart';
+import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
 import 'package:luckygo_pemandu/view15/countdown_text.dart';
 import 'package:luckygo_pemandu/view15/global_variables_for_view15.dart';
 import 'package:luckygo_pemandu/view15/item_details.dart';
@@ -12,7 +14,6 @@ class View15 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
-
     final countdownKey = GlobalKey<CountdownTextState>();
 
     // One-time read of the active job doc for this passenger
@@ -25,325 +26,350 @@ class View15 extends StatelessWidget {
         .doc(Gv.passengerPhone)
         .get();
 
-    return Scaffold(
-      body: SafeArea(
-        child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          future: priceDocFuture,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator(strokeWidth: 2));
-            }
+    return PopScope(
+      canPop: false, // BLOCK device/gesture back on this page
+      onPopInvoked: (didPop) {
+        // If the system tried to pop but we blocked it, show a brief message
+        if (!didPop) {
+          final messenger = ScaffoldMessenger.of(context);
+          messenger.clearSnackBars();
+          messenger.showSnackBar(
+            const SnackBar(
+              duration: Duration(milliseconds: 900),
+              content: Text('Back is disabled on this page'),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            future: priceDocFuture,
+            builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+              }
 
-            if (snap.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'Error: ${snap.error}',
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              );
-            }
-
-            if (snap.hasData && snap.data!.exists) {
-              final data = snap.data!.data()!;
-              passengerName.value   = (data['job_creator_name'] ?? '') as String;
-              passengerPhone.value  = (data['job_created_by'] ?? '') as String;
-              passengerSelfie.value = (data['passenger_selfie'] ?? '') as String;
-            }
-
-            // ---------- UI ----------
-            return Padding(
-              padding: const EdgeInsets.all(12),
-              child: Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                elevation: 2,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                clipBehavior: Clip.antiAlias,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.blue.shade50,
-                        Colors.blue.shade100,
-                        Colors.blue.shade200,
-                      ],
+              if (snap.hasError) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      'Error: ${snap.error}',
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Price breakdown:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
+                );
+              }
 
-                      // 👇 Only this area scrolls
-                      const Expanded(
-                        child: ItemDetails(),
-                      ),
+              if (snap.hasData && snap.data!.exists) {
+                final data = snap.data!.data()!;
+                passengerName.value   = (data['job_creator_name'] ?? '') as String;
+                passengerPhone.value  = (data['job_created_by'] ?? '') as String;
+                passengerSelfie.value = (data['passenger_selfie'] ?? '') as String;
+              }
 
-                      const Divider(height: 20, thickness: 2),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Image.asset('assets/images/ind_passenger.png',
-                                  width: 32, height: 32, fit: BoxFit.contain),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 4),
-                                child: Icon(Icons.arrow_forward, size: 20, color: Colors.grey),
-                              ),
-                              Image.asset('assets/images/finish.png',
-                                  width: 32, height: 32, fit: BoxFit.contain),
-                              const SizedBox(width: 8),
-                              Text('${_km1(Gv.totalKm)} km'),
-                            ],
-                          ),
-                          Text('RM ${_rm2(Gv.totalPrice)}',
-                              style: Theme.of(context).textTheme.titleMedium),
+              // ---------- UI ----------
+              return Padding(
+                padding: const EdgeInsets.all(12),
+                child: Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  clipBehavior: Clip.antiAlias,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.blue.shade50,
+                          Colors.blue.shade100,
+                          Colors.blue.shade200,
                         ],
                       ),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text('Price breakdown:', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const Spacer(),
+                            IconButton(
+                                icon: const Icon(Icons.close, color: Colors.red),
 
-                      const Divider(height: 14, thickness: 2),
 
-                      _addrWithIcon(
-                        'assets/images/ind_passenger.png',
-                        overlayNumber: Gv.passengerCount,
-                        l1: Gv.sAdd1,
-                        l2: Gv.sAdd2,
-                        ctx: context,
-                      ),
-                      const SizedBox(height: 4),
-                      _addrWithIcon(
-                        'assets/images/finish.png',
-                        l1: Gv.dAdd1,
-                        l2: Gv.dAdd2,
-                        ctx: context,
-                      ),
 
-                      const Divider(height: 14, thickness: 2),
+                              onPressed: () async {
+                                countdownKey.currentState?.cancel();
+                                await FirebaseFirestore.instance
+                                    .collection(Gv.negara)
+                                    .doc(Gv.negeri)
+                                    .collection('passenger_account')
+                                    .doc('${passengerPhone.value}')
+                                    .collection('my_active_job')
+                                    .doc('${passengerPhone.value}')
+                                    .update({
+                                  'found_a_driver': true,
+                                  'lite_job_id': Gv.liteJobId,
+                                  'job_is_available': false,
+                                  'job_is_taken_by': Gv.loggedUser,
+                                  'order_status': 'driver_accepted_job',
+                                  'x_driver_selfie': Gv.driverSelfie,
+                                  'x_driver_geopoint': GeoPoint(Gv.driverGp!.latitude, Gv.driverGp!.longitude),
+                                });
+                                if (context.mounted) {
+                                  Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+                                );}                      
 
-                      Builder(
-                        builder: (_) {
-                          final chips = <String, int>{
-                            'Wheelchair': Gv.wheelchairCount,
-                            'Stick': Gv.supportStickCount,
-                            'Stroller': Gv.babyStrollerCount,
-                            'Bags': Gv.shoppingBagCount,
-                            'Luggage': Gv.luggageCount,
-                            'Pets': Gv.petsCount,
-                            'Dog': Gv.dogCount,
-                            'Goat': Gv.goatCount,
-                            'Rooster': Gv.roosterCount,
-                            'Snake': Gv.snakeCount,
-                            'Durian': Gv.durianCount,
-                            'Odour fruit': Gv.odourFruitsCount,
-                            'Wet food': Gv.wetFoodCount,
-                            'Tupperware': Gv.tupperwareCount,
-                            'Gas tank': Gv.gasTankCount,
-                          }..removeWhere((_, v) => v <= 0);
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
 
-                          final badges = <Widget>[];
-                          if (Gv.isBlind) badges.add(_badge('Blind', context));
-                          if (Gv.isDeaf)  badges.add(_badge('Deaf', context));
-                          if (Gv.isMute)  badges.add(_badge('Mute', context));
-                          for (final e in chips.entries) {
-                            badges.add(_badge('${e.key} x${e.value}', context));
-                          }
+                        // 👇 Only this area scrolls
+                        const Expanded(
+                          child: ItemDetails(),
+                        ),
 
-                          return SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
+                        const Divider(height: 20, thickness: 2),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
                               children: [
-                                for (int i = 0; i < badges.length; i++) ...[
-                                  Transform.scale(scale: 1.25, child: badges[i]),
-                                  if (i != badges.length - 1) const SizedBox(width: 16),
-                                ],
+                                Image.asset('assets/images/ind_passenger.png',
+                                    width: 32, height: 32, fit: BoxFit.contain),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 4),
+                                  child: Icon(Icons.arrow_forward, size: 20, color: Colors.grey),
+                                ),
+                                Image.asset('assets/images/finish.png',
+                                    width: 32, height: 32, fit: BoxFit.contain),
+                                const SizedBox(width: 8),
+                                Text('${_km1(Gv.totalKm)} km'),
                               ],
                             ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      Row(
-                        children: [
-                          Text('Eta ${Gv.roadEta} minutes',
-                              style: const TextStyle(height: 0.5, fontSize: 12)),
-                        ],
-                      ),
-
-                      Row(
-                        children: [
-                          Image.asset('assets/images/car.png',
-                              width: 32, height: 32, fit: BoxFit.contain),
-                          const SizedBox(width: 6),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('${_km1(Gv.roadKm)} km',
-                                  style: const TextStyle(height: 0.6, fontSize: 12)),
-                              const Text('⟶',
-                                  style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
-                            ],
-                          ),
-                          const SizedBox(width: 6),
-                          if (Gv.markerCount >= 2) markerStrip(Gv.markerCount, size: 28, spacing: 1),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      const Divider(height: 14, thickness: 2),
-
-                      // Top Passenger Card
-                      Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 40,
-                                backgroundImage: passengerSelfie.value.isNotEmpty
-                                    ? NetworkImage(passengerSelfie.value)
-                                    : const AssetImage('assets/default_avatar.png') as ImageProvider,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      passengerName.value,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      passengerPhone.value,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                            Text('${Gv.currency} ${_rm2(Gv.totalPrice)}',
+                                style: Theme.of(context).textTheme.titleMedium),
+                          ],
                         ),
-                      ),
 
-                      Center(
-                        child: SizedBox(
-                          width: 300,
-                          height: 80,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(32),
+                        const Divider(height: 14, thickness: 2),
+
+                        _addrWithIcon(
+                          'assets/images/ind_passenger.png',
+                          overlayNumber: Gv.passengerCount,
+                          l1: Gv.sAdd1,
+                          l2: Gv.sAdd2,
+                          ctx: context,
+                        ),
+                        const SizedBox(height: 4),
+                        _addrWithIcon(
+                          'assets/images/finish.png',
+                          l1: Gv.dAdd1,
+                          l2: Gv.dAdd2,
+                          ctx: context,
+                        ),
+
+                        const Divider(height: 14, thickness: 2),
+
+                        Builder(
+                          builder: (_) {
+                            final chips = <String, int>{
+                              'Wheelchair': Gv.wheelchairCount,
+                              'Stick': Gv.supportStickCount,
+                              'Stroller': Gv.babyStrollerCount,
+                              'Bags': Gv.shoppingBagCount,
+                              'Luggage': Gv.luggageCount,
+                              'Pets': Gv.petsCount,
+                              'Dog': Gv.dogCount,
+                              'Goat': Gv.goatCount,
+                              'Rooster': Gv.roosterCount,
+                              'Snake': Gv.snakeCount,
+                              'Durian': Gv.durianCount,
+                              'Odour fruit': Gv.odourFruitsCount,
+                              'Wet food': Gv.wetFoodCount,
+                              'Tupperware': Gv.tupperwareCount,
+                              'Gas tank': Gv.gasTankCount,
+                            }..removeWhere((_, v) => v <= 0);
+
+                            final badges = <Widget>[];
+                            if (Gv.isBlind) badges.add(_badge('Blind', context));
+                            if (Gv.isDeaf)  badges.add(_badge('Deaf', context));
+                            if (Gv.isMute)  badges.add(_badge('Mute', context));
+                            for (final e in chips.entries) {
+                              badges.add(_badge('${e.key} x${e.value}', context));
+                            }
+
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  for (int i = 0; i < badges.length; i++) ...[
+                                    Transform.scale(scale: 1.25, child: badges[i]),
+                                    if (i != badges.length - 1) const SizedBox(width: 16),
+                                  ],
+                                ],
                               ),
-                              textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                            ),
-                            onPressed: () async {
-                              countdownKey.currentState?.cancel();
-                              await FirebaseFirestore.instance
-                              .collection(Gv.negara)
-                              .doc(Gv.negeri)
-                              .collection('passenger_account')
-                              .doc('${passengerPhone.value}')
-                              .collection('my_active_job')
-                              .doc('${passengerPhone.value}')
-                              .update({
-                                'found_a_driver':true,
-                                'lite_job_id': Gv.liteJobId,
-                                'job_is_available': false,
-                                'job_is_taken_by': Gv.loggedUser,
-                                'order_status': 'driver_accepted_job',
-                                'x_driver_selfie': Gv.driverSelfie,
-                                'x_driver_geopoint': GeoPoint(Gv.driverGp!.latitude, Gv.driverGp!.longitude),                               
-                              }); 
-                              if (context.mounted) {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const DAJ()),
-                                );
-                              }
+                            );
+                          },
+                        ),
 
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        const SizedBox(height: 4),
+
+                        Row(
+                          children: [
+                            Text('Eta ${Gv.roadEta} minutes',
+                                style: const TextStyle(height: 0.5, fontSize: 12)),
+                          ],
+                        ),
+
+                        Row(
+                          children: [
+                            Image.asset('assets/images/car.png',
+                                width: 32, height: 32, fit: BoxFit.contain),
+                            const SizedBox(width: 6),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Spacer(flex: 2),
-                                const Expanded(
-                                  flex: 6,
-                                  child: Center(child: Text('Accept')),
+                                Text('${_km1(Gv.roadKm)} km',
+                                    style: const TextStyle(height: 0.6, fontSize: 12)),
+                                const Text('⟶',
+                                    style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
+                              ],
+                            ),
+                            const SizedBox(width: 6),
+                            if (Gv.markerCount >= 2) markerStrip(Gv.markerCount, size: 28, spacing: 1),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        const Divider(height: 14, thickness: 2),
+
+                        // Top Passenger Card
+                        Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 40,
+                                  backgroundImage: passengerSelfie.value.isNotEmpty
+                                      ? NetworkImage(passengerSelfie.value)
+                                      : const AssetImage('assets/default_avatar.png') as ImageProvider,
                                 ),
+                                const SizedBox(width: 16),
                                 Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: Builder(
-                                      builder: (ctx) =>                                       
-                                      
-                                      // CountdownText(
-                                      //   onFinished: () async {
-                                      //     final jobDocRef = FirebaseFirestore.instance
-                                      //         .collection(Gv.negara)
-                                      //         .doc(Gv.negeri)
-                                      //         .collection('active_job')
-                                      //         .doc('active_job_lite');
-                                      //     try {
-                                      //       await jobDocRef.set(
-                                      //         { Gv.liteJobId: Gv.liteJobData },
-                                      //         SetOptions(merge: true),
-                                      //       );
-                                      //     } finally {
-                                      //       if (ctx.mounted) {
-                                      //         Navigator.of(ctx).pop(); // guaranteed pop
-                                      //       }
-                                      //     }
-                                      //   },
-                                      // ),
-
-                                      CountdownText(
-                                        key: countdownKey,
-                                        onFinished: () async {
-                                          // only called if not cancelled
-                                          await FirebaseFirestore.instance
-                                              .collection(Gv.negara)
-                                              .doc(Gv.negeri)
-                                              .collection('active_job')
-                                              .doc('active_job_lite')
-                                              .set({Gv.liteJobId: Gv.liteJobData}, SetOptions(merge: true));
-                                          if (context.mounted) Navigator.of(context).pop();
-                                        },
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        passengerName.value,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-
-
-
-                                    ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        passengerPhone.value,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                      ),
-                    ],
+
+                        Center(
+                          child: SizedBox(
+                            width: 300,
+                            height: 80,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(32),
+                                ),
+                                textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                              ),
+                              onPressed: () async {
+                                countdownKey.currentState?.cancel();
+                                await FirebaseFirestore.instance
+                                    .collection(Gv.negara)
+                                    .doc(Gv.negeri)
+                                    .collection('passenger_account')
+                                    .doc('${passengerPhone.value}')
+                                    .collection('my_active_job')
+                                    .doc('${passengerPhone.value}')
+                                    .update({
+                                  'found_a_driver': true,
+                                  'lite_job_id': Gv.liteJobId,
+                                  'job_is_available': false,
+                                  'job_is_taken_by': Gv.loggedUser,
+                                  'order_status': 'driver_accepted_job',
+                                  'x_driver_selfie': Gv.driverSelfie,
+                                  'x_driver_geopoint': GeoPoint(Gv.driverGp!.latitude, Gv.driverGp!.longitude),
+                                });
+                                if (context.mounted) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => const DAJ()),
+                                  );
+                                }
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Spacer(flex: 2),
+                                  const Expanded(
+                                    flex: 6,
+                                    child: Center(child: Text('Accept')),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Center(
+                                      child: Builder(
+                                        builder: (ctx) => CountdownText(
+                                          key: countdownKey,
+                                          onFinished: () async {
+                                            // only called if not cancelled
+                                            await FirebaseFirestore.instance
+                                                .collection(Gv.negara)
+                                                .doc(Gv.negeri)
+                                                .collection('active_job')
+                                                .doc('active_job_lite')
+                                                .set({Gv.liteJobId: Gv.liteJobData}, SetOptions(merge: true));
+                                            if (context.mounted) Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -384,10 +410,6 @@ Widget _addrWithIcon(
                     Shadow(offset: Offset( 1, -1), color: Colors.white),
                     Shadow(offset: Offset(-1,  1), color: Colors.white),
                     Shadow(offset: Offset( 1,  1), color: Colors.white),
-                    Shadow(offset: Offset( 0, -1), color: Colors.white),
-                    Shadow(offset: Offset( 0,  1), color: Colors.white),
-                    Shadow(offset: Offset(-1,  0), color: Colors.white),
-                    Shadow(offset: Offset( 1,  0), color: Colors.white),
                   ],
                 ),
               ),
@@ -435,8 +457,6 @@ Widget _badge(String text, BuildContext ctx) {
                 shadows: const [
                   Shadow(offset: Offset(-1, -1), color: Colors.white),
                   Shadow(offset: Offset( 1, -1), color: Colors.white),
-                  Shadow(offset: Offset(-1,  1), color: Colors.white),
-                  Shadow(offset: Offset( 1,  1), color: Colors.white),
                 ],
               ),
             ),
@@ -500,6 +520,7 @@ Widget markerStrip(int markerCount, {double size = 28, double spacing = 2}) {
 
 // import 'package:flutter/material.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:luckygo_pemandu/driver_accept_job/driver_accept_job.dart';
 // import 'package:luckygo_pemandu/global.dart';
 // import 'package:luckygo_pemandu/view15/countdown_text.dart';
 // import 'package:luckygo_pemandu/view15/global_variables_for_view15.dart';
@@ -508,348 +529,348 @@ Widget markerStrip(int markerCount, {double size = 28, double spacing = 2}) {
 // class View15 extends StatelessWidget {
 //   const View15({super.key});
 
+//   @override
+//   Widget build(BuildContext context) {
+//     final t = Theme.of(context).textTheme;
 
-// @override
-// Widget build(BuildContext context) {
-//   final t = Theme.of(context).textTheme;
+//     final countdownKey = GlobalKey<CountdownTextState>();
 
-//   // One-time read of the active job doc for this passenger
-//   final priceDocFuture = FirebaseFirestore.instance
-//       .collection(Gv.negara)
-//       .doc(Gv.negeri)
-//       .collection('passenger_account')
-//       .doc(Gv.passengerPhone)
-//       .collection('my_active_job')
-//       .doc(Gv.passengerPhone)
-//       .get();
+//     // One-time read of the active job doc for this passenger
+//     final priceDocFuture = FirebaseFirestore.instance
+//         .collection(Gv.negara)
+//         .doc(Gv.negeri)
+//         .collection('passenger_account')
+//         .doc(Gv.passengerPhone)
+//         .collection('my_active_job')
+//         .doc(Gv.passengerPhone)
+//         .get();
 
-//   return Scaffold(
-//     body: SafeArea(
-//       child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-//         future: priceDocFuture,
-//         builder: (context, snap) {
-//           if (snap.connectionState == ConnectionState.waiting) {
-//             return const Center(child: CircularProgressIndicator(strokeWidth: 2));
-//           }
+//     return Scaffold(
+//       body: SafeArea(
+//         child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+//           future: priceDocFuture,
+//           builder: (context, snap) {
+//             if (snap.connectionState == ConnectionState.waiting) {
+//               return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+//             }
 
-//           if (snap.hasError) {
-//             return Center(
-//               child: Padding(
-//                 padding: const EdgeInsets.all(16),
-//                 child: Text(
-//                   'Error: ${snap.error}',
-//                   style: const TextStyle(color: Colors.red),
-//                   textAlign: TextAlign.center,
-//                 ),
-//               ),
-//             );
-//           }
-
-//           if (snap.hasData && snap.data!.exists) {
-//             final data = snap.data!.data()!;
-//             passengerName.value   = (data['job_creator_name'] ?? '') as String;
-//             passengerPhone.value  = (data['job_created_by'] ?? '') as String;
-//             passengerSelfie.value = (data['passenger_selfie'] ?? '') as String;
-//           }
-
-//           // ---------- UI ----------
-//           return Padding(
-//             padding: const EdgeInsets.all(12),
-//             child: Card(
-//               margin: const EdgeInsets.only(bottom: 12),
-//               elevation: 2,
-//               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-//               clipBehavior: Clip.antiAlias,
-//               child: Container(
-//                 decoration: BoxDecoration(
-//                   borderRadius: BorderRadius.circular(12),
-//                   gradient: LinearGradient(
-//                     begin: Alignment.topCenter,
-//                     end: Alignment.bottomCenter,
-//                     colors: [
-//                       Colors.blue.shade50,
-//                       Colors.blue.shade100,
-//                       Colors.blue.shade200,
-//                     ],
+//             if (snap.hasError) {
+//               return Center(
+//                 child: Padding(
+//                   padding: const EdgeInsets.all(16),
+//                   child: Text(
+//                     'Error: ${snap.error}',
+//                     style: const TextStyle(color: Colors.red),
+//                     textAlign: TextAlign.center,
 //                   ),
 //                 ),
-//                 padding: const EdgeInsets.all(12),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     const Text('Price breakdown:', style: TextStyle(fontWeight: FontWeight.bold)),
-//                     const SizedBox(height: 8),
+//               );
+//             }
 
-//                     // 👇 Only this area scrolls
-//                     Expanded(
-//                       child: ItemDetails(),
-//                     ),
+//             if (snap.hasData && snap.data!.exists) {
+//               final data = snap.data!.data()!;
+//               passengerName.value   = (data['job_creator_name'] ?? '') as String;
+//               passengerPhone.value  = (data['job_created_by'] ?? '') as String;
+//               passengerSelfie.value = (data['passenger_selfie'] ?? '') as String;
+//             }
 
-//                     const Divider(height: 20, thickness: 2),
-
-//                     Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         Row(
-//                           children: [
-//                             Image.asset('assets/images/ind_passenger.png',
-//                                 width: 32, height: 32, fit: BoxFit.contain),
-//                             const Padding(
-//                               padding: EdgeInsets.symmetric(horizontal: 4),
-//                               child: Icon(Icons.arrow_forward, size: 20, color: Colors.grey),
-//                             ),
-//                             Image.asset('assets/images/finish.png',
-//                                 width: 32, height: 32, fit: BoxFit.contain),
-//                             const SizedBox(width: 8),
-//                             Text('${_km1(Gv.totalKm)} km'),
-//                           ],
-//                         ),
-//                         Text('RM ${_rm2(Gv.totalPrice)}',
-//                             style: Theme.of(context).textTheme.titleMedium),
+//             // ---------- UI ----------
+//             return Padding(
+//               padding: const EdgeInsets.all(12),
+//               child: Card(
+//                 margin: const EdgeInsets.only(bottom: 12),
+//                 elevation: 2,
+//                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//                 clipBehavior: Clip.antiAlias,
+//                 child: Container(
+//                   decoration: BoxDecoration(
+//                     borderRadius: BorderRadius.circular(12),
+//                     gradient: LinearGradient(
+//                       begin: Alignment.topCenter,
+//                       end: Alignment.bottomCenter,
+//                       colors: [
+//                         Colors.blue.shade50,
+//                         Colors.blue.shade100,
+//                         Colors.blue.shade200,
 //                       ],
 //                     ),
+//                   ),
+//                   padding: const EdgeInsets.all(12),
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       const Text('Price breakdown:', style: TextStyle(fontWeight: FontWeight.bold)),
+//                       const SizedBox(height: 8),
 
-//                     const Divider(height: 14, thickness: 2),
-
-//                     _addrWithIcon(
-//                       'assets/images/ind_passenger.png',
-//                       overlayNumber: Gv.passengerCount,
-//                       l1: Gv.sAdd1,
-//                       l2: Gv.sAdd2,
-//                       ctx: context,
-//                     ),
-//                     const SizedBox(height: 4),
-//                     _addrWithIcon(
-//                       'assets/images/finish.png',
-//                       l1: Gv.dAdd1,
-//                       l2: Gv.dAdd2,
-//                       ctx: context,
-//                     ),
-
-//                     const Divider(height: 14, thickness: 2),
-
-//                     Builder(
-//                       builder: (_) {
-//                         final chips = <String, int>{
-//                           'Wheelchair': Gv.wheelchairCount,
-//                           'Stick': Gv.supportStickCount,
-//                           'Stroller': Gv.babyStrollerCount,
-//                           'Bags': Gv.shoppingBagCount,
-//                           'Luggage': Gv.luggageCount,
-//                           'Pets': Gv.petsCount,
-//                           'Dog': Gv.dogCount,
-//                           'Goat': Gv.goatCount,
-//                           'Rooster': Gv.roosterCount,
-//                           'Snake': Gv.snakeCount,
-//                           'Durian': Gv.durianCount,
-//                           'Odour fruit': Gv.odourFruitsCount,
-//                           'Wet food': Gv.wetFoodCount,
-//                           'Tupperware': Gv.tupperwareCount,
-//                           'Gas tank': Gv.gasTankCount,
-//                         }..removeWhere((_, v) => v <= 0);
-
-//                         final badges = <Widget>[];
-//                         if (Gv.isBlind) badges.add(_badge('Blind', context));
-//                         if (Gv.isDeaf)  badges.add(_badge('Deaf', context));
-//                         if (Gv.isMute)  badges.add(_badge('Mute', context));
-//                         for (final e in chips.entries) {
-//                           badges.add(_badge('${e.key} x${e.value}', context));
-//                         }
-
-//                         // return Wrap(
-//                         //   spacing: 16,
-//                         //   runSpacing: 12,
-//                         //   children: badges
-//                         //       .map((w) => Transform.scale(scale: 1.25, child: w))
-//                         //       .toList(),
-//                         // );
-
-// return SingleChildScrollView(
-//   scrollDirection: Axis.horizontal,
-//   child: Row(
-//     children: [
-//       for (int i = 0; i < badges.length; i++) ...[
-//         Transform.scale(scale: 1.25, child: badges[i]),
-//         if (i != badges.length - 1) const SizedBox(width: 16), // 16px spacing
-//       ],
-//     ],
-//   ),
-// );
-
-
-//                       },
-//                     ),
-
-//                     const SizedBox(height: 4),
-
-//                     Row(
-//                       children: [
-//                         Text('Eta ${Gv.roadEta} minutes',
-//                             style: const TextStyle(height: 0.5, fontSize: 12)),
-//                       ],
-//                     ),
-
-//                     Row(
-//                       children: [
-//                         Image.asset('assets/images/car.png',
-//                             width: 32, height: 32, fit: BoxFit.contain),
-//                         const SizedBox(width: 6),
-//                         Column(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           children: [
-//                             Text('${_km1(Gv.roadKm)} km',
-//                                 style: const TextStyle(height: 0.6, fontSize: 12)),
-//                             const Text('⟶',
-//                                 style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
-//                           ],
-//                         ),
-//                         const SizedBox(width: 6),
-//                         if (Gv.markerCount >= 2) markerStrip(Gv.markerCount, size: 28, spacing: 1),
-//                       ],
-//                     ),
-//                     const SizedBox(height: 6),
-//                     const Divider(height: 14, thickness: 2),
-
-//                     // Top Passenger Card
-//                     Card(
-//                       elevation: 4,
-//                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//                       child: Padding(
-//                         padding: const EdgeInsets.all(4),
-//                         child: Row(
-//                           children: [
-//                             CircleAvatar(
-//                               radius: 40,
-//                               backgroundImage: passengerSelfie.value.isNotEmpty
-//                                   ? NetworkImage(passengerSelfie.value)
-//                                   : const AssetImage('assets/default_avatar.png') as ImageProvider,
-//                             ),
-//                             const SizedBox(width: 16),
-//                             Expanded(
-//                               child: Column(
-//                                 crossAxisAlignment: CrossAxisAlignment.start,
-//                                 children: [
-//                                   Text(
-//                                     passengerName.value,
-//                                     style: const TextStyle(
-//                                       fontSize: 18,
-//                                       fontWeight: FontWeight.bold,
-//                                     ),
-//                                   ),
-//                                   const SizedBox(height: 6),
-//                                   Text(
-//                                     passengerPhone.value,
-//                                     style: const TextStyle(
-//                                       fontSize: 16,
-//                                       color: Colors.grey,
-//                                     ),
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                           ],
-//                         ),
+//                       // 👇 Only this area scrolls
+//                       const Expanded(
+//                         child: ItemDetails(),
 //                       ),
-//                     ),
 
-//                     Center(
-//                       child: SizedBox(
-//                         width: 300,
-//                         height: 80,
-//                         child: ElevatedButton(
-//                           style: ElevatedButton.styleFrom(
-//                             shape: RoundedRectangleBorder(
-//                               borderRadius: BorderRadius.circular(32),
-//                             ),
-//                             textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-//                           ),
-//                           onPressed: () {
-//                             // TODO: Add accept logic here
-//                           },
-//                           child: Row(
-//                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                       const Divider(height: 20, thickness: 2),
+
+//                       Row(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Row(
 //                             children: [
-//                               const Spacer(flex: 2),
-//                               const Expanded(
-//                                 flex: 6,
-//                                 child: Center(child: Text('Accept')),
+//                               Image.asset('assets/images/ind_passenger.png',
+//                                   width: 32, height: 32, fit: BoxFit.contain),
+//                               const Padding(
+//                                 padding: EdgeInsets.symmetric(horizontal: 4),
+//                                 child: Icon(Icons.arrow_forward, size: 20, color: Colors.grey),
 //                               ),
+//                               Image.asset('assets/images/finish.png',
+//                                   width: 32, height: 32, fit: BoxFit.contain),
+//                               const SizedBox(width: 8),
+//                               Text('${_km1(Gv.totalKm)} km'),
+//                             ],
+//                           ),
+//                           Text('${Gv.currency} ${_rm2(Gv.totalPrice)}',
+//                               style: Theme.of(context).textTheme.titleMedium),
+//                         ],
+//                       ),
+
+//                       const Divider(height: 14, thickness: 2),
+
+//                       _addrWithIcon(
+//                         'assets/images/ind_passenger.png',
+//                         overlayNumber: Gv.passengerCount,
+//                         l1: Gv.sAdd1,
+//                         l2: Gv.sAdd2,
+//                         ctx: context,
+//                       ),
+//                       const SizedBox(height: 4),
+//                       _addrWithIcon(
+//                         'assets/images/finish.png',
+//                         l1: Gv.dAdd1,
+//                         l2: Gv.dAdd2,
+//                         ctx: context,
+//                       ),
+
+//                       const Divider(height: 14, thickness: 2),
+
+//                       Builder(
+//                         builder: (_) {
+//                           final chips = <String, int>{
+//                             'Wheelchair': Gv.wheelchairCount,
+//                             'Stick': Gv.supportStickCount,
+//                             'Stroller': Gv.babyStrollerCount,
+//                             'Bags': Gv.shoppingBagCount,
+//                             'Luggage': Gv.luggageCount,
+//                             'Pets': Gv.petsCount,
+//                             'Dog': Gv.dogCount,
+//                             'Goat': Gv.goatCount,
+//                             'Rooster': Gv.roosterCount,
+//                             'Snake': Gv.snakeCount,
+//                             'Durian': Gv.durianCount,
+//                             'Odour fruit': Gv.odourFruitsCount,
+//                             'Wet food': Gv.wetFoodCount,
+//                             'Tupperware': Gv.tupperwareCount,
+//                             'Gas tank': Gv.gasTankCount,
+//                           }..removeWhere((_, v) => v <= 0);
+
+//                           final badges = <Widget>[];
+//                           if (Gv.isBlind) badges.add(_badge('Blind', context));
+//                           if (Gv.isDeaf)  badges.add(_badge('Deaf', context));
+//                           if (Gv.isMute)  badges.add(_badge('Mute', context));
+//                           for (final e in chips.entries) {
+//                             badges.add(_badge('${e.key} x${e.value}', context));
+//                           }
+
+//                           return SingleChildScrollView(
+//                             scrollDirection: Axis.horizontal,
+//                             child: Row(
+//                               children: [
+//                                 for (int i = 0; i < badges.length; i++) ...[
+//                                   Transform.scale(scale: 1.25, child: badges[i]),
+//                                   if (i != badges.length - 1) const SizedBox(width: 16),
+//                                 ],
+//                               ],
+//                             ),
+//                           );
+//                         },
+//                       ),
+
+//                       const SizedBox(height: 4),
+
+//                       Row(
+//                         children: [
+//                           Text('Eta ${Gv.roadEta} minutes',
+//                               style: const TextStyle(height: 0.5, fontSize: 12)),
+//                         ],
+//                       ),
+
+//                       Row(
+//                         children: [
+//                           Image.asset('assets/images/car.png',
+//                               width: 32, height: 32, fit: BoxFit.contain),
+//                           const SizedBox(width: 6),
+//                           Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               Text('${_km1(Gv.roadKm)} km',
+//                                   style: const TextStyle(height: 0.6, fontSize: 12)),
+//                               const Text('⟶',
+//                                   style: TextStyle(height: 0.1, fontSize: 30, color: Colors.red)),
+//                             ],
+//                           ),
+//                           const SizedBox(width: 6),
+//                           if (Gv.markerCount >= 2) markerStrip(Gv.markerCount, size: 28, spacing: 1),
+//                         ],
+//                       ),
+//                       const SizedBox(height: 6),
+//                       const Divider(height: 14, thickness: 2),
+
+//                       // Top Passenger Card
+//                       Card(
+//                         elevation: 4,
+//                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//                         child: Padding(
+//                           padding: const EdgeInsets.all(4),
+//                           child: Row(
+//                             children: [
+//                               CircleAvatar(
+//                                 radius: 40,
+//                                 backgroundImage: passengerSelfie.value.isNotEmpty
+//                                     ? NetworkImage(passengerSelfie.value)
+//                                     : const AssetImage('assets/default_avatar.png') as ImageProvider,
+//                               ),
+//                               const SizedBox(width: 16),
 //                               Expanded(
-//                                 flex: 2,
-//                                 child: Center(
-//                                   child: 
-
-
-
-                                  
-//                                   // CountdownText(
-//                                   //   onFinished: () async {
-//                                   //     await FirebaseFirestore.instance
-//                                   //         .collection(Gv.negara)
-//                                   //         .doc(Gv.negeri)
-//                                   //         .collection('active_job')
-//                                   //         .doc('active_job_lite')
-//                                   //         .set({Gv.liteJobId: Gv.liteJobData});
-//                                   //     if (context.mounted) Navigator.of(context).pop();
-//                                   //   },
-//                                   // ),
-
-// Builder(
-//   builder: (ctx) => CountdownText(
-//     // optional: key: UniqueKey(),  // forces a fresh timer each time
-//     onFinished: () async {
-//       final jobDocRef = FirebaseFirestore.instance
-//           .collection(Gv.negara)
-//           .doc(Gv.negeri)
-//           .collection('active_job')
-//           .doc('active_job_lite');
-//       try {
-//         await jobDocRef.set(
-//           { Gv.liteJobId: Gv.liteJobData },
-//           SetOptions(merge: true),
-//         );
-//       } catch (e) {
-//         // ignore or log; we still want to leave the screen
-//       } finally {
-//         if (ctx.mounted) {
-//           Navigator.of(ctx).pop(); // guaranteed pop
-//         }
-//       }
-//     },
-//   ),
-// )
-
-
-
-
-
-
-
-
-
-
+//                                 child: Column(
+//                                   crossAxisAlignment: CrossAxisAlignment.start,
+//                                   children: [
+//                                     Text(
+//                                       passengerName.value,
+//                                       style: const TextStyle(
+//                                         fontSize: 18,
+//                                         fontWeight: FontWeight.bold,
+//                                       ),
+//                                     ),
+//                                     const SizedBox(height: 6),
+//                                     Text(
+//                                       passengerPhone.value,
+//                                       style: const TextStyle(
+//                                         fontSize: 16,
+//                                         color: Colors.grey,
+//                                       ),
+//                                     ),
+//                                   ],
 //                                 ),
 //                               ),
 //                             ],
 //                           ),
 //                         ),
 //                       ),
-//                     ),
-//                   ],
+
+//                       Center(
+//                         child: SizedBox(
+//                           width: 300,
+//                           height: 80,
+//                           child: ElevatedButton(
+//                             style: ElevatedButton.styleFrom(
+//                               shape: RoundedRectangleBorder(
+//                                 borderRadius: BorderRadius.circular(32),
+//                               ),
+//                               textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+//                             ),
+//                             onPressed: () async {
+//                               countdownKey.currentState?.cancel();
+//                               await FirebaseFirestore.instance
+//                               .collection(Gv.negara)
+//                               .doc(Gv.negeri)
+//                               .collection('passenger_account')
+//                               .doc('${passengerPhone.value}')
+//                               .collection('my_active_job')
+//                               .doc('${passengerPhone.value}')
+//                               .update({
+//                                 'found_a_driver':true,
+//                                 'lite_job_id': Gv.liteJobId,
+//                                 'job_is_available': false,
+//                                 'job_is_taken_by': Gv.loggedUser,
+//                                 'order_status': 'driver_accepted_job',
+//                                 'x_driver_selfie': Gv.driverSelfie,
+//                                 'x_driver_geopoint': GeoPoint(Gv.driverGp!.latitude, Gv.driverGp!.longitude),                               
+//                               }); 
+//                               if (context.mounted) {
+//                                 Navigator.of(context).push(
+//                                   MaterialPageRoute(builder: (_) => const DAJ()),
+//                                 );
+//                               }
+
+//                             },
+//                             child: Row(
+//                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                               children: [
+//                                 const Spacer(flex: 2),
+//                                 const Expanded(
+//                                   flex: 6,
+//                                   child: Center(child: Text('Accept')),
+//                                 ),
+//                                 Expanded(
+//                                   flex: 2,
+//                                   child: Center(
+//                                     child: Builder(
+//                                       builder: (ctx) =>                                       
+                                      
+//                                       // CountdownText(
+//                                       //   onFinished: () async {
+//                                       //     final jobDocRef = FirebaseFirestore.instance
+//                                       //         .collection(Gv.negara)
+//                                       //         .doc(Gv.negeri)
+//                                       //         .collection('active_job')
+//                                       //         .doc('active_job_lite');
+//                                       //     try {
+//                                       //       await jobDocRef.set(
+//                                       //         { Gv.liteJobId: Gv.liteJobData },
+//                                       //         SetOptions(merge: true),
+//                                       //       );
+//                                       //     } finally {
+//                                       //       if (ctx.mounted) {
+//                                       //         Navigator.of(ctx).pop(); // guaranteed pop
+//                                       //       }
+//                                       //     }
+//                                       //   },
+//                                       // ),
+
+//                                       CountdownText(
+//                                         key: countdownKey,
+//                                         onFinished: () async {
+//                                           // only called if not cancelled
+//                                           await FirebaseFirestore.instance
+//                                               .collection(Gv.negara)
+//                                               .doc(Gv.negeri)
+//                                               .collection('active_job')
+//                                               .doc('active_job_lite')
+//                                               .set({Gv.liteJobId: Gv.liteJobData}, SetOptions(merge: true));
+//                                           if (context.mounted) Navigator.of(context).pop();
+//                                         },
+//                                       ),
+
+
+
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
 //                 ),
 //               ),
-//             ),
-//           );
-//         },
+//             );
+//           },
+//         ),
 //       ),
-//     ),
-//   );
+//     );
+//   }
 // }
 
-// }
-
-// // =============== Helpers copied to match Bucket123’s look & feel ===============
-
+// // =============== Helpers ===============
 // String _km1(double v) => v.isFinite ? v.toStringAsFixed(1) : '-';
 // String _rm2(double v) => v.isFinite ? v.toStringAsFixed(2) : '-';
 
@@ -936,10 +957,6 @@ Widget markerStrip(int markerCount, {double size = 28, double spacing = 2}) {
 //                   Shadow(offset: Offset( 1, -1), color: Colors.white),
 //                   Shadow(offset: Offset(-1,  1), color: Colors.white),
 //                   Shadow(offset: Offset( 1,  1), color: Colors.white),
-//                   Shadow(offset: Offset( 0, -1), color: Colors.white),
-//                   Shadow(offset: Offset( 0,  1), color: Colors.white),
-//                   Shadow(offset: Offset(-1,  0), color: Colors.white),
-//                   Shadow(offset: Offset( 1,  0), color: Colors.white),
 //                 ],
 //               ),
 //             ),
@@ -999,5 +1016,4 @@ Widget markerStrip(int markerCount, {double size = 28, double spacing = 2}) {
 //     ),
 //   );
 // }
-
 

@@ -332,7 +332,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
                   ],
                 ),
               ),
-              Text('RM ${Gv.totalPrice.toStringAsFixed(2)}', style: t.titleLarge),
+              Text('${Gv.currency} ${Gv.totalPrice.toStringAsFixed(2)}', style: t.titleLarge),
             ],
           ),
 
