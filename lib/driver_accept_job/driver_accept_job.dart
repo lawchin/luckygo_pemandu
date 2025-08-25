@@ -519,6 +519,7 @@ Widget _primaryActionForStatus(BuildContext context, String? rawStatus) {
       return const _DelayedJobCompleteButton();
 
     case 'job_completed':
+
       return const _DelayedPaymentReceivedButton();
 
     case 'payment_received':
@@ -606,7 +607,10 @@ class _DelayedJobCompleteButtonState extends State<_DelayedJobCompleteButton> {
                   .doc(Gv.passengerPhone)
                   .collection('my_active_job')
                   .doc(Gv.passengerPhone)
-                  .update({'order_status': 'job_completed'});
+                  .update({
+                    'job_is_completed': true,
+                    'order_status': 'job_completed',
+                    });
             }
           : null, // disabled until enabled == true
     );
@@ -639,6 +643,16 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
       label: 'Payment Received',
       onPressed: _enabled
           ? () {
+              debugPrint('Payment Received pressed');
+
+              // 1) Navigate FIRST (context is valid here)
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+                (route) => false,
+              );
+
+              // 2) Fire-and-forget the write (no need for context afterwards)
+              // ignore: discarded_futures
               FirebaseFirestore.instance
                   .collection(Gv.negara)
                   .doc(Gv.negeri)
@@ -646,9 +660,19 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
                   .doc(Gv.passengerPhone)
                   .collection('my_active_job')
                   .doc(Gv.passengerPhone)
-                  .update({'order_status': 'payment_received'});
+                  .set({'order_status': 'payment_received'}, SetOptions(merge: true))
+                  .then((_) => debugPrint('payment_received write OK'))
+                  .catchError((e, st) {
+                    debugPrint('payment_received write failed: $e\n$st');
+                  });
             }
           : null,
+
+
+
+
+
+
     );
   }
 }
