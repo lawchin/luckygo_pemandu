@@ -39,6 +39,7 @@ class AuthGate extends StatelessWidget {
               ? email.replaceAll('@driver.com', '')
               : email;
           Gv.userName = (user.displayName ?? '').trim();
+ 
         }
 
         return const LandingPage();

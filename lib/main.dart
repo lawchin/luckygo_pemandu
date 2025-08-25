@@ -79,7 +79,12 @@ Future<void> fetchAndUpdateGroupCapability() async {
     if (docSnapshot.exists) {
       final data = docSnapshot.data();
       Gv.groupCapability = data?['group_capability'] as int? ?? 0;
-    } else {
+      final brand = data?['reg_vehicle_brand'] ?? '';
+      final color = data?['reg_vehicle_color'] ?? '';
+      final model = data?['reg_vehicle_model'] ?? '';
+      final plate = data?['reg_vehicle_plate'] ?? '';
+      Gv.driverVehicleDetails = '$brand $model $color $plate';
+
       print('Document does not exist.');
     }
   } catch (e) {

@@ -137,4 +137,6 @@ class Gv {
   static String driverSelfie = '';
   static String currency = '';
   // static String orderStatus = '';
+  
+  static String driverVehicleDetails = '';
 }

@@ -317,12 +317,16 @@ class View15 extends StatelessWidget {
                                     .doc('${passengerPhone.value}')
                                     .update({
                                   'found_a_driver': true,
-                                  'lite_job_id': Gv.liteJobId,
                                   'job_is_available': false,
                                   'job_is_taken_by': Gv.loggedUser,
+                                  'lite_job_id': Gv.liteJobId,
                                   'order_status': 'driver_accepted_job',
-                                  'x_driver_selfie': Gv.driverSelfie,
+                                  'x_driver_distance_to_source': Gv.roadKm,
+                                  'x_driver_eta_to_source': Gv.roadEta,
+                                  'x_driver_name': Gv.userName,
                                   'x_driver_geopoint': GeoPoint(Gv.driverGp!.latitude, Gv.driverGp!.longitude),
+                                  'x_driver_selfie': Gv.driverSelfie,
+                                  'x_driver_vehicle_details' : Gv.driverVehicleDetails
                                 });
                                 if (context.mounted) {
                                   Navigator.of(context).push(
