@@ -69,7 +69,7 @@ class _ItemWidgetState extends State<DesWidget> {
                     ),
                   ),
                   Expanded(
-                    flex: 20,
+                    flex: 26,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -85,7 +85,7 @@ class _ItemWidgetState extends State<DesWidget> {
                     ),
                   ), 
                   Expanded(
-                    flex: 36,
+                    flex: 30,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [

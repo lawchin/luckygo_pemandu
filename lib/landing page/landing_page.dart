@@ -110,6 +110,9 @@ class _LandingPageState extends State<LandingPage> {
         Gv.driverGp = GeoPoint(pos.latitude, pos.longitude);
         Gv.driverLat = pos.latitude;
         Gv.driverLng = pos.longitude;
+        print('Gv.driverGp: ${Gv.driverGp}');
+        print('Gv.driverLat: ${Gv.driverLat}');
+        print('Gv.driverLng: ${Gv.driverLng}');
         
         // 5️⃣ Fetch jobs now that location is ready
         // await fetchAllJobs();

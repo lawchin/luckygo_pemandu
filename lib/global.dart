@@ -41,9 +41,10 @@ class Gv {
   static String bahasa = '';
 
   // Current location
-  static GeoPoint? driverGp;
+  static GeoPoint driverGp = const GeoPoint(0.0, 0.0);
   static double driverLat = 0.0;
   static double driverLng = 0.0;
+  static GeoPoint passengerGp = const GeoPoint(0.0, 0.0);
 
   // Lite job core details
   static String liteJobId        = '';   // 0

@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 class DAJ extends StatelessWidget {
   const DAJ({super.key});
 
+  static const String _TAG = '[DAJ]';
+
   @override
   Widget build(BuildContext context) {
     // Supports either String or ValueNotifier<String> in your Gv
@@ -49,6 +51,7 @@ class DAJ extends StatelessWidget {
                 stream: docRef.snapshots(),
                 builder: (context, snap) {
                   if (snap.connectionState == ConnectionState.waiting) {
+                    _d('Stream waiting… phone=$phone');
                     return const Center(
                       child: SizedBox(
                         width: 28,
@@ -58,6 +61,7 @@ class DAJ extends StatelessWidget {
                     );
                   }
                   if (snap.hasError) {
+                    _d('Stream error: ${snap.error}');
                     return _paddedCard(
                       child: const Center(
                         child: Text('Failed to load job data', style: TextStyle(color: Colors.red)),
@@ -66,7 +70,8 @@ class DAJ extends StatelessWidget {
                   }
 
                   if (!snap.hasData || !snap.data!.exists) {
-                    // schedule navigation after 1500ms
+                    _d('No active job doc for $phone → schedule redirect to FilterJobsOneStream2');
+                    // schedule navigation after 5000ms
                     Future.delayed(const Duration(milliseconds: 5000), () {
                       if (context.mounted) {
                         Navigator.of(context).pushReplacement(
@@ -82,10 +87,20 @@ class DAJ extends StatelessWidget {
                     );
                   }
 
-
-
-
                   final data  = snap.data!.data() ?? {};
+                  // ✅ Fill your globals for map usage (exact fields as you requested)
+                  Gv.passengerGp = data['z_source'] is GeoPoint
+                      ? data['z_source'] as GeoPoint
+                      : const GeoPoint(0.0, 0.0);
+
+                  Gv.driverGp = data['x_driver_geopoint'] is GeoPoint
+                      ? data['x_driver_geopoint'] as GeoPoint
+                      : const GeoPoint(0.0, 0.0);
+
+                  _d('Updated globals from Firestore: '
+                     'driver=(${Gv.driverGp.latitude}, ${Gv.driverGp.longitude}), '
+                     'pickup=(${Gv.passengerGp.latitude}, ${Gv.passengerGp.longitude})');
+
                   final selfie = (data['y_passenger_selfie'] as String?) ?? '';
                   final pPhone = (data['job_created_by'] as String?) ?? '';
                   final pName  = (data['job_creator_name'] as String?) ?? pPhone;
@@ -115,6 +130,7 @@ class DAJ extends StatelessWidget {
                                     InkWell(
                                       borderRadius: BorderRadius.circular(999),
                                       onTap: () {
+                                        _d('Price Details tapped');
                                         // TODO: show price details
                                       },
                                       child: Row(
@@ -142,6 +158,7 @@ class DAJ extends StatelessWidget {
                                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                                       ),
                                       onPressed: () {
+                                        _d('Action button tapped');
                                         // TODO: open action sheet
                                       },
                                       child: const Text(
@@ -232,7 +249,8 @@ class DAJ extends StatelessWidget {
                                 icon: Icons.map_rounded,
                                 color: const Color(0xFF2F69FE),
                                 onTap: () {
-                                  // TODO: open maps for navigation
+                                  _d('Map button tapped');
+                                  _openDriverToPickupInGoogleMaps(context);
                                 },
                               ),
                               const SizedBox(width: 10),
@@ -242,6 +260,7 @@ class DAJ extends StatelessWidget {
                                 label: 'Chat',
                                 color: const Color(0xFF22A447),
                                 onTap: () {
+                                  _d('Chat button tapped → $pPhone');
                                   _openWhatsApp(
                                     context,
                                     pPhone,
@@ -256,6 +275,7 @@ class DAJ extends StatelessWidget {
                                 label: 'Call',
                                 color: const Color(0xFF22A447),
                                 onTap: () {
+                                  _d('Call button tapped → $pPhone');
                                   _callNumber(context, pPhone); // <-- CALL: opens dialer
                                 },
                               ),
@@ -284,8 +304,7 @@ class DAJ extends StatelessWidget {
                             )
                           ),
                           const Spacer(),
-_primaryActionForStatus(context, orderStatus),
-
+                          _primaryActionForStatus(context, orderStatus),
 
                           // Bottom row: Price Details • Action • Amount (again)
                         ],
@@ -393,19 +412,28 @@ _primaryActionForStatus(context, orderStatus),
     );
   }
 
-  // ---------- launch helpers ----------
+  // ---------- launch helpers & debug ----------
+  static void _d(String msg) => debugPrint('$_TAG $msg');
+
+  bool _validGeo(GeoPoint gp) {
+    final ok = !(gp.latitude == 0.0 && gp.longitude == 0.0) &&
+        gp.latitude >= -90 && gp.latitude <= 90 &&
+        gp.longitude >= -180 && gp.longitude <= 180;
+    _d('Validate GeoPoint (${gp.latitude}, ${gp.longitude}) -> $ok');
+    return ok;
+  }
+
   // Keep digits and '+' (dialer understands +6011..., etc.)
   String _normalizePhone(String raw) {
     return raw.replaceAll(RegExp(r'[^0-9\+]'), '');
   }
 
-  // Chat (WhatsApp) – unchanged
+  // Chat (WhatsApp)
   Future<void> _openWhatsApp(BuildContext context, String rawPhone, {String? prefill}) async {
     final phone = _normalizePhone(rawPhone);
+    _d('Open WhatsApp: raw="$rawPhone" normalized="$phone" prefill="$prefill"');
     if (phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No passenger phone number')),
-      );
+      _snack(context, 'No passenger phone number');
       return;
     }
 
@@ -414,35 +442,91 @@ _primaryActionForStatus(context, orderStatus),
     final uriWeb = Uri.parse('https://wa.me/$phone?text=$text');
 
     try {
-      if (await canLaunchUrl(uriApp)) {
-        await launchUrl(uriApp, mode: LaunchMode.externalApplication);
+      final canApp = await canLaunchUrl(uriApp);
+      _d('canLaunchUrl(app)=$canApp');
+      if (canApp) {
+        final ok = await launchUrl(uriApp, mode: LaunchMode.externalApplication);
+        _d('launchUrl(app)=$ok');
       } else {
-        await launchUrl(uriWeb, mode: LaunchMode.externalApplication);
+        final ok = await launchUrl(uriWeb, mode: LaunchMode.externalApplication);
+        _d('launchUrl(web)=$ok');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to open WhatsApp: $e')),
-      );
+      _d('WhatsApp open failed: $e');
+      _snack(context, 'Unable to open WhatsApp: $e');
     }
   }
 
   // CALL button – opens device dialer (no CALL_PHONE permission needed)
   Future<void> _callNumber(BuildContext context, String rawPhone) async {
     final phone = _normalizePhone(rawPhone);
+    _d('Open dialer: raw="$rawPhone" normalized="$phone"');
     if (phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No passenger phone number')),
-      );
+      _snack(context, 'No passenger phone number');
       return;
     }
     final telUri = Uri.parse('tel:$phone'); // opens dialer; user confirms call
     try {
-      await launchUrl(telUri, mode: LaunchMode.externalApplication);
+      final ok = await launchUrl(telUri, mode: LaunchMode.externalApplication);
+      _d('launchUrl(tel)=$ok');
+      if (!ok) _snack(context, 'Unable to start call');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to start call: $e')),
-      );
+      _d('Dialer failed: $e');
+      _snack(context, 'Unable to start call: $e');
     }
+  }
+
+  /// Opens Google Maps with turn-by-turn route (polylines) DRIVER → PICKUP.
+  /// Uses global GeoPoints set from Firestore: Gv.driverGp and Gv.passengerGp.
+  Future<void> _openDriverToPickupInGoogleMaps(BuildContext context) async {
+    final driver = Gv.driverGp;
+    final pickup = Gv.passengerGp;
+
+    _d('Launch Maps DRIVER→PICKUP with globals: '
+        'driver=(${driver.latitude}, ${driver.longitude}), '
+        'pickup=(${pickup.latitude}, ${pickup.longitude})');
+
+    if (!_validGeo(driver) || !_validGeo(pickup)) {
+      _snack(context, 'Missing driver/pickup location for map directions');
+      return;
+    }
+
+    // Prefer Google Maps app scheme if available; fallback to universal https
+    final uriApp = Uri.parse(
+      'comgooglemaps://?saddr=${driver.latitude},${driver.longitude}'
+      '&daddr=${pickup.latitude},${pickup.longitude}'
+      '&directionsmode=driving',
+    );
+    final uriWeb = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1'
+      '&origin=${driver.latitude},${driver.longitude}'
+      '&destination=${pickup.latitude},${pickup.longitude}'
+      '&travelmode=driving',
+    );
+
+    try {
+      final canApp = await canLaunchUrl(uriApp);
+      _d('canLaunchUrl(app)=$canApp uri="$uriApp"');
+      if (canApp) {
+        final ok = await launchUrl(uriApp, mode: LaunchMode.externalApplication);
+        _d('launchUrl(app)=$ok');
+        if (!ok) _snack(context, 'Could not open Google Maps app');
+      } else {
+        final ok = await launchUrl(uriWeb, mode: LaunchMode.externalApplication);
+        _d('launchUrl(web)=$ok uri="$uriWeb"');
+        if (!ok) _snack(context, 'Could not open Google Maps');
+      }
+    } catch (e) {
+      _d('Maps open failed: $e');
+      _snack(context, 'Unable to open Google Maps: $e');
+    }
+  }
+
+  void _snack(BuildContext context, String msg) {
+    _d('SNACKBAR: $msg');
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.showSnackBar(SnackBar(content: Text(msg)));
   }
 }
 
@@ -482,6 +566,7 @@ Widget _primaryActionForStatus(BuildContext context, String? rawStatus) {
         context: context,
         label: 'Go',
         onPressed: () {
+          debugPrint('[DAJ] Status button: Go → set order_status=driver_coming');
           FirebaseFirestore.instance
               .collection(Gv.negara)
               .doc(Gv.negeri)
@@ -504,6 +589,7 @@ Widget _primaryActionForStatus(BuildContext context, String? rawStatus) {
         context: context,
         label: 'Start Destination',
         onPressed: () {
+          debugPrint('[DAJ] Status button: Start Destination → set order_status=start_destination');
           FirebaseFirestore.instance
               .collection(Gv.negara)
               .doc(Gv.negeri)
@@ -519,7 +605,6 @@ Widget _primaryActionForStatus(BuildContext context, String? rawStatus) {
       return const _DelayedJobCompleteButton();
 
     case 'job_completed':
-
       return const _DelayedPaymentReceivedButton();
 
     case 'payment_received':
@@ -529,8 +614,6 @@ Widget _primaryActionForStatus(BuildContext context, String? rawStatus) {
       return const SizedBox.shrink();
   }
 }
-
-
 
 class _DelayedArrivedButton extends StatefulWidget {
   const _DelayedArrivedButton();
@@ -545,10 +628,12 @@ class _DelayedArrivedButtonState extends State<_DelayedArrivedButton> {
   @override
   void initState() {
     super.initState();
+    debugPrint('[DAJ] _DelayedArrivedButton init');
     // unlock button after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() => _enabled = true);
+        debugPrint('[DAJ] _DelayedArrivedButton enabled');
       }
     });
   }
@@ -560,6 +645,7 @@ class _DelayedArrivedButtonState extends State<_DelayedArrivedButton> {
       label: 'Arrived',
       onPressed: _enabled
           ? () {
+              debugPrint('[DAJ] Arrived → set order_status=driver_arrived');
               FirebaseFirestore.instance
                   .collection(Gv.negara)
                   .doc(Gv.negeri)
@@ -587,9 +673,13 @@ class _DelayedJobCompleteButtonState extends State<_DelayedJobCompleteButton> {
   @override
   void initState() {
     super.initState();
+    debugPrint('[DAJ] _DelayedJobCompleteButton init');
     // unlock button after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) setState(() => _enabled = true);
+      if (mounted) {
+        setState(() => _enabled = true);
+        debugPrint('[DAJ] _DelayedJobCompleteButton enabled');
+      }
     });
   }
 
@@ -600,6 +690,7 @@ class _DelayedJobCompleteButtonState extends State<_DelayedJobCompleteButton> {
       label: 'Job Complete',
       onPressed: _enabled
           ? () {
+              debugPrint('[DAJ] Job Complete → set job_is_completed=true, order_status=job_completed');
               FirebaseFirestore.instance
                   .collection(Gv.negara)
                   .doc(Gv.negeri)
@@ -610,7 +701,7 @@ class _DelayedJobCompleteButtonState extends State<_DelayedJobCompleteButton> {
                   .update({
                     'job_is_completed': true,
                     'order_status': 'job_completed',
-                    });
+                  });
             }
           : null, // disabled until enabled == true
     );
@@ -630,9 +721,13 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
   @override
   void initState() {
     super.initState();
+    debugPrint('[DAJ] _DelayedPaymentReceivedButton init');
     // unlock after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) setState(() => _enabled = true);
+      if (mounted) {
+        setState(() => _enabled = true);
+        debugPrint('[DAJ] _DelayedPaymentReceivedButton enabled');
+      }
     });
   }
 
@@ -643,7 +738,7 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
       label: 'Payment Received',
       onPressed: _enabled
           ? () {
-              debugPrint('Payment Received pressed');
+              debugPrint('[DAJ] Payment Received pressed');
 
               // 1) Navigate FIRST (context is valid here)
               Navigator.of(context).pushAndRemoveUntil(
@@ -661,25 +756,12 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
                   .collection('my_active_job')
                   .doc(Gv.passengerPhone)
                   .set({'order_status': 'payment_received'}, SetOptions(merge: true))
-                  .then((_) => debugPrint('payment_received write OK'))
+                  .then((_) => debugPrint('[DAJ] payment_received write OK'))
                   .catchError((e, st) {
-                    debugPrint('payment_received write failed: $e\n$st');
+                    debugPrint('[DAJ] payment_received write failed: $e\n$st');
                   });
             }
           : null,
-
-
-
-
-
-
     );
   }
 }
-
-
-
-
-
-
-
