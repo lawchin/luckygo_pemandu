@@ -31,6 +31,8 @@ dependencies:
   permission_handler: ^11.3.1
   geolocator: ^11.1.0
   http: ^1.2.1
+  share_plus: ^11.1.0
+  pdf: ^3.11.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -111,3 +113,10 @@ flutter:
     - assets/images/doc_roadtax.png
     - assets/images/pin.png
     - assets/images/tips.png
+    - assets/images/rhb_logo.png
+    - assets/images/maybank_logo.png
+    - assets/images/public_bank_logo.png
+    - assets/images/cimb_bank_logo.png
+    - assets/images/hong_leong_bank_logo.png
+    - assets/images/alliance_bank_logo.png
+    - assets/images/bsn_logo.png

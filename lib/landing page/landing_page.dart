@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:luckygo_pemandu/end_drawer/deposit_page.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
@@ -17,6 +18,26 @@ import 'package:luckygo_pemandu/loginRegister/login_page.dart';
 import 'package:luckygo_pemandu/main.dart';
 import 'package:luckygo_pemandu/translate_bahasa.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+String getFormattedDate() {
+  final now = DateTime.now();
+  final day = now.day.toString().padLeft(2, '0');
+  final month = now.month.toString().padLeft(2, '0');
+  final year = now.year.toString().substring(2, 4);
+
+  int hour = now.hour;
+  final minute = now.minute.toString().padLeft(2, '0');
+  final second = now.second.toString().padLeft(2, '0');
+
+  final period = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12;
+  if (hour == 0) hour = 12; // 12 AM or 12 PM
+
+  final hourStr = hour.toString().padLeft(2, '0');
+
+  return '$day$month$year $hourStr$minute$second$period';
+}
+
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -428,6 +449,16 @@ Future<void> _logout() async {
                     ? Gv.loggedUser
                     : 'Not signed in'),
               ),
+            ListTile(
+                leading: const Icon(Icons.account_balance_wallet, color: Colors.amber),
+              title: const Text('Deposit', style: TextStyle(color: Colors.black87)),
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => DepositPage()),
+                );
+              },
+            ),
               ListTile(
                 leading: const Icon(Icons.public),
                 title: const Text('Region'),
