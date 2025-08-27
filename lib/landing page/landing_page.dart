@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:luckygo_pemandu/end_drawer/deposit_history.dart';
 import 'package:luckygo_pemandu/end_drawer/deposit_page.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
@@ -433,6 +434,7 @@ Future<void> _logout() async {
           ),
         ],
       ),
+
       endDrawer: Drawer(
         child: SafeArea(
           child: Column(
@@ -459,11 +461,16 @@ Future<void> _logout() async {
                 );
               },
             ),
-              ListTile(
-                leading: const Icon(Icons.public),
-                title: const Text('Region'),
-                subtitle: Text(regionLabel),
-              ),
+            ListTile(// deposit history
+                leading: const Icon(Icons.receipt_long, color: Colors.blueAccent),
+              title: const Text('Deposit History', style: TextStyle(color: Colors.black87)),
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => DepositHistory()),
+                );
+              },
+            ),
 
               const Spacer(),
               Padding(
@@ -481,6 +488,7 @@ Future<void> _logout() async {
           ),
         ),
       ),
+
 body: Stack(
   children: [
     // ---- Background + main content ----
