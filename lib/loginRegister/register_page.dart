@@ -94,6 +94,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     // Save user data to Firestore
     final data = {
+      'account_balance': 0,
       'email': email,
       'fullname': name,
       'gender': gender, // ← store gender

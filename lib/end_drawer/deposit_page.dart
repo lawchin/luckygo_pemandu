@@ -4,9 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+// DRIVER app globals here:
 import 'package:luckygo_pemandu/global.dart';
-import 'package:luckygo_pemandu/landing%20page/landing_page.dart';
-import 'processing_deposit.dart'; // keep next to this file or adjust path
+
+import 'processing_deposit.dart'; // put next to this file or adjust path
 
 class DepositPage extends StatefulWidget {
   const DepositPage({Key? key}) : super(key: key);
@@ -34,7 +35,7 @@ class _DepositPageState extends State<DepositPage> {
 
   Future<List<Map<String, dynamic>>> fetchBankData() async {
     final snapshot = await FirebaseFirestore.instance
-        .collection(Gv.negara!)
+        .collection(Gv.negara)
         .doc(Gv.negeri)
         .collection('information')
         .doc('banking')
@@ -115,15 +116,15 @@ class _DepositPageState extends State<DepositPage> {
     }
   }
 
+  // filename-safe timestamp for IDs
   String _safeStamp() {
     final now = DateTime.now();
     String two(int v) => v.toString().padLeft(2, '0');
     return '${now.year}-${two(now.month)}-${two(now.day)}_${two(now.hour)}${two(now.minute)}${two(now.second)}';
   }
 
-  /// ===== Logo helpers =====
+  // ====== Logo helpers (logo top, full width; name mid; account bottom) ======
 
-  /// Big, full-width logo box (no crop; keeps aspect ratio).
   Widget _logoBox(Widget child, double maxHeight) {
     return Container(
       width: double.infinity,
@@ -135,14 +136,10 @@ class _DepositPageState extends State<DepositPage> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.black12),
       ),
-      child: FittedBox(
-        fit: BoxFit.contain, // show entire logo
-        child: child,
-      ),
+      child: FittedBox(fit: BoxFit.contain, child: child),
     );
   }
 
-  /// Fallback avatar with bank initials if no logo.
   Widget _fallbackLogo(String? bankName, {double size = 72}) {
     final initials = (bankName ?? '??')
         .trim()
@@ -167,21 +164,15 @@ class _DepositPageState extends State<DepositPage> {
     );
   }
 
-  /// Build logo from url/asset/storage path (assets are under assets/images/).
   Widget _buildBankLogoTop(Map<String, dynamic> bank, {double maxHeight = 72}) {
     final String? url = bank['bank_logo_url'];
     final String? assetName = bank['bank_logo']; // e.g. "cimb_bank.png"
     final String? storagePath = bank['bank_logo_storage_path'];
 
-    if (url != null && url.isNotEmpty) {
-      return _logoBox(Image.network(url), maxHeight);
-    }
-
+    if (url != null && url.isNotEmpty) return _logoBox(Image.network(url), maxHeight);
     if (assetName != null && assetName.isNotEmpty) {
-      // **Your requested path:** assets/images/<file>
       return _logoBox(Image.asset('assets/images/$assetName'), maxHeight);
     }
-
     if (storagePath != null && storagePath.isNotEmpty) {
       return FutureBuilder<String>(
         future: FirebaseStorage.instance.ref(storagePath).getDownloadURL(),
@@ -189,9 +180,7 @@ class _DepositPageState extends State<DepositPage> {
           if (snap.connectionState == ConnectionState.done && snap.hasData) {
             return _logoBox(Image.network(snap.data!), maxHeight);
           }
-          if (snap.hasError) {
-            return _fallbackLogo(bank['name'], size: maxHeight);
-          }
+          if (snap.hasError) return _fallbackLogo(bank['name'], size: maxHeight);
           return Container(
             width: double.infinity,
             height: maxHeight,
@@ -201,19 +190,21 @@ class _DepositPageState extends State<DepositPage> {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: Colors.black12),
             ),
-            child: const SizedBox(
-              width: 20, height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+            child: const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
           );
         },
       );
     }
-
     return _fallbackLogo(bank['name'], size: maxHeight);
   }
 
-  /// ===== Submit deposit flow =====
+  // ====== Submit deposit (DRIVER) ======
+  /// 1) Show blocking progress dialog
+  /// 2) Upload image to Storage: <negara>/<negeri>/driver/<uid>/<stamp>(Deposit).jpg
+  /// 3) Firestore batch:
+  ///    - information/banking/deposit_data/{docId}
+  ///    - driver_account/{uid}/deposit_history/(<stamp>)uid  (deposit_status: Pending)
+  /// 4) Close dialog, navigate to ProcessingDeposit() with details
   Future<void> processDeposit() async {
     if (_submitting) return;
 
@@ -240,27 +231,30 @@ class _DepositPageState extends State<DepositPage> {
 
     final stamp = _safeStamp();
     final docId = '$stamp(${Gv.loggedUser})';
+    final docId2 = '$stamp(Deposit)';
+
+    // NOTE: driver storage folder
     final storageObjectPath =
-        '${Gv.negara}/${Gv.negeri}/driver/${Gv.loggedUser}/$docId.jpg';
+        '${Gv.negara}/${Gv.negeri}/driver/${Gv.loggedUser}/$docId2.jpg';
 
     try {
-      // Upload image
+      // 2) Upload to Firebase Storage
       final file = File(_proofImage!.path);
       final storageRef = FirebaseStorage.instance.ref().child(storageObjectPath);
       await storageRef.putFile(file, SettableMetadata(contentType: 'image/jpeg'));
       final downloadUrl = await storageRef.getDownloadURL();
 
-      // Firestore batch
+      // 3) Firestore batch (atomic)
       final payload = {
+        'admin_remark': '',
+        'admin_remark_date': '',
         'deposit_amount': amount,
         'deposit_date': FieldValue.serverTimestamp(),
-        'driver_or_passenger': 'driver',
+        'driver_or_passenger': 'Driver', // <-- driver tag
         'last_4d_phone': last4,
+        'name': Gv.userName,
         'receipt_image_url': downloadUrl,
-        'receipt_storage_path': storageObjectPath,
-        'uid': Gv.loggedUser,
-        'negara': Gv.negara,
-        'negeri': Gv.negeri,
+        'phone': Gv.loggedUser,
       };
 
       final adminRef = FirebaseFirestore.instance
@@ -274,19 +268,20 @@ class _DepositPageState extends State<DepositPage> {
       final historyRef = FirebaseFirestore.instance
           .collection(Gv.negara!)
           .doc(Gv.negeri)
-          .collection('driver_account')
+          .collection('driver_account') // <-- driver path
           .doc('${Gv.loggedUser}')
           .collection('deposit_history')
-          .doc('($stamp)${Gv.loggedUser}');
+          .doc('$stamp(${Gv.loggedUser})');
 
       final batch = FirebaseFirestore.instance.batch();
-      batch.set(adminRef, payload);
-      batch.set(historyRef, {...payload, 'deposit_status': 'pending'});
+      batch.set(adminRef, {...payload, 'deposit_needed_process': true});
+      batch.set(historyRef, {...payload, 'deposit_status': 'Pending'});
       await batch.commit();
 
+      // capture local path BEFORE clearing state
       final String? localPath = _proofImage?.path;
 
-      // close dialog, then navigate
+      // 4) close progress dialog, then navigate
       if (!mounted) return;
       _closeProcessingDialogIfOpen();
 
@@ -301,7 +296,7 @@ class _DepositPageState extends State<DepositPage> {
         ),
       );
 
-      // reset locals
+      // optional: reset locals after navigating
       depositAmountController.clear();
       last4DigitsController.clear();
       _proofImage = null;
@@ -318,7 +313,7 @@ class _DepositPageState extends State<DepositPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Driver Deposit Page')),
+      appBar: AppBar(title: const Text('Deposit Page')),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: fetchBankData(),
         builder: (context, snapshot) {
@@ -362,11 +357,8 @@ class _DepositPageState extends State<DepositPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Top: Full-width logo
                             _buildBankLogoTop(bank, maxHeight: 72),
                             const SizedBox(height: 10),
-
-                            // Mid: Bank name
                             Text(
                               bankName,
                               textAlign: TextAlign.center,
@@ -376,8 +368,6 @@ class _DepositPageState extends State<DepositPage> {
                               ),
                             ),
                             const SizedBox(height: 4),
-
-                            // Bottom: Account number
                             Text(
                               'Account Number: $accountNo',
                               textAlign: TextAlign.center,
@@ -638,9 +628,9 @@ class _DepositPageState extends State<DepositPage> {
 //       barrierDismissible: false,
 //       builder: (_) => WillPopScope(
 //         onWillPop: () async => false,
-//         child: AlertDialog(
+//         child: const AlertDialog(
 //           content: Row(
-//             children: const [
+//             children: [
 //               SizedBox(
 //                 width: 24,
 //                 height: 24,
@@ -663,20 +653,105 @@ class _DepositPageState extends State<DepositPage> {
 //     }
 //   }
 
-//   // filename-safe timestamp for IDs
 //   String _safeStamp() {
 //     final now = DateTime.now();
 //     String two(int v) => v.toString().padLeft(2, '0');
 //     return '${now.year}-${two(now.month)}-${two(now.day)}_${two(now.hour)}${two(now.minute)}${two(now.second)}';
 //   }
 
-//   /// Submit deposit (DRIVER):
-//   /// 1) Show blocking progress dialog
-//   /// 2) Upload image to Storage: <negara>/<negeri>/driver/<Gv.loggedUser>/<docId>.jpg
-//   /// 3) Firestore batch:
-//   ///    - information/banking/deposit_data/{docId}
-//   ///    - driver_account/{uid}/deposit_history/(<stamp>)uid  (with deposit_status: pending)
-//   /// 4) Close dialog, navigate to ProcessingDeposit() with details
+//   /// ===== Logo helpers =====
+
+//   /// Big, full-width logo box (no crop; keeps aspect ratio).
+//   Widget _logoBox(Widget child, double maxHeight) {
+//     return Container(
+//       width: double.infinity,
+//       height: maxHeight,
+//       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+//       alignment: Alignment.center,
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(10),
+//         border: Border.all(color: Colors.black12),
+//       ),
+//       child: FittedBox(
+//         fit: BoxFit.contain, // show entire logo
+//         child: child,
+//       ),
+//     );
+//   }
+
+//   /// Fallback avatar with bank initials if no logo.
+//   Widget _fallbackLogo(String? bankName, {double size = 72}) {
+//     final initials = (bankName ?? '??')
+//         .trim()
+//         .split(RegExp(r'\s+'))
+//         .where((w) => w.isNotEmpty)
+//         .take(2)
+//         .map((w) => w[0].toUpperCase())
+//         .join();
+//     return Container(
+//       width: double.infinity,
+//       height: size,
+//       alignment: Alignment.center,
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(10),
+//         border: Border.all(color: Colors.black12),
+//       ),
+//       child: CircleAvatar(
+//         radius: size / 2.6,
+//         child: Text(initials, style: const TextStyle(fontWeight: FontWeight.bold)),
+//       ),
+//     );
+//   }
+
+//   /// Build logo from url/asset/storage path (assets are under assets/images/).
+//   Widget _buildBankLogoTop(Map<String, dynamic> bank, {double maxHeight = 72}) {
+//     final String? url = bank['bank_logo_url'];
+//     final String? assetName = bank['bank_logo']; // e.g. "cimb_bank.png"
+//     final String? storagePath = bank['bank_logo_storage_path'];
+
+//     if (url != null && url.isNotEmpty) {
+//       return _logoBox(Image.network(url), maxHeight);
+//     }
+
+//     if (assetName != null && assetName.isNotEmpty) {
+//       // **Your requested path:** assets/images/<file>
+//       return _logoBox(Image.asset('assets/images/$assetName'), maxHeight);
+//     }
+
+//     if (storagePath != null && storagePath.isNotEmpty) {
+//       return FutureBuilder<String>(
+//         future: FirebaseStorage.instance.ref(storagePath).getDownloadURL(),
+//         builder: (context, snap) {
+//           if (snap.connectionState == ConnectionState.done && snap.hasData) {
+//             return _logoBox(Image.network(snap.data!), maxHeight);
+//           }
+//           if (snap.hasError) {
+//             return _fallbackLogo(bank['name'], size: maxHeight);
+//           }
+//           return Container(
+//             width: double.infinity,
+//             height: maxHeight,
+//             alignment: Alignment.center,
+//             decoration: BoxDecoration(
+//               color: Colors.white,
+//               borderRadius: BorderRadius.circular(10),
+//               border: Border.all(color: Colors.black12),
+//             ),
+//             child: const SizedBox(
+//               width: 20, height: 20,
+//               child: CircularProgressIndicator(strokeWidth: 2),
+//             ),
+//           );
+//         },
+//       );
+//     }
+
+//     return _fallbackLogo(bank['name'], size: maxHeight);
+//   }
+
+//   /// ===== Submit deposit flow =====
 //   Future<void> processDeposit() async {
 //     if (_submitting) return;
 
@@ -698,7 +773,6 @@ class _DepositPageState extends State<DepositPage> {
 
 //     FocusScope.of(context).unfocus();
 //     setState(() => _submitting = true);
-//     // Show progress (non-blocking await via Future.microtask so we can proceed)
 //     // ignore: unawaited_futures
 //     Future.microtask(() => _showProcessingDialog('Processing deposit…'));
 
@@ -708,16 +782,13 @@ class _DepositPageState extends State<DepositPage> {
 //         '${Gv.negara}/${Gv.negeri}/driver/${Gv.loggedUser}/$docId.jpg';
 
 //     try {
-//       // 2) Upload to Firebase Storage
+//       // Upload image
 //       final file = File(_proofImage!.path);
 //       final storageRef = FirebaseStorage.instance.ref().child(storageObjectPath);
-//       await storageRef.putFile(
-//         file,
-//         SettableMetadata(contentType: 'image/jpeg'),
-//       );
+//       await storageRef.putFile(file, SettableMetadata(contentType: 'image/jpeg'));
 //       final downloadUrl = await storageRef.getDownloadURL();
 
-//       // 3) Firestore batch (atomic)
+//       // Firestore batch
 //       final payload = {
 //         'deposit_amount': amount,
 //         'deposit_date': FieldValue.serverTimestamp(),
@@ -751,10 +822,9 @@ class _DepositPageState extends State<DepositPage> {
 //       batch.set(historyRef, {...payload, 'deposit_status': 'pending'});
 //       await batch.commit();
 
-//       // capture local path BEFORE clearing state
 //       final String? localPath = _proofImage?.path;
 
-//       // 4) close progress dialog, then navigate
+//       // close dialog, then navigate
 //       if (!mounted) return;
 //       _closeProcessingDialogIfOpen();
 
@@ -764,12 +834,12 @@ class _DepositPageState extends State<DepositPage> {
 //             imageUrl: downloadUrl,
 //             amount: amount,
 //             last4: last4,
-//             localImagePath: localPath, // nullable & safe
+//             localImagePath: localPath,
 //           ),
 //         ),
 //       );
 
-//       // optional: reset locals after navigating
+//       // reset locals
 //       depositAmountController.clear();
 //       last4DigitsController.clear();
 //       _proofImage = null;
@@ -814,19 +884,45 @@ class _DepositPageState extends State<DepositPage> {
 //                 ),
 //               ),
 
-//               // Bank list
+//               // Bank list (Logo top, name mid, account bottom)
 //               SliverList.builder(
 //                 itemCount: banks.length,
 //                 itemBuilder: (context, index) {
-//                   final bank = banks[index];
+//                   final Map<String, dynamic> bank = banks[index];
+//                   final bankName = bank['name'] ?? 'Unknown Bank';
+//                   final accountNo = bank['account_no'] ?? '-';
+
 //                   return Padding(
-//                     padding:
-//                         const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+//                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
 //                     child: Card(
-//                       child: ListTile(
-//                         title: Text(bank['name'] ?? 'Unknown Bank'),
-//                         subtitle: Text(
-//                             'Account Number: ${bank['account_no'] ?? '-'}'),
+//                       child: Padding(
+//                         padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
+//                         child: Column(
+//                           crossAxisAlignment: CrossAxisAlignment.stretch,
+//                           children: [
+//                             // Top: Full-width logo
+//                             _buildBankLogoTop(bank, maxHeight: 72),
+//                             const SizedBox(height: 10),
+
+//                             // Mid: Bank name
+//                             Text(
+//                               bankName,
+//                               textAlign: TextAlign.center,
+//                               style: const TextStyle(
+//                                 fontSize: 16,
+//                                 fontWeight: FontWeight.w600,
+//                               ),
+//                             ),
+//                             const SizedBox(height: 4),
+
+//                             // Bottom: Account number
+//                             Text(
+//                               'Account Number: $accountNo',
+//                               textAlign: TextAlign.center,
+//                               style: const TextStyle(fontSize: 14, color: Colors.black87),
+//                             ),
+//                           ],
+//                         ),
 //                       ),
 //                     ),
 //                   );
@@ -854,10 +950,8 @@ class _DepositPageState extends State<DepositPage> {
 //                     crossAxisAlignment: CrossAxisAlignment.start,
 //                     children: [
 //                       Text('1. Choose a bank from the list above.'),
-//                       Text(
-//                           '2. Deposit with cash deposit machine (CDM) or online transfer.'),
-//                       Text(
-//                           '3. Enter deposit amount and last 4 digits of phone number.'),
+//                       Text('2. Deposit with cash deposit machine (CDM) or online transfer.'),
+//                       Text('3. Enter deposit amount and last 4 digits of phone number.'),
 //                       Text('4. Upload the receipt and press Submit.'),
 //                     ],
 //                   ),
@@ -876,8 +970,7 @@ class _DepositPageState extends State<DepositPage> {
 //                       border: OutlineInputBorder(),
 //                       prefixIcon: Icon(Icons.attach_money),
 //                     ),
-//                     keyboardType:
-//                         const TextInputType.numberWithOptions(decimal: true),
+//                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
 //                     inputFormatters: [
 //                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
 //                     ],
@@ -969,8 +1062,7 @@ class _DepositPageState extends State<DepositPage> {
 //                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
 //                   child: Center(
 //                     child: ElevatedButton(
-//                       onPressed:
-//                           _submitting ? null : () async => processDeposit(),
+//                       onPressed: _submitting ? null : () async => processDeposit(),
 //                       child: _submitting
 //                           ? const SizedBox(
 //                               width: 20,

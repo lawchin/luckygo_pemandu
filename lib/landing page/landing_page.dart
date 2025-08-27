@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:luckygo_pemandu/end_drawer/deposit_history.dart';
 import 'package:luckygo_pemandu/end_drawer/deposit_page.dart';
+import 'package:luckygo_pemandu/end_drawer/transaction_history.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
@@ -17,6 +18,7 @@ import 'package:luckygo_pemandu/landing%20page/presenter_page.dart';
 import 'package:luckygo_pemandu/loginRegister/complete_registration_page.dart';
 import 'package:luckygo_pemandu/loginRegister/login_page.dart';
 import 'package:luckygo_pemandu/main.dart';
+import 'package:luckygo_pemandu/notification_page.dart';
 import 'package:luckygo_pemandu/translate_bahasa.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -424,16 +426,140 @@ Future<void> _logout() async {
 
     return Scaffold(
       key: _scaffoldKey,
+
+      // appBar: AppBar(
+      //   title: const Text('Landing Page'),
+      //   actions: [
+      //     IconButton(
+      //       tooltip: 'Menu',
+      //       onPressed: _openEndDrawer,
+      //       icon: const Icon(Icons.menu),
+      //     ),
+      //   ],
+      // ),
+
+
       appBar: AppBar(
-        title: const Text('Landing Page'),
+        backgroundColor: const Color(0xFF107572),
+        elevation: 4,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // Driver account balance
+            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection(Gv.negara)
+                  .doc(Gv.negeri)
+                  .collection('driver_account')
+                  .doc(Gv.loggedUser)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                final data = snapshot.data?.data();
+                final balance = (data?['account_balance'] ?? 0).toDouble();
+
+                return Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${Gv.currency}',
+                          style: const TextStyle(color: Colors.white, height: 0.8, fontSize: 12),
+                        ),
+                        Text(
+                          balance.toStringAsFixed(2),
+                          style: const TextStyle(color: Colors.white, height: 1, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 18),
+                  ],
+                );
+              },
+            ),
+
+            // Help center button
+            IconButton(
+              icon: const Icon(Icons.support_agent, color: Colors.white),
+              tooltip: 'Driver Live Help Center',
+              onPressed: () {
+                // TODO: Handle driver help center button press
+              },
+            ),
+
+            // Driver notification badge
+            StreamBuilder<int>(
+              stream: FirebaseFirestore.instance
+                  .collection(Gv.negara)
+                  .doc(Gv.negeri)
+                  .collection('driver_account')
+                  .doc(Gv.loggedUser)
+                  .collection('notification_page')
+                  .where('notification_seen', isEqualTo: false)
+                  .snapshots()
+                  .map((s) => s.size)
+                  .distinct(),
+              builder: (context, snap) {
+                final count = snap.data ?? 0;
+
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.notifications,
+                        color: count > 0 ? Colors.red : Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => NotificationPage()),
+                        );
+                      },
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(minWidth: 16, minHeight: 14),
+                          child: Text(
+                            '+${count > 99 ? 99 : count}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              height: 1,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
         actions: [
-          IconButton(
-            tooltip: 'Menu',
-            onPressed: _openEndDrawer,
-            icon: const Icon(Icons.menu),
+          Builder(
+            builder: (drawerContext) => IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              onPressed: () {
+                Scaffold.of(drawerContext).openEndDrawer();
+              },
+            ),
           ),
         ],
       ),
+
+
+
 
       endDrawer: Drawer(
         child: SafeArea(
@@ -468,6 +594,16 @@ Future<void> _logout() async {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => DepositHistory()),
+                );
+              },
+            ),
+            ListTile(// transaction history                
+                leading: const Icon(Icons.history, color: Colors.blueAccent),
+              title: const Text('Transaction History', style: TextStyle(color: Colors.black87)),
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => TransactionHistory()),
                 );
               },
             ),
