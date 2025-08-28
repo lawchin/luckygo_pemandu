@@ -2,24 +2,56 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bbkk.luckygo_pemandu">
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Android 13+ media permission -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <!-- Legacy external storage read (maxSdkVersion 32 to avoid conflicts on 33+) -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"/>
+
+    <!-- Package visibility (Android 11+) -->
+    <queries>
+        <!-- Google Maps app -->
+        <package android:name="com.google.android.apps.maps" />
+        <!-- Google Play Store (fallback when Maps isn't installed) -->
+        <package android:name="com.android.vending" />
+
+        <!-- Intents we plan to resolve -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="google.navigation" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="comgooglemaps" />
+        </intent>
+
+        <!-- Keep your existing text processing query -->
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
 
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="luckygo_pemandu">
 
+        <!-- Google Maps API Key (copied from admin app) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key"/>
+            android:value="AIzaSyBr2bdTwwE-x9PyHSArUbCgZ_BsDupqmfA" />
 
         <activity
             android:name=".MainActivity"
@@ -45,10 +77,4 @@
             android:value="2"/>
     </application>
 
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
-        </intent>
-    </queries>
 </manifest>

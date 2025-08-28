@@ -95,17 +95,18 @@ class _RegisterPageState extends State<RegisterPage> {
     // Save user data to Firestore
     final data = {
       'account_balance': 0,
+      'area': area,
+      'country': country,
+      'created_at': DateTime.now().toIso8601String(),
+      'disclosureAccepted': false,
       'email': email,
       'fullname': name,
       'gender': gender, // ← store gender
-      'country': country,
-      'state': state,
-      'area': area,
+      'group_capability': 3,
       'language': language,
-      'created_at': DateTime.now().toIso8601String(),
+      'must_exit_block_zone': false,
       'registration_approved': false,
-      'disclosureAccepted': false,
-      'group_capability': 3
+      'state': state,
     };
     try {
       await FirebaseFirestore.instance

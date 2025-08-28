@@ -1,13 +1,37 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:luckygo_pemandu/geo_fencing/geofencing_controller.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DAJ extends StatelessWidget {
+class DAJ extends StatefulWidget {
   const DAJ({super.key});
 
+  @override
+  State<DAJ> createState() => _DAJState();
+}
+
+class _DAJState extends State<DAJ> {
   static const String _TAG = '[DAJ]';
+
+  bool _paymentDone = false; // marks that "Payment Received" was pressed
+
+  @override
+  void initState() {
+    super.initState();
+    // While DAJ is visible, IGNORE geofencing everywhere else.
+    GeofencingController.instance.enableBypass();
+  }
+
+  @override
+  void dispose() {
+    // If user leaves DAJ without pressing Payment, restore geofencing.
+    if (!_paymentDone) {
+      GeofencingController.instance.disableBypass();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +51,6 @@ class DAJ extends StatelessWidget {
     return PopScope(
       canPop: false, // ⛔ Block device back + swipe back on this page
       onPopInvoked: (didPop) {
-        // If the system attempted to pop but we blocked it, show a brief message
         if (!didPop) {
           final messenger = ScaffoldMessenger.of(context);
           messenger.clearSnackBars();
@@ -82,13 +105,15 @@ class DAJ extends StatelessWidget {
 
                     return _paddedCard(
                       child: const Center(
-                        child: Text("The job has been cancelled, either by the passenger or by Admin due to a technical issue."),
+                        child: Text(
+                          "The job has been cancelled, either by the passenger or by Admin due to a technical issue.",
+                        ),
                       ),
                     );
                   }
 
-                  final data  = snap.data!.data() ?? {};
-                  // ✅ Fill your globals for map usage (exact fields as you requested)
+                  final data = snap.data!.data() ?? {};
+                  // ✅ Fill your globals for map usage
                   Gv.passengerGp = data['z_source'] is GeoPoint
                       ? data['z_source'] as GeoPoint
                       : const GeoPoint(0.0, 0.0);
@@ -98,16 +123,16 @@ class DAJ extends StatelessWidget {
                       : const GeoPoint(0.0, 0.0);
 
                   _d('Updated globals from Firestore: '
-                     'driver=(${Gv.driverGp.latitude}, ${Gv.driverGp.longitude}), '
-                     'pickup=(${Gv.passengerGp.latitude}, ${Gv.passengerGp.longitude})');
+                      'driver=(${Gv.driverGp.latitude}, ${Gv.driverGp.longitude}), '
+                      'pickup=(${Gv.passengerGp.latitude}, ${Gv.passengerGp.longitude})');
 
                   final selfie = (data['y_passenger_selfie'] as String?) ?? '';
                   final pPhone = (data['job_created_by'] as String?) ?? '';
-                  final pName  = (data['job_creator_name'] as String?) ?? pPhone;
-                  final total  = (data['total_price'] as num?)?.toDouble() ?? 0.0;
-                  final tips1  = (data['tips_amount1'] as num?)?.toDouble() ?? 0.0;
-                  final tips2  = (data['tips_amount2'] as num?)?.toDouble() ?? 0.0;
-                  final orderStatus  = (data['order_status'] as String?) ?? '';
+                  final pName = (data['job_creator_name'] as String?) ?? pPhone;
+                  final total = (data['total_price'] as num?)?.toDouble() ?? 0.0;
+                  final tips1 = (data['tips_amount1'] as num?)?.toDouble() ?? 0.0;
+                  final tips2 = (data['tips_amount2'] as num?)?.toDouble() ?? 0.0;
+                  final orderStatus = (data['order_status'] as String?) ?? '';
 
                   return _paddedCard(
                     child: Padding(
@@ -115,23 +140,22 @@ class DAJ extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Top row: avatar + name/phone + amount on right
+                          // Top row
                           SizedBox(
                             height: 30,
                             child: Card(
                               elevation: 2,
-                              margin: const EdgeInsets.symmetric(horizontal: 2), // ⬅ shrink left & right
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              color: const Color(0xFFE9F8EF), // very light green
+                              color: const Color(0xFFE9F8EF),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical:4),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 child: Row(
                                   children: [
                                     InkWell(
                                       borderRadius: BorderRadius.circular(999),
                                       onTap: () {
                                         _d('Price Details tapped');
-                                        // TODO: show price details
                                       },
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -159,14 +183,13 @@ class DAJ extends StatelessWidget {
                                       ),
                                       onPressed: () {
                                         _d('Action button tapped');
-                                        // TODO: open action sheet
                                       },
                                       child: const Text(
                                         'Action',
                                         style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                           color: Colors.black87,
-                                          height: 1
+                                          height: 1,
                                         ),
                                       ),
                                     ),
@@ -223,11 +246,11 @@ class DAJ extends StatelessWidget {
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFF1982E3),
-                                      height:0.2
+                                      height: 0.2,
                                     ),
                                   ),
                                   Text(
-                                    '${total.toStringAsFixed(2)}',
+                                    total.toStringAsFixed(2),
                                     style: const TextStyle(
                                       fontSize: 26,
                                       fontWeight: FontWeight.w700,
@@ -276,7 +299,7 @@ class DAJ extends StatelessWidget {
                                 color: const Color(0xFF22A447),
                                 onTap: () {
                                   _d('Call button tapped → $pPhone');
-                                  _callNumber(context, pPhone); // <-- CALL: opens dialer
+                                  _callNumber(context, pPhone);
                                 },
                               ),
                             ],
@@ -297,16 +320,18 @@ class DAJ extends StatelessWidget {
                             const SizedBox(height: 6),
                           ],
                           const Spacer(),
-                          Center(
+                          const Center(
                             child: Text(
                               "Press Go button if you're ready",
-                              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                            )
+                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
                           ),
                           const Spacer(),
-                          _primaryActionForStatus(context, orderStatus),
-
-                          // Bottom row: Price Details • Action • Amount (again)
+                          _primaryActionForStatus(context, orderStatus,
+                              onPaymentFinished: () {
+                            // child tells parent payment is done → don't re-enable bypass in dispose
+                            _paymentDone = true;
+                          }),
                         ],
                       ),
                     ),
@@ -321,6 +346,8 @@ class DAJ extends StatelessWidget {
   }
 
   // ---------- small UI helpers ----------
+  static void _d(String msg) => debugPrint('$_TAG $msg');
+
   Widget _paddedCard({required Widget child}) {
     return Padding(
       padding: const EdgeInsets.all(12.0),
@@ -412,9 +439,6 @@ class DAJ extends StatelessWidget {
     );
   }
 
-  // ---------- launch helpers & debug ----------
-  static void _d(String msg) => debugPrint('$_TAG $msg');
-
   bool _validGeo(GeoPoint gp) {
     final ok = !(gp.latitude == 0.0 && gp.longitude == 0.0) &&
         gp.latitude >= -90 && gp.latitude <= 90 &&
@@ -457,7 +481,7 @@ class DAJ extends StatelessWidget {
     }
   }
 
-  // CALL button – opens device dialer (no CALL_PHONE permission needed)
+  // CALL button – opens device dialer
   Future<void> _callNumber(BuildContext context, String rawPhone) async {
     final phone = _normalizePhone(rawPhone);
     _d('Open dialer: raw="$rawPhone" normalized="$phone"');
@@ -465,7 +489,7 @@ class DAJ extends StatelessWidget {
       _snack(context, 'No passenger phone number');
       return;
     }
-    final telUri = Uri.parse('tel:$phone'); // opens dialer; user confirms call
+    final telUri = Uri.parse('tel:$phone');
     try {
       final ok = await launchUrl(telUri, mode: LaunchMode.externalApplication);
       _d('launchUrl(tel)=$ok');
@@ -477,7 +501,6 @@ class DAJ extends StatelessWidget {
   }
 
   /// Opens Google Maps with turn-by-turn route (polylines) DRIVER → PICKUP.
-  /// Uses global GeoPoints set from Firestore: Gv.driverGp and Gv.passengerGp.
   Future<void> _openDriverToPickupInGoogleMaps(BuildContext context) async {
     final driver = Gv.driverGp;
     final pickup = Gv.passengerGp;
@@ -530,12 +553,12 @@ class DAJ extends StatelessWidget {
   }
 }
 
-// 1) Put these helpers in your widget (e.g., inside DAJ, below build):
+// ------------- Buttons & primary action area -------------
 
 Widget _primaryActionButton({
   required BuildContext context,
   required String label,
-  required VoidCallback? onPressed, // <-- nullable so we can pass null to disable
+  required VoidCallback? onPressed, // null = disabled
 }) {
   return SizedBox(
     width: MediaQuery.of(context).size.width - 20,
@@ -548,7 +571,7 @@ Widget _primaryActionButton({
         foregroundColor: Colors.white,
         elevation: 3,
       ),
-      onPressed: onPressed, // null = disabled (greyed out, no taps)
+      onPressed: onPressed,
       child: Text(
         label,
         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -557,7 +580,12 @@ Widget _primaryActionButton({
   );
 }
 
-Widget _primaryActionForStatus(BuildContext context, String? rawStatus) {
+// Added onPaymentFinished to notify parent so DAJ won't re-enable bypass in dispose
+Widget _primaryActionForStatus(
+  BuildContext context,
+  String? rawStatus, {
+  VoidCallback? onPaymentFinished,
+}) {
   final status = (rawStatus ?? '').trim().toLowerCase();
 
   switch (status) {
@@ -566,14 +594,10 @@ Widget _primaryActionForStatus(BuildContext context, String? rawStatus) {
         context: context,
         label: 'Go',
         onPressed: () {
-          debugPrint('[DAJ] Status button: Go → set order_status=driver_coming');
           FirebaseFirestore.instance
-              .collection(Gv.negara)
-              .doc(Gv.negeri)
-              .collection('passenger_account')
-              .doc(Gv.passengerPhone)
-              .collection('my_active_job')
-              .doc(Gv.passengerPhone)
+              .collection(Gv.negara).doc(Gv.negeri)
+              .collection('passenger_account').doc(Gv.passengerPhone)
+              .collection('my_active_job').doc(Gv.passengerPhone)
               .update({'order_status': 'driver_coming'});
         },
       );
@@ -589,14 +613,10 @@ Widget _primaryActionForStatus(BuildContext context, String? rawStatus) {
         context: context,
         label: 'Start Destination',
         onPressed: () {
-          debugPrint('[DAJ] Status button: Start Destination → set order_status=start_destination');
           FirebaseFirestore.instance
-              .collection(Gv.negara)
-              .doc(Gv.negeri)
-              .collection('passenger_account')
-              .doc(Gv.passengerPhone)
-              .collection('my_active_job')
-              .doc(Gv.passengerPhone)
+              .collection(Gv.negara).doc(Gv.negeri)
+              .collection('passenger_account').doc(Gv.passengerPhone)
+              .collection('my_active_job').doc(Gv.passengerPhone)
               .update({'order_status': 'start_destination'});
         },
       );
@@ -605,7 +625,7 @@ Widget _primaryActionForStatus(BuildContext context, String? rawStatus) {
       return const _DelayedJobCompleteButton();
 
     case 'job_completed':
-      return const _DelayedPaymentReceivedButton();
+      return _DelayedPaymentReceivedButton(onPaymentFinished: onPaymentFinished);
 
     case 'payment_received':
       return const SizedBox.shrink();
@@ -628,13 +648,8 @@ class _DelayedArrivedButtonState extends State<_DelayedArrivedButton> {
   @override
   void initState() {
     super.initState();
-    debugPrint('[DAJ] _DelayedArrivedButton init');
-    // unlock button after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() => _enabled = true);
-        debugPrint('[DAJ] _DelayedArrivedButton enabled');
-      }
+      if (mounted) setState(() => _enabled = true);
     });
   }
 
@@ -645,17 +660,13 @@ class _DelayedArrivedButtonState extends State<_DelayedArrivedButton> {
       label: 'Arrived',
       onPressed: _enabled
           ? () {
-              debugPrint('[DAJ] Arrived → set order_status=driver_arrived');
               FirebaseFirestore.instance
-                  .collection(Gv.negara)
-                  .doc(Gv.negeri)
-                  .collection('passenger_account')
-                  .doc(Gv.passengerPhone)
-                  .collection('my_active_job')
-                  .doc(Gv.passengerPhone)
+                  .collection(Gv.negara).doc(Gv.negeri)
+                  .collection('passenger_account').doc(Gv.passengerPhone)
+                  .collection('my_active_job').doc(Gv.passengerPhone)
                   .update({'order_status': 'driver_arrived'});
             }
-          : null, // disabled until _enabled == true
+          : null,
     );
   }
 }
@@ -673,13 +684,8 @@ class _DelayedJobCompleteButtonState extends State<_DelayedJobCompleteButton> {
   @override
   void initState() {
     super.initState();
-    debugPrint('[DAJ] _DelayedJobCompleteButton init');
-    // unlock button after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() => _enabled = true);
-        debugPrint('[DAJ] _DelayedJobCompleteButton enabled');
-      }
+      if (mounted) setState(() => _enabled = true);
     });
   }
 
@@ -690,26 +696,24 @@ class _DelayedJobCompleteButtonState extends State<_DelayedJobCompleteButton> {
       label: 'Job Complete',
       onPressed: _enabled
           ? () {
-              debugPrint('[DAJ] Job Complete → set job_is_completed=true, order_status=job_completed');
               FirebaseFirestore.instance
-                  .collection(Gv.negara)
-                  .doc(Gv.negeri)
-                  .collection('passenger_account')
-                  .doc(Gv.passengerPhone)
-                  .collection('my_active_job')
-                  .doc(Gv.passengerPhone)
+                  .collection(Gv.negara).doc(Gv.negeri)
+                  .collection('passenger_account').doc(Gv.passengerPhone)
+                  .collection('my_active_job').doc(Gv.passengerPhone)
                   .update({
-                    'job_is_completed': true,
-                    'order_status': 'job_completed',
-                  });
+                'job_is_completed': true,
+                'order_status': 'job_completed',
+              });
             }
-          : null, // disabled until enabled == true
+          : null,
     );
   }
 }
 
 class _DelayedPaymentReceivedButton extends StatefulWidget {
-  const _DelayedPaymentReceivedButton();
+  const _DelayedPaymentReceivedButton({this.onPaymentFinished});
+
+  final VoidCallback? onPaymentFinished;
 
   @override
   State<_DelayedPaymentReceivedButton> createState() => _DelayedPaymentReceivedButtonState();
@@ -721,13 +725,8 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
   @override
   void initState() {
     super.initState();
-    debugPrint('[DAJ] _DelayedPaymentReceivedButton init');
-    // unlock after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() => _enabled = true);
-        debugPrint('[DAJ] _DelayedPaymentReceivedButton enabled');
-      }
+      if (mounted) setState(() => _enabled = true);
     });
   }
 
@@ -737,29 +736,36 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
       context: context,
       label: 'Payment Received',
       onPressed: _enabled
-          ? () {
-              debugPrint('[DAJ] Payment Received pressed');
+          ? () async {
+              // 1) Tell parent: payment completed so it won't re-enable bypass in dispose
+              widget.onPaymentFinished?.call();
 
-              // 1) Navigate FIRST (context is valid here)
+              // 2) Turn OFF bypass so geofencing starts enforcing right away
+              GeofencingController.instance.disableBypass();
+
+              // (Optional) Force policy flag if you use it:
+              // await FirebaseFirestore.instance
+              //   .collection(Gv.negara).doc(Gv.negeri)
+              //   .collection('driver_account').doc(Gv.loggedUser)
+              //   .update({'must_exit_block_zone': true});
+
+              // 3) Navigate away to job list
+              if (!mounted) return;
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
                 (route) => false,
               );
 
-              // 2) Fire-and-forget the write (no need for context afterwards)
-              // ignore: discarded_futures
-              FirebaseFirestore.instance
-                  .collection(Gv.negara)
-                  .doc(Gv.negeri)
-                  .collection('passenger_account')
-                  .doc(Gv.passengerPhone)
-                  .collection('my_active_job')
-                  .doc(Gv.passengerPhone)
-                  .set({'order_status': 'payment_received'}, SetOptions(merge: true))
-                  .then((_) => debugPrint('[DAJ] payment_received write OK'))
-                  .catchError((e, st) {
-                    debugPrint('[DAJ] payment_received write failed: $e\n$st');
-                  });
+              // 4) Fire-and-forget order_status write
+              try {
+                await FirebaseFirestore.instance
+                    .collection(Gv.negara).doc(Gv.negeri)
+                    .collection('passenger_account').doc(Gv.passengerPhone)
+                    .collection('my_active_job').doc(Gv.passengerPhone)
+                    .set({'order_status': 'payment_received'}, SetOptions(merge: true));
+              } catch (e, st) {
+                debugPrint('[DAJ] payment_received write failed: $e\n$st');
+              }
             }
           : null,
     );
