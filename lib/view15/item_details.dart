@@ -4,7 +4,7 @@ import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/view15/destination_widget.dart';
 import 'package:luckygo_pemandu/view15/global_variables_for_view15.dart';
 import 'package:luckygo_pemandu/view15/item_widget.dart';
-import 'package:luckygo_pemandu/view15/special_widget.dart';
+import 'package:luckygo_pemandu/view15/special_widget.dart'; 
 
 class ItemDetails extends StatelessWidget {
   const ItemDetails({super.key});
@@ -78,6 +78,12 @@ class ItemDetails extends StatelessWidget {
           km_d4d5.value      = _toD(data['km_d4d5']);
           km_d5d6.value      = _toD(data['km_d5d6']);
 
+          eta_sod1.value      = _toI(data['eta_sod1']);
+          eta_d1d2.value      = _toI(data['eta_d1d2']);
+          eta_d2d3.value      = _toI(data['eta_d2d3']);
+          eta_d3d4.value      = _toI(data['eta_d3d4']);
+          eta_d4d5.value      = _toI(data['eta_d4d5']);
+          eta_d5d6.value      = _toI(data['eta_d5d6']);
 
           pr_supportstick   = _toD(data['price_supportStick']);
           pr_tupperWare     = _toD(data['price_tupperware']);
@@ -118,10 +124,11 @@ class ItemDetails extends StatelessWidget {
           ct_passengerDeaf.value   = _toB(data['qty_deaf'])  || pr_passengerDeaf  > 0;
 
  
+// print('km_sod1.value: ${km_sod1.value}🔴🔴🔴🔴🔴\n'*10);
 
-          // Debug print example (as you used earlier)
-          if (data.containsKey('tips_amount1') && data['tips_amount1'] != null) {
-          }
+      // Debug print example (as you used earlier)
+      if (data.containsKey('tips_amount1') && data['tips_amount1'] != null) {
+      }
 
 return Column(
   children: [
@@ -307,47 +314,59 @@ Expanded(
             quantity: qty_wheelchair.value, total: pr_wheelchair,
           ),
 
-        if (km_sod1.value > 0)
+
+
+
+        if(km_sod1.value > 0)
           DesWidget(
-            img1: 'ind_passenger', img2: 'd1',
-            desKm: km_sod1.value, desCharges: pr_sod1,
-            visible: true,
+            description01: 'Pickup to destination 1',
+            desKm: '${km_sod1.value}',
+            desEta: '${eta_sod1.value}',
+            desCharges: pr_sod1.toStringAsFixed(2),
           ),
 
-        if (km_d1d2.value > 0)
+        if(km_d1d2.value > 0)
           DesWidget(
-            img1: 'd1', img2: 'd2',
-            desKm: km_d1d2.value, desCharges: pr_d1d2,
-            visible: true,
+            description01: 'Destination 1 to destination 2',
+            desKm: '${km_d1d2.value}',
+            desEta: '${eta_d1d2.value}',
+            desCharges: pr_d1d2.toStringAsFixed(2),
           ),
 
-        if (km_d2d3.value > 0)
+        if(km_d2d3.value > 0)
           DesWidget(
-            img1: 'd2', img2: 'd3',
-            desKm: km_d2d3.value, desCharges: pr_d2d3,
-            visible: true,
+            description01: 'Destination 2 to destination 3',
+            desKm: '${km_d2d3.value}',
+            desEta: '${eta_d2d3.value}',
+            desCharges: pr_d2d3.toStringAsFixed(2),
           ),
 
-        if (km_d3d4.value > 0)
+        if(km_d3d4.value > 0)
           DesWidget(
-            img1: 'd3', img2: 'd4',
-            desKm: km_d3d4.value, desCharges: pr_d3d4,
-            visible: true,
+            description01: 'Destination 3 to destination 4',
+            desKm: '${km_d3d4.value}',
+            desEta: '${eta_d3d4.value}',
+            desCharges: pr_d3d4.toStringAsFixed(2),
           ),
 
-        if (km_d4d5.value > 0)
+        if(km_d4d5.value > 0)
           DesWidget(
-            img1: 'd4', img2: 'd5',
-            desKm: km_d4d5.value, desCharges: pr_d4d5,
-            visible: true,
+            description01: 'Destination 4 to destination 5',
+            desKm: '${km_d4d5.value}',
+            desEta: '${eta_d4d5.value}',
+            desCharges: pr_d4d5.toStringAsFixed(2),
           ),
 
-        if (km_d5d6.value > 0)
+        if(km_d5d6.value > 0)
           DesWidget(
-            img1: 'd5', img2: 'finish',
-            desKm: km_d5d6.value, desCharges: pr_d5d6,
-            visible: true,
+            description01: 'Destination 5 to destination 6',
+            desKm: '${km_d5d6.value}',
+            desEta: '${eta_d5d6.value}',
+            desCharges: pr_d5d6.toStringAsFixed(2),
           ),
+        
+
+
 
         if (qty_pin.value > 0)
           ItemWidget(

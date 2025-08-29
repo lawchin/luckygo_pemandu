@@ -46,6 +46,7 @@ class Gv {
   static double driverLng = 0.0;
   static GeoPoint passengerGp = const GeoPoint(0.0, 0.0);
 
+  static int totalEta = 0;
   // Lite job core details
   static String liteJobId        = '';   // 0
   static dynamic passengerPhone = '';
@@ -140,6 +141,59 @@ class Gv {
   // static String orderStatus = '';
   
   static String driverVehicleDetails = '';
+
+  static double grandTotal = 0.0;
+  static double totalPinCharge = 0.0;
+
+  static String destination1Address1 = '';
+  static String destination1Address2 = '';
+  static String destination2Address1 = '';
+  static String destination2Address2 = '';
+  static String destination3Address1 = '';
+  static String destination3Address2 = '';
+  static String destination4Address1 = '';
+  static String destination4Address2 = '';
+  static String destination5Address1 = '';
+  static String destination5Address2 = '';
+  static String destination6Address1 = '';
+  static String destination6Address2 = '';
+  static String sourceAddress1 = '';
+  static String sourceAddress2 = '';
+
+  // static double km_sod1 = 0.0;
+    static final ValueNotifier<double> km_sod1 = ValueNotifier(0.0);
+  static int eta_SoToD1 = 0;
+  static double pr_sod1 = 0.0;
+  static double pinCharges_SoToD1 = 0.0;
+
+  static double km_d1d2 = 0.0;
+  static int eta_D1ToD2 = 0;
+  static double pr_d1d2 = 0.0;
+  static double pinCharges_D1ToD2 = 0.0;
+
+  static double km_d2d3 = 0.0;
+  static int eta_D2ToD3 = 0;
+  static double pr_d2d3 = 0.0;
+  static double pinCharges_D2ToD3 = 0.0;
+
+  static double km_d3d4 = 0.0;
+  static int eta_D3ToD4 = 0;
+  static double pr_d3d4 = 0.0;
+  static double pinCharges_D3ToD4 = 0.0;
+
+  static double km_d4d5 = 0.0;
+  static int eta_D4ToD5 = 0;
+  static double pr_d4d5 = 0.0;
+  static double pinCharges_D4ToD5 = 0.0;
+
+  static double km_d5d6 = 0.0;
+  static int eta_D5ToD6 = 0;
+  static double pr_d5d6 = 0.0;
+  static double pinCharges_D5ToD6 = 0.0;
+
+
 }
 
 
+final GlobalKey<NavigatorState> rootNavKey = GlobalKey<NavigatorState>();
+BuildContext? get rootContext => rootNavKey.currentContext;

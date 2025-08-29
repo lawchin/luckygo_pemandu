@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:luckygo_pemandu/driver_accept_job/receipt_page.dart';
+import 'package:luckygo_pemandu/driver_accept_job/tell_others.dart';
 import 'package:luckygo_pemandu/geo_fencing/geofencing_controller.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
@@ -47,6 +49,8 @@ class _DAJState extends State<DAJ> {
         .doc(phone)
         .collection('my_active_job')
         .doc(phone);
+
+        //  IF DATA EXIST grandTotal = data['total_price']
 
     return PopScope(
       canPop: false, // ⛔ Block device back + swipe back on this page
@@ -134,6 +138,10 @@ class _DAJState extends State<DAJ> {
                   final tips2 = (data['tips_amount2'] as num?)?.toDouble() ?? 0.0;
                   final orderStatus = (data['order_status'] as String?) ?? '';
 
+                  Gv.passengerName = (data['job_creator_name'] as String?) ?? pPhone;
+                  Gv.passengerPhone = (data['job_created_by'] as String?) ?? '';
+                  Gv.grandTotal = (data['total_price'] as num?)?.toDouble() ?? 0.0;
+
                   return _paddedCard(
                     child: Padding(
                       padding: const EdgeInsets.all(6),
@@ -142,7 +150,7 @@ class _DAJState extends State<DAJ> {
                         children: [
                           // Top row
                           SizedBox(
-                            height: 30,
+                            height: 50,
                             child: Card(
                               elevation: 2,
                               margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -182,7 +190,44 @@ class _DAJState extends State<DAJ> {
                                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                                       ),
                                       onPressed: () {
-                                        _d('Action button tapped');
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: const Text('Action'),
+                                              content: SizedBox(
+                                                width: double.maxFinite,
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).push(
+                                                          PageRouteBuilder(
+                                                            opaque: false,
+                                                            barrierDismissible: true,
+                                                            pageBuilder: (_, __, ___) => TellOthers(),
+                                                            transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
+                                                          ),
+                                                        );
+                                                      }, 
+                                                      child: const Text('Tell Others')
+                                                    ),
+
+                                                    ElevatedButton(onPressed: () {}, child: const Text('')),
+                                                    ElevatedButton(onPressed: () {}, child: const Text('')),
+                                                    ElevatedButton(onPressed: () {}, child: const Text('')),
+                                                    ElevatedButton(onPressed: () {}, child: const Text('')),
+                                                    ElevatedButton(
+                                                      onPressed: () => Navigator.of(context).pop(),
+                                                      child: const Text('Close'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
                                       },
                                       child: const Text(
                                         'Action',
@@ -553,7 +598,7 @@ class _DAJState extends State<DAJ> {
   }
 }
 
-// ------------- Buttons & primary action area -------------
+
 
 Widget _primaryActionButton({
   required BuildContext context,
@@ -629,6 +674,16 @@ Widget _primaryActionForStatus(
 
     case 'payment_received':
       return const SizedBox.shrink();
+      // After payment received, navigate to ReceiptPage
+      // return _primaryActionButton(
+      //   context: context,
+      //   label: 'View Receipt',
+      //   onPressed: () {
+      //     Navigator.of(context).push(
+      //   MaterialPageRoute(builder: (_) => const ReceiptPage()),
+      //     );
+      //   },
+      // );
 
     default:
       return const SizedBox.shrink();
@@ -750,11 +805,17 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
               //   .update({'must_exit_block_zone': true});
 
               // 3) Navigate away to job list
+              // if (!mounted) return;
+              // Navigator.of(context).pushAndRemoveUntil(
+              //   MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+              //   (route) => false,
+              // );
               if (!mounted) return;
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+                MaterialPageRoute(builder: (_) => const ReceiptPage()),
                 (route) => false,
               );
+
 
               // 4) Fire-and-forget order_status write
               try {

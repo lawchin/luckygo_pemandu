@@ -153,9 +153,28 @@ class BlockedOverlay extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                const Text(
-                  "You're inside a geofenced area.\n"
-                  "New jobs are blocked until you exit the zone.",
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "You are",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 15, height: 1.35),
+                    ),
+                    Text(
+                      " NOT ",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 15, height: 1.35, fontWeight: FontWeight.w800, color: Colors.red),
+                    ),                
+                    Text(
+                      "able to receive new",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 15, height: 1.35),
+                    ),
+                  ],
+                ),
+                Text(
+                  "job until you leave this zone.",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 15, height: 1.35),
                 ),

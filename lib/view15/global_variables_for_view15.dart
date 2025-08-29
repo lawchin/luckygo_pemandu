@@ -86,6 +86,14 @@ ValueNotifier<double> km_d3d4 = ValueNotifier<double>(0);
 ValueNotifier<double> km_d4d5 = ValueNotifier<double>(0);
 ValueNotifier<double> km_d5d6 = ValueNotifier<double>(0);
 
+
+ValueNotifier<int> eta_sod1 = ValueNotifier<int>(0);
+ValueNotifier<int> eta_d1d2 = ValueNotifier<int>(0);
+ValueNotifier<int> eta_d2d3 = ValueNotifier<int>(0);
+ValueNotifier<int> eta_d3d4 = ValueNotifier<int>(0);
+ValueNotifier<int> eta_d4d5 = ValueNotifier<int>(0);
+ValueNotifier<int> eta_d5d6 = ValueNotifier<int>(0);
+
 ValueNotifier<String> passengerName = ValueNotifier<String>('');
 ValueNotifier<String> passengerPhone = ValueNotifier<String>('');
 ValueNotifier<String> passengerSelfie = ValueNotifier<String>('');

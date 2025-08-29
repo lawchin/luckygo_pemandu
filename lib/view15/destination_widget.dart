@@ -1,21 +1,20 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 
 class DesWidget extends StatefulWidget {
-  final String img1;
-  final String img2;
-  final double desKm;
-  final double desCharges;
-  final bool visible;
+  final String description01;
+  final String desEta;
+  final String desKm;
+  final String desCharges;
 
   const DesWidget({
     Key? key,
-    required this.img1,
-    required this.img2,
+    required this.description01,
     required this.desKm,
+    required this.desEta,
     required this.desCharges,
-    required this.visible,
   }) : super(key: key);
 
   @override
@@ -25,87 +24,73 @@ class DesWidget extends StatefulWidget {
 class _ItemWidgetState extends State<DesWidget> {
   @override
   Widget build(BuildContext context) {
-    return Visibility(
-      visible: widget.visible,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
       child: Container(
+        color: Colors.amberAccent,
         child: Column(
           children: [
-            SizedBox(height:6),
-            
+            SizedBox(height: 6),
+            Container(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '${widget.description01}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  height: 0.7,
+                ),
+              ),
+            ),
             SizedBox(
               height: 30,
               child: Row(
                 children: [
-      
                   Expanded(
-                    flex: 44,
-                    child: Row(
-                      children: [
-                        SizedBox(width:7),
-                        Image.asset(
-                          'assets/images/${widget.img1}.png',
-                          width: 20,
-                          height: 30,
-                          fit: BoxFit.cover,
+                    flex: 34,
+                    child: Container(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '${widget.desKm} km',
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          height: 0.6,
                         ),
-                          Padding(
-                            padding: const EdgeInsets.only(left:4.0, right:4.0),
-                            child: Text(
-                                '⟶',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    color: Colors.red,
-                                    height:0.8
-                                  ),
-                                ),
-                          ),                            
-                        Image.asset(
-                          'assets/images/${widget.img2}.png',
-                          width: 20,
-                          height: 30,
-                          fit: BoxFit.cover,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                   Expanded(
-                    flex: 26,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left:6, right:6),
-                          child: Text(
-                          '${widget.desKm.toString()} km',
-                          style: TextStyle(
-                          ),
-                          ),
+                    flex: 33,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${widget.desEta} min',
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          height: 0.6,
                         ),
-                      ],
+                      ),
                     ),
-                  ), 
+                  ),
                   Expanded(
-                    flex: 30,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                        '${widget.desCharges.toString()}',
-                        style: TextStyle(
+                    flex: 33,
+                    child: Container(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        widget.desCharges,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          height: 0.6,
                         ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 6,)
-          
-      
           ],
         ),
       ),
     );
   }
 }
+
