@@ -160,36 +160,7 @@ class Gv {
   static String sourceAddress1 = '';
   static String sourceAddress2 = '';
 
-  // static double km_sod1 = 0.0;
-    static final ValueNotifier<double> km_sod1 = ValueNotifier(0.0);
-  static int eta_SoToD1 = 0;
-  static double pr_sod1 = 0.0;
-  static double pinCharges_SoToD1 = 0.0;
-
-  static double km_d1d2 = 0.0;
-  static int eta_D1ToD2 = 0;
-  static double pr_d1d2 = 0.0;
-  static double pinCharges_D1ToD2 = 0.0;
-
-  static double km_d2d3 = 0.0;
-  static int eta_D2ToD3 = 0;
-  static double pr_d2d3 = 0.0;
-  static double pinCharges_D2ToD3 = 0.0;
-
-  static double km_d3d4 = 0.0;
-  static int eta_D3ToD4 = 0;
-  static double pr_d3d4 = 0.0;
-  static double pinCharges_D3ToD4 = 0.0;
-
-  static double km_d4d5 = 0.0;
-  static int eta_D4ToD5 = 0;
-  static double pr_d4d5 = 0.0;
-  static double pinCharges_D4ToD5 = 0.0;
-
-  static double km_d5d6 = 0.0;
-  static int eta_D5ToD6 = 0;
-  static double pr_d5d6 = 0.0;
-  static double pinCharges_D5ToD6 = 0.0;
+  static double minimumKm = 0.0;
 
 
 }

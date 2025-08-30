@@ -644,18 +644,6 @@ body: Stack(
             child: ValueListenableBuilder<bool>(
               valueListenable: Gv.showPresenter,
               builder: (context, isVisible, _) {
-                // if (Gv.form2Completed == false) {
-                //   // Navigate to CompleteRegistrationPage (CRP)
-                //   WidgetsBinding.instance.addPostFrameCallback((_) {
-                //     if (Navigator.canPop(context)) {
-                //       Navigator.pop(context);
-                //     }
-                //     Navigator.of(context).pushReplacement(
-                //       MaterialPageRoute(builder: (_) => const CompleteRegistrationPage()),
-                //     );
-                //   });
-                //   return const SizedBox.shrink();
-                // }
                 return isVisible ? const SizedBox.shrink() : const PresenterPage();
               },
             ),

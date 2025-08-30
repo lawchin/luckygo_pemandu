@@ -4,6 +4,7 @@ import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/view15/destination_widget.dart';
 import 'package:luckygo_pemandu/view15/global_variables_for_view15.dart';
 import 'package:luckygo_pemandu/view15/item_widget.dart';
+import 'package:luckygo_pemandu/view15/passenger_widget.dart';
 import 'package:luckygo_pemandu/view15/special_widget.dart'; 
 
 class ItemDetails extends StatelessWidget {
@@ -55,6 +56,7 @@ class ItemDetails extends StatelessWidget {
           pr_odourfruits    = _toD(data['price_odourFruits']);
           pr_passengerAdult = _toD(data['price_passengerAdult']);
           pr_passengerBaby  = _toD(data['price_passengerBaby']);
+          pr_totalPassenger  = _toD(data['price_totalPassenger']);
           pr_passengerBlind = _toD(data['price_passengerBlind']);
           pr_passengerDeaf  = _toD(data['price_passengerDeaf']);
           pr_passengerMute  = _toD(data['price_passengerMute']);
@@ -102,6 +104,8 @@ class ItemDetails extends StatelessWidget {
           qty_odourfruits.value    = _toI(data['qty_odourFruits']    ?? data['odour_fruits_qty']);
           qty_passengerAdult.value = _toI(data['qty_passengerAdult'] ?? data['passenger_adult_qty']);
           qty_passengerBaby.value  = _toI(data['qty_passengerBaby']  ?? data['passenger_baby_qty']);
+          qty_passengerTotal.value  = _toI(data['qty_passengerTotal']  ?? data['total_passenger_qty']);
+
           qty_pets.value           = _toI(data['qty_pets']           ?? data['pets_qty']);
           qty_pin.value            = _toI(data['qty_pin']            ?? data['pin_qty']);
           qty_rooster.value        = _toI(data['qty_rooster']        ?? data['rooster_qty']);
@@ -182,17 +186,50 @@ Expanded(
     padding: const EdgeInsets.all(12),
     child: Column(
       children: [
-        if (qty_passengerBaby.value > 0)
-          ItemWidget(
-            indicator: 'ind_baby', label: 'Passenger Baby',
-            quantity: qty_passengerBaby.value, total: pr_passengerBaby,
+
+
+
+
+
+
+
+
+
+        // if (qty_passengerBaby.value > 0)
+        //   ItemWidget(
+        //     indicator: 'ind_baby', label: 'Passenger Baby',
+        //     quantity: qty_passengerBaby.value, total: pr_passengerBaby,
+        //   ),
+
+        // if (qty_passengerAdult.value > 0)
+        //   ItemWidget(
+        //     indicator: 'ind_adult', label: 'Passenger Adult',
+        //     quantity: qty_passengerAdult.value, total: pr_passengerAdult,
+        //   ),
+
+        if (qty_passengerTotal.value > 0)
+          PassengerWidget(
+
+            indicator: 'ind_passenger', 
+            label: 'Total Passenger',
+            quantity: qty_passengerTotal.value, 
+            total: pr_totalPassenger,
+
+            indicator2: 'ind_passenger', 
+            label2: 'Total Passenger',
+            quantity2: qty_passengerTotal.value,             
+            total2: pr_totalPassenger,
+
+            total3: pr_totalPassenger, 
+            totalTotal: qty_passengerTotal.value,
+            label3: 'Total Passenger',
           ),
 
-        if (qty_passengerAdult.value > 0)
-          ItemWidget(
-            indicator: 'ind_adult', label: 'Passenger Adult',
-            quantity: qty_passengerAdult.value, total: pr_passengerAdult,
-          ),
+
+
+
+
+
 
         if (ct_passengerBlind.value)
           SpecialWidget(

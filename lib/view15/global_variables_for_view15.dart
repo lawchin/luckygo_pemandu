@@ -20,6 +20,7 @@ double pr_luggage = 0.0;
 double pr_odourfruits = 0.0;
 double pr_passengerAdult = 0.0;
 double pr_passengerBaby = 0.0;
+double pr_totalPassenger = 0.0;
 double pr_passengerBlind = 0.0;
 double pr_passengerDeaf = 0.0;
 double pr_passengerMute = 0.0;
@@ -56,6 +57,7 @@ ValueNotifier<int> qty_luggage = ValueNotifier<int>(0);
 ValueNotifier<int> qty_odourfruits = ValueNotifier<int>(0);
 ValueNotifier<int> qty_passengerAdult = ValueNotifier<int>(0);
 ValueNotifier<int> qty_passengerBaby = ValueNotifier<int>(0);
+ValueNotifier<int> qty_passengerTotal = ValueNotifier<int>(0);
 ValueNotifier<int> qty_pets = ValueNotifier<int>(0);
 ValueNotifier<int> qty_pin = ValueNotifier<int>(0);
 ValueNotifier<int> qty_rooster = ValueNotifier<int>(0);
@@ -97,3 +99,5 @@ ValueNotifier<int> eta_d5d6 = ValueNotifier<int>(0);
 ValueNotifier<String> passengerName = ValueNotifier<String>('');
 ValueNotifier<String> passengerPhone = ValueNotifier<String>('');
 ValueNotifier<String> passengerSelfie = ValueNotifier<String>('');
+
+
