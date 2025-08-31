@@ -9,7 +9,8 @@ import 'package:http/http.dart' as http;
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/bucket123b.dart';
 import 'package:luckygo_pemandu/jobFilter/bucket414.dart';
-import 'package:luckygo_pemandu/jobFilter/filter_jobs_helper.dart'; // ShortJob
+import 'package:luckygo_pemandu/jobFilter/filter_jobs_helper.dart';
+import 'package:luckygo_pemandu/landing%20page/landing_page.dart'; // ShortJob
 
 /// Single-stream page (v2):
 /// - Accepts 35-token records (indexes 0..34)
@@ -22,6 +23,10 @@ class FilterJobsOneStream2 extends StatefulWidget {
 }
 
 class _FilterJobsOneStream2State extends State<FilterJobsOneStream2> {
+
+
+
+  
   late final DocumentReference<Map<String, dynamic>> _docRef;
 
   Map<String, dynamic> _raw = const {};
@@ -116,6 +121,29 @@ class _FilterJobsOneStream2State extends State<FilterJobsOneStream2> {
     }
 
     return Scaffold(
+
+    // appBar: AppBar(
+    //   leading: GestureDetector(
+    //     onTap: () {
+    //       // Navigator.pushReplacement(
+    //       //   context,
+    //       //   MaterialPageRoute(builder: (_) => LandingPage()),
+    //       // );
+    //       Navigator.pop(context);
+
+    //     },
+
+    //     child: const Padding(
+    //   padding: EdgeInsets.symmetric(horizontal: 16),
+    //   child: Text('🔙', style: TextStyle(fontSize: 22)),
+    //     ),
+    //   ),
+    //   title: const Text('Jobs'),
+    //   centerTitle: true,
+    //   elevation: 1,
+    // ),
+
+
       appBar: AppBar(
         title: const Text('Nearby Buckets (One Stream) · v2'),
         actions: [
@@ -141,6 +169,7 @@ class _FilterJobsOneStream2State extends State<FilterJobsOneStream2> {
           ),
         ],
       ),
+      
       // FIX: no Expanded directly under body
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 8),

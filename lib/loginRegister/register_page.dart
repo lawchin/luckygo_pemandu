@@ -98,6 +98,9 @@ class _RegisterPageState extends State<RegisterPage> {
       'area': area,
       'country': country,
       'created_at': DateTime.now().toIso8601String(),
+      'com_fixed_or_percentage': false, // ← store commission type
+      'commission_percentage': 10, // ← store commission percentage
+      'commission_fixed': 1,
       'disclosureAccepted': false,
       'email': email,
       'fullname': name,

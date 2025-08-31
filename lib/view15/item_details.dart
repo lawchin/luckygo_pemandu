@@ -116,11 +116,11 @@ class ItemDetails extends StatelessWidget {
           qty_wetfood.value        = _toI(data['qty_wetFood']        ?? data['wet_food_qty']);
           qty_wheelchair.value     = _toI(data['qty_wheelchair']     ?? data['wheelchair_qty']);
 
-          tips1Amount.value     = _toI(data['tips_amount1']);
-          tips2Amount.value     = _toI(data['tips_amount2']);
+          tips1Amount.value     = _toD(data['tips_amount1']);
+          tips2Amount.value     = _toD(data['tips_amount2']);
 
           // Optional total pin charges if you store it
-          totalPinCharges.value    = _toI(data['price_totalPin']);
+          totalPinCharges.value    = _toD(data['price_totalPin']);
 
           // ============== FLAGS (ValueNotifier<bool>) ==============
           ct_passengerBlind.value  = _toB(data['qty_blind']) || pr_passengerBlind > 0;

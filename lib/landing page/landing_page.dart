@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:luckygo_pemandu/end_drawer/deposit_history.dart';
 import 'package:luckygo_pemandu/end_drawer/deposit_page.dart';
+import 'package:luckygo_pemandu/end_drawer/job_history.dart';
 import 'package:luckygo_pemandu/end_drawer/transaction_history.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
@@ -441,6 +442,7 @@ Future<void> _logout() async {
 
       appBar: AppBar(
         backgroundColor: const Color(0xFF107572),
+        automaticallyImplyLeading: false,
         elevation: 4,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -607,6 +609,16 @@ Future<void> _logout() async {
                 );
               },
             ),
+            ListTile(// transaction history                
+                leading: const Icon(Icons.history, color: Colors.blueAccent),
+              title: const Text('Job History', style: TextStyle(color: Colors.black87)),
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => JobHistory()),
+                );
+              },
+            ),
 
               const Spacer(),
               Padding(
@@ -660,9 +672,15 @@ body: Stack(
                     minimumSize: const Size.fromHeight(48),
                   ),
                   onPressed: () {
+                    // Navigator.of(context).push(
+                    //   // MaterialPageRoute(builder: (_) => const BucketsLauncherPage()),
+                    //   MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+                    // );
                     Navigator.of(context).push(
-                      // MaterialPageRoute(builder: (_) => const BucketsLauncherPage()),
-                      MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+                      MaterialPageRoute(
+                        settings: const RouteSettings(name: 'FJOS2'),
+                        builder: (_) => const FilterJobsOneStream2(),
+                      ),
                     );
                   },
                 ),

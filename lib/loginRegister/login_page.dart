@@ -10,6 +10,7 @@ import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/landing%20page/landing_page.dart';
 import 'package:luckygo_pemandu/loginRegister/fill_form.dart';
 import 'package:luckygo_pemandu/loginRegister/register_page.dart';
+import 'package:luckygo_pemandu/loginRegister/register_with_otp.dart';
 import 'package:luckygo_pemandu/main.dart';
 import 'package:luckygo_pemandu/translate_bahasa.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -440,6 +441,9 @@ TextField(
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => const RegisterPage()),
                     );
+                    // Navigator.of(context).push(
+                    //   MaterialPageRoute(builder: (context) => const RegisterWithOtp()),
+                    // );
                   },
                   child: Text(
                     t.registerHere,

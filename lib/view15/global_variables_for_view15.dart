@@ -68,9 +68,9 @@ ValueNotifier<int> qty_tupperWare = ValueNotifier<int>(0);
 ValueNotifier<int> qty_wetfood = ValueNotifier<int>(0);
 ValueNotifier<int> qty_wheelchair = ValueNotifier<int>(0);
 
-ValueNotifier<int> totalPinCharges = ValueNotifier<int>(0);
-ValueNotifier<int> tips1Amount = ValueNotifier<int>(0);
-ValueNotifier<int> tips2Amount = ValueNotifier<int>(0);
+ValueNotifier<double> totalPinCharges = ValueNotifier<double>(0);
+ValueNotifier<double> tips1Amount = ValueNotifier<double>(0);
+ValueNotifier<double> tips2Amount = ValueNotifier<double>(0);
 
 
 

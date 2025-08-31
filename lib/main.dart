@@ -87,6 +87,10 @@ class _MyAppState extends State<MyApp> {
         final model = data?['reg_vehicle_model'] ?? '';
         final plate = data?['reg_vehicle_plate'] ?? '';
         Gv.driverVehicleDetails = '$brand $model $color $plate';
+        Gv.commissionFixedOrPercentage = data?['commission_fixed_or_percentage'] ?? false;
+        Gv.commissionPercentage = data?['commission_percentage'] ?? 0;
+        Gv.commissionFixed = data?['commission_fixed'] ?? 0;
+
 
         print('Document does not exist.');
       }

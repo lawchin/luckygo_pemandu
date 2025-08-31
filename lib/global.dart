@@ -161,6 +161,9 @@ class Gv {
   static String sourceAddress2 = '';
 
   static double minimumKm = 0.0;
+  static bool commissionFixedOrPercentage = false;
+  static int commissionPercentage = 0;
+  static int commissionFixed = 0;
 
 
 }

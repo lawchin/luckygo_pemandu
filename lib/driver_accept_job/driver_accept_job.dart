@@ -5,7 +5,28 @@ import 'package:luckygo_pemandu/driver_accept_job/tell_others.dart';
 import 'package:luckygo_pemandu/geo_fencing/geofencing_controller.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
+import 'package:luckygo_pemandu/landing%20page/landing_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+
+String getNiceDate() {
+  final now = DateTime.now();
+  final day = now.day;
+  final month = _monthName(now.month);
+  final year = now.year;
+  final hour = now.hour > 12 ? now.hour - 12 : now.hour == 0 ? 12 : now.hour;
+  final minute = now.minute.toString().padLeft(2, '0');
+  final period = now.hour >= 12 ? 'pm' : 'am';
+  return '$day $month $year - $hour:$minute $period';
+}
+
+String _monthName(int month) {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  return months[month - 1];
+}
 
 class DAJ extends StatefulWidget {
   const DAJ({super.key});
@@ -785,6 +806,131 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
     });
   }
 
+
+
+
+
+
+
+Future<void> handlePaymentReceived() async {
+  final fs = FirebaseFirestore.instance;
+
+  // ---- Refs ----
+  final myActiveJobRef = fs
+      .collection(Gv.negara).doc(Gv.negeri)
+      .collection('passenger_account').doc(Gv.passengerPhone)
+      .collection('my_active_job').doc(Gv.passengerPhone);
+
+  final passengerRef = fs
+      .collection(Gv.negara).doc(Gv.negeri)
+      .collection('passenger_account').doc(Gv.passengerPhone);
+
+  final driverRef = fs
+      .collection(Gv.negara).doc(Gv.negeri)
+      .collection('driver_account').doc(Gv.loggedUser);
+
+  // Stable, human-readable history doc IDs
+  final historyDocId = '${getFormattedDate()}(${Gv.passengerPhone})';
+
+  final passengerRideHistoryRef = passengerRef
+      .collection('ride_history').doc(historyDocId);
+
+  final driverJobHistoryRef = driverRef
+      .collection('job_history').doc(historyDocId);
+
+  // Compute commission once
+  final double commission = (Gv.commissionFixedOrPercentage
+      ? Gv.commissionFixed
+      : (Gv.totalPrice * Gv.commissionPercentage / 100))
+      .toDouble();
+
+  // Optional idempotency (e.g., a unique ID for this payment)
+  final paymentId = '${DateTime.now().millisecondsSinceEpoch}-${Gv.passengerPhone}-${Gv.loggedUser}';
+
+  await fs.runTransaction((tx) async {
+    // 1) Read driver + job data up front
+    final driverSnap = await tx.get(driverRef);
+    if (!driverSnap.exists) {
+      throw Exception('Driver account not found.');
+    }
+
+    final jobSnap = await tx.get(myActiveJobRef);
+    if (!jobSnap.exists) {
+      throw Exception('Active job not found for passenger ${Gv.passengerPhone}.');
+    }
+
+    final jobData = Map<String, dynamic>.from(jobSnap.data()!);
+
+    // (Optional) Idempotency: skip if we already processed this paymentId
+    final processed = (driverSnap.data()?['processed_payment_ids'] as List?)?.cast<String>() ?? const <String>[];
+    if (processed.contains(paymentId)) {
+      // Already done; exit early
+      return;
+    }
+
+    // 2) Deduct commission from driver balance (atomic increment)
+    // If you must **not allow negative**, read current balance and clamp.
+    final currentBalNum = (driverSnap.data()?['account_balance'] as num?) ?? 0;
+    final currentBalance = currentBalNum.toDouble();
+    final newBalance = currentBalance - commission;
+
+    // Prevent negative (optional)
+    if (newBalance < 0) {
+      throw Exception('Insufficient balance to deduct commission: ${commission.toStringAsFixed(2)}');
+    }
+
+    // Use increment for concurrency safety
+    tx.update(driverRef, {
+      'account_balance': FieldValue.increment(-commission),
+      // keep a rolling record of processed payments (cap this list in your backend if needed)
+      'processed_payment_ids': FieldValue.arrayUnion([paymentId]),
+      'last_payment_timestamp': FieldValue.serverTimestamp(),
+      'last_payment_amount': commission,
+    });
+
+    // 3) Update my_active_job status
+    tx.set(myActiveJobRef, {      
+      'job_complete_date': getNiceDate(),
+      'order_status': 'payment_received',
+      'process_driver_job_complete': true,
+      'commission_deduction': commission,
+      'updated_at': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    // 4) Copy job to passenger + driver histories (merge keeps any extra fields)
+    final historyPayload = {
+      ...jobData,
+      'order_status': 'payment_received',
+      'commission_deduction': commission,
+      'archived_at': FieldValue.serverTimestamp(),
+    };
+
+    tx.set(passengerRideHistoryRef, historyPayload, SetOptions(merge: true));
+    tx.set(driverJobHistoryRef, historyPayload, SetOptions(merge: true));
+
+    // 5) Update passenger_account flags (per your flow)
+    tx.set(passengerRef, {
+      'job_still_active': false,
+      'ddpcc': 0,
+      'ddpcc_start_time': FieldValue.delete(),
+      'last_job_archived_at': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    // 6) (Optional) Create a transaction record for driver
+    final txRef = driverRef.collection('transaction_history').doc(paymentId);
+    tx.set(txRef, {
+      'transaction_amount': commission,
+      'transaction_date': FieldValue.serverTimestamp(),
+      'transaction_description': "Commission Deduction",
+      'transaction_money_in': false,
+    });
+  });
+}
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return _primaryActionButton(
@@ -811,19 +957,21 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
               //   (route) => false,
               // );
               if (!mounted) return;
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const ReceiptPage()),
-                (route) => false,
-              );
-
+              // Navigator.of(context).pushAndRemoveUntil(
+              //   MaterialPageRoute(builder: (_) => const ReceiptPage()),
+              //   (route) => false,
+              // );
+    
+Navigator.of(context).push(
+  MaterialPageRoute(
+    settings: const RouteSettings(name: 'Receipt'),
+    builder: (_) => const ReceiptPage(),
+  ),
+);
 
               // 4) Fire-and-forget order_status write
               try {
-                await FirebaseFirestore.instance
-                    .collection(Gv.negara).doc(Gv.negeri)
-                    .collection('passenger_account').doc(Gv.passengerPhone)
-                    .collection('my_active_job').doc(Gv.passengerPhone)
-                    .set({'order_status': 'payment_received'}, SetOptions(merge: true));
+                await handlePaymentReceived();
               } catch (e, st) {
                 debugPrint('[DAJ] payment_received write failed: $e\n$st');
               }
