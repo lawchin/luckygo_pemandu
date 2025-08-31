@@ -56,7 +56,7 @@ class ItemDetails extends StatelessWidget {
           pr_odourfruits    = _toD(data['price_odourFruits']);
           pr_passengerAdult = _toD(data['price_passengerAdult']);
           pr_passengerBaby  = _toD(data['price_passengerBaby']);
-          pr_totalPassenger  = _toD(data['price_totalPassenger']);
+          pr_totalPassenger  = _toD(data['price_passengerTotal']);
           pr_passengerBlind = _toD(data['price_passengerBlind']);
           pr_passengerDeaf  = _toD(data['price_passengerDeaf']);
           pr_passengerMute  = _toD(data['price_passengerMute']);
@@ -209,20 +209,16 @@ Expanded(
 
         if (qty_passengerTotal.value > 0)
           PassengerWidget(
+           description: 'Passenger',
 
-            indicator: 'ind_passenger', 
-            label: 'Total Passenger',
-            quantity: qty_passengerTotal.value, 
-            total: pr_totalPassenger,
+            ind_adult: 'ind_adult', 
+            qty_adult: qty_passengerAdult.value,
 
-            indicator2: 'ind_passenger', 
-            label2: 'Total Passenger',
-            quantity2: qty_passengerTotal.value,             
-            total2: pr_totalPassenger,
+            ind_baby: 'ind_baby', 
+            qty_baby: qty_passengerBaby.value,
 
-            total3: pr_totalPassenger, 
-            totalTotal: qty_passengerTotal.value,
-            label3: 'Total Passenger',
+            ttl_psg: qty_passengerTotal.value,
+            price: pr_totalPassenger,
           ),
 
 
