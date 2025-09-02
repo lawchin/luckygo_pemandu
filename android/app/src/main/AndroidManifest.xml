@@ -2,27 +2,49 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bbkk.luckygo_pemandu">
 
-    <!-- Permissions -->
+    <!-- ===================== Permissions ===================== -->
+    <!-- Network / Internet (required for Flutter, Firebase, Jitsi) -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <!-- Location (your existing map features) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <!-- Camera & Mic (Jitsi: mic for voice; camera is optional) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.CAMERA"/>
-    <!-- Android 13+ media permission -->
+
+    <!-- Audio routing & Bluetooth for headsets (Jitsi calls) -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <!-- Legacy Bluetooth (pre-Android 12) -->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <!-- Android 12+ runtime Bluetooth permission for audio routing to BT devices -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+
+    <!-- Keep CPU awake during an ongoing call if needed -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <!-- Android 13+ media permission (you had this already) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <!-- Legacy external storage read (maxSdkVersion 32 to avoid conflicts on 33+) -->
+
+    <!-- Legacy external storage read (limit to API <= 32) -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"/>
 
-    <!-- Package visibility (Android 11+) -->
+    <!-- Declare that camera/microphone hardware are optional, not required to install -->
+    <uses-feature android:name="android.hardware.camera.any" android:required="false"/>
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
+
+    <!-- ================= Package Visibility (Android 11+) ================= -->
     <queries>
         <!-- Google Maps app -->
         <package android:name="com.google.android.apps.maps" />
         <!-- Google Play Store (fallback when Maps isn't installed) -->
         <package android:name="com.android.vending" />
 
-        <!-- Intents we plan to resolve -->
+        <!-- Intents we plan to resolve for navigation -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="google.navigation" />
@@ -43,16 +65,18 @@
         </intent>
     </queries>
 
+    <!-- ===================== Application ===================== -->
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="luckygo_pemandu">
 
-        <!-- Google Maps API Key (copied from admin app) -->
+        <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBr2bdTwwE-x9PyHSArUbCgZ_BsDupqmfA" />
 
+        <!-- Main Flutter Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

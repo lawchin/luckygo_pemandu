@@ -227,23 +227,23 @@ Expanded(
 
 
 
-        if (ct_passengerBlind.value)
-          SpecialWidget(
-            indicator: 'blind_symbol', label: 'Passenger Blind',
-            label2: 'Yes', total: 0.00, isVisible: ct_passengerBlind.value,
-          ),
+        // if (ct_passengerBlind.value)
+        //   SpecialWidget(
+        //     indicator: 'blind_symbol', label: 'Passenger Blind',
+        //     label2: 'Yes', total: 0.00, isVisible: ct_passengerBlind.value,
+        //   ),
 
-        if (ct_passengerDeaf.value)
-          SpecialWidget(
-            indicator: 'deaf_symbol', label: 'Passenger Deaf',
-            label2: 'Yes', total: 0.00, isVisible: ct_passengerDeaf.value,
-          ),
+        // if (ct_passengerDeaf.value)
+        //   SpecialWidget(
+        //     indicator: 'deaf_symbol', label: 'Passenger Deaf',
+        //     label2: 'Yes', total: 0.00, isVisible: ct_passengerDeaf.value,
+        //   ),
 
-        if (ct_passengerMute.value)
-          SpecialWidget(
-            indicator: 'mute_symbol', label: 'Passenger Mute',
-            label2: 'Yes', total: 0.00, isVisible: ct_passengerMute.value,
-          ),
+        // if (ct_passengerMute.value)
+        //   SpecialWidget(
+        //     indicator: 'mute_symbol', label: 'Passenger Mute',
+        //     label2: 'Yes', total: 0.00, isVisible: ct_passengerMute.value,
+        //   ),
 
         if (tips1Amount.value > 0)
           ItemWidget(

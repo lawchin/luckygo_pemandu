@@ -21,13 +21,15 @@ android {
     }
 
     defaultConfig {
-    // Updated Application ID for Firebase
-    applicationId = "com.bbkk.luckygo_pemandu"
-    // Set minSdk to 23 for Firebase compatibility
-    minSdk = 23
-    targetSdk = flutter.targetSdkVersion
-    versionCode = flutter.versionCode
-    versionName = flutter.versionName
+        // Updated Application ID for Firebase
+        applicationId = "com.bbkk.luckygo_pemandu"
+
+        // ⬇️ REQUIRED for jitsi_meet_flutter_sdk (was 23)
+        minSdk = 24
+
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     buildTypes {

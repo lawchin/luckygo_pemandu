@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:luckygo_pemandu/driver_accept_job/job_status_updater.dart';
 import 'package:luckygo_pemandu/driver_accept_job/receipt_page.dart';
 import 'package:luckygo_pemandu/driver_accept_job/tell_others.dart';
 import 'package:luckygo_pemandu/geo_fencing/geofencing_controller.dart';
@@ -162,6 +163,8 @@ class _DAJState extends State<DAJ> {
                   Gv.passengerName = (data['job_creator_name'] as String?) ?? pPhone;
                   Gv.passengerPhone = (data['job_created_by'] as String?) ?? '';
                   Gv.grandTotal = (data['total_price'] as num?)?.toDouble() ?? 0.0;
+
+
 
                   return _paddedCard(
                     child: Padding(
@@ -402,6 +405,9 @@ class _DAJState extends State<DAJ> {
                       ),
                     ),
                   );
+
+
+
                 },
               ),
             ),
@@ -813,6 +819,8 @@ class _DelayedPaymentReceivedButtonState extends State<_DelayedPaymentReceivedBu
 
 
 Future<void> handlePaymentReceived() async {
+  const kStatusPaymentReceived = 'payment_received'; // <- unify this
+
   final fs = FirebaseFirestore.instance;
 
   // ---- Refs ----
@@ -829,6 +837,10 @@ Future<void> handlePaymentReceived() async {
       .collection(Gv.negara).doc(Gv.negeri)
       .collection('driver_account').doc(Gv.loggedUser);
 
+  // If you also keep a single "active_job_lite" collection:
+  final activeJobLiteRef = fs
+      .collection('active_job').doc('active_job_lite'); // adjust if your path differs
+
   // Stable, human-readable history doc IDs
   final historyDocId = '${getFormattedDate()}(${Gv.passengerPhone})';
 
@@ -844,11 +856,11 @@ Future<void> handlePaymentReceived() async {
       : (Gv.totalPrice * Gv.commissionPercentage / 100))
       .toDouble();
 
-  // Optional idempotency (e.g., a unique ID for this payment)
+  // Optional idempotency
   final paymentId = '${DateTime.now().millisecondsSinceEpoch}-${Gv.passengerPhone}-${Gv.loggedUser}';
 
   await fs.runTransaction((tx) async {
-    // 1) Read driver + job data up front
+    // --- 1) Read driver + job data up front ---
     final driverSnap = await tx.get(driverRef);
     if (!driverSnap.exists) {
       throw Exception('Driver account not found.');
@@ -858,57 +870,51 @@ Future<void> handlePaymentReceived() async {
     if (!jobSnap.exists) {
       throw Exception('Active job not found for passenger ${Gv.passengerPhone}.');
     }
-
     final jobData = Map<String, dynamic>.from(jobSnap.data()!);
 
-    // (Optional) Idempotency: skip if we already processed this paymentId
-    final processed = (driverSnap.data()?['processed_payment_ids'] as List?)?.cast<String>() ?? const <String>[];
-    if (processed.contains(paymentId)) {
-      // Already done; exit early
-      return;
+    // (Optional) idempotency
+    final processedIds = (driverSnap.data()?['processed_payment_ids'] as List?)?.cast<String>() ?? const <String>[];
+    if (processedIds.contains(paymentId)) {
+      return; // already processed
     }
 
-    // 2) Deduct commission from driver balance (atomic increment)
-    // If you must **not allow negative**, read current balance and clamp.
+    // --- 2) Deduct commission from driver balance ---
     final currentBalNum = (driverSnap.data()?['account_balance'] as num?) ?? 0;
     final currentBalance = currentBalNum.toDouble();
     final newBalance = currentBalance - commission;
 
-    // Prevent negative (optional)
+    // Prevent negative if required by your business rules
     if (newBalance < 0) {
       throw Exception('Insufficient balance to deduct commission: ${commission.toStringAsFixed(2)}');
     }
 
-    // Use increment for concurrency safety
     tx.update(driverRef, {
       'account_balance': FieldValue.increment(-commission),
-      // keep a rolling record of processed payments (cap this list in your backend if needed)
       'processed_payment_ids': FieldValue.arrayUnion([paymentId]),
       'last_payment_timestamp': FieldValue.serverTimestamp(),
       'last_payment_amount': commission,
     });
 
-    // 3) Update my_active_job status
-    tx.set(myActiveJobRef, {      
+    // --- 3) Update my_active_job status (force update, not upsert) ---
+    tx.update(myActiveJobRef, {
       'job_complete_date': getNiceDate(),
-      'order_status': 'payment_received',
+      'order_status': kStatusPaymentReceived, // <<< unified, expected value
       'process_driver_job_complete': true,
       'commission_deduction': commission,
       'updated_at': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    });
 
-    // 4) Copy job to passenger + driver histories (merge keeps any extra fields)
+    // --- 4) Copy job to passenger + driver histories ---
     final historyPayload = {
       ...jobData,
-      'order_status': 'payment_received',
+      'order_status': kStatusPaymentReceived,
       'commission_deduction': commission,
       'archived_at': FieldValue.serverTimestamp(),
     };
-
     tx.set(passengerRideHistoryRef, historyPayload, SetOptions(merge: true));
     tx.set(driverJobHistoryRef, historyPayload, SetOptions(merge: true));
 
-    // 5) Update passenger_account flags (per your flow)
+    // --- 5) Update passenger_account flags ---
     tx.set(passengerRef, {
       'job_still_active': false,
       'ddpcc': 0,
@@ -916,7 +922,7 @@ Future<void> handlePaymentReceived() async {
       'last_job_archived_at': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
-    // 6) (Optional) Create a transaction record for driver
+    // --- 6) Create a transaction record for driver ---
     final txRef = driverRef.collection('transaction_history').doc(paymentId);
     tx.set(txRef, {
       'transaction_amount': commission,
@@ -924,7 +930,28 @@ Future<void> handlePaymentReceived() async {
       'transaction_description': "Commission Deduction",
       'transaction_money_in': false,
     });
+
+    // --- 7) (Optional per your Step 43) remove job from active buckets ---
+    // tx.update(activeJobLiteRef, {
+    //   // however you store/identify the job string to remove:
+    //   // e.g., FieldValue.arrayRemove([ jobString ])
+    // });
+
+    // --- 8) (Optional per Step 43) delete my_active_job doc ---
+    // tx.delete(myActiveJobRef);
   });
+
+  // Post-transaction sanity check (helps you debug what UI is reading)
+  try {
+    final verify = await myActiveJobRef.get();
+    if (verify.exists) {
+      debugPrint('my_active_job.order_status = ${verify.data()?['order_status']}');
+    } else {
+      debugPrint('my_active_job has been deleted.');
+    }
+  } catch (e) {
+    debugPrint('Verification read failed: $e');
+  }
 }
 
 
@@ -936,47 +963,35 @@ Future<void> handlePaymentReceived() async {
     return _primaryActionButton(
       context: context,
       label: 'Payment Received',
-      onPressed: _enabled
-          ? () async {
-              // 1) Tell parent: payment completed so it won't re-enable bypass in dispose
-              widget.onPaymentFinished?.call();
 
-              // 2) Turn OFF bypass so geofencing starts enforcing right away
-              GeofencingController.instance.disableBypass();
 
-              // (Optional) Force policy flag if you use it:
-              // await FirebaseFirestore.instance
-              //   .collection(Gv.negara).doc(Gv.negeri)
-              //   .collection('driver_account').doc(Gv.loggedUser)
-              //   .update({'must_exit_block_zone': true});
+onPressed: _enabled ? () {
+  // Grab a stable navigator BEFORE any awaits/state changes.
+  final nav = Navigator.of(context, rootNavigator: true);
 
-              // 3) Navigate away to job list
-              // if (!mounted) return;
-              // Navigator.of(context).pushAndRemoveUntil(
-              //   MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
-              //   (route) => false,
-              // );
-              if (!mounted) return;
-              // Navigator.of(context).pushAndRemoveUntil(
-              //   MaterialPageRoute(builder: (_) => const ReceiptPage()),
-              //   (route) => false,
-              // );
-    
-Navigator.of(context).push(
-  MaterialPageRoute(
-    settings: const RouteSettings(name: 'Receipt'),
-    builder: (_) => const ReceiptPage(),
-  ),
-);
+  // Navigate immediately (don’t await, don’t check mounted here).
+  nav.push(
+    MaterialPageRoute(
+      settings: const RouteSettings(name: 'Receipt'),
+      builder: (_) => const ReceiptPage(),
+    ),
+  );
 
-              // 4) Fire-and-forget order_status write
-              try {
-                await handlePaymentReceived();
-              } catch (e, st) {
-                debugPrint('[DAJ] payment_received write failed: $e\n$st');
-              }
-            }
-          : null,
+  // Fire-and-forget the writes AFTER the push; don't touch context again.
+  () async {
+    try {
+      await updatePaymentReceivedStatus(); // status-only write
+      await handlePaymentReceived();       // heavy write
+    } catch (e, st) {
+      debugPrint('payment_received write failed: $e\n$st');
+    }
+  }();
+} : null,
+
+
+
+
+
     );
   }
 }
