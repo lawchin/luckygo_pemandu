@@ -458,7 +458,7 @@ class _TellOthersState extends State<TellOthers> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text('Would you like to tell others?', style: TextStyle(fontSize: 18)),
-                const SizedBox(height: 12),
+                // const SizedBox(height: 12),
 
                 if (_loading)
                   const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator()),
@@ -469,27 +469,7 @@ class _TellOthersState extends State<TellOthers> {
                     child: Text(_error!, style: TextStyle(color: Colors.red)),
                   ),
 
-                const SizedBox(height: 12),
 
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: [
-                    ElevatedButton(
-                      onPressed: !canSend ? null : () async {
-                        final msg = _buildSafetyMessage();
-                        // You can pass passengerPhone here if you want a targeted chat
-                        await _openWhatsAppWithMessage(msg /*, phone: passengerPhone*/);
-                      },
-                      child: Text('Yes'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('No'),
-                    ),
-                  ],
-                ),
 
                 const SizedBox(height: 12),
 
@@ -516,6 +496,32 @@ class _TellOthersState extends State<TellOthers> {
                   )
                 else
                   const Expanded(child: SizedBox()),
+
+
+                const SizedBox(height: 12),
+
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('No'),
+                    ),
+                    SizedBox(width:20),
+                    ElevatedButton(
+                      onPressed: !canSend ? null : () async {
+                        final msg = _buildSafetyMessage();
+                        // You can pass passengerPhone here if you want a targeted chat
+                        await _openWhatsAppWithMessage(msg /*, phone: passengerPhone*/);
+                      },
+                      child: Text('Yes'),
+                    ),
+                  ],
+                ),
+
+
               ],
             ),
           ),

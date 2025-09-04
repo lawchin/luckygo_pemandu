@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
+import 'package:luckygo_pemandu/end_drawer/deposit_page.dart';
+import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/bucket123b.dart';
@@ -23,6 +25,98 @@ class FilterJobsOneStream2 extends StatefulWidget {
 }
 
 class _FilterJobsOneStream2State extends State<FilterJobsOneStream2> {
+bool _negDialogShown = false;
+Widget _negativeBalanceWatcher() {
+  if (Gv.loggedUser.isEmpty || Gv.negara.isEmpty || Gv.negeri.isEmpty) {
+    return const SizedBox.shrink();
+  }
+
+  final driverRef = FirebaseFirestore.instance
+      .collection(Gv.negara).doc(Gv.negeri)
+      .collection('driver_account').doc(Gv.loggedUser);
+
+BuildContext? dialogContext;
+bool dialogShown = false;
+
+return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+  stream: driverRef.snapshots(),
+  builder: (ctx, snap) {
+
+    if (!snap.hasData || !snap.data!.exists) return const SizedBox.shrink();
+
+    final data = snap.data!.data();
+    final ab = ((data?['account_balance'] as num?) ?? 0).toDouble();
+
+    if (ab <= 0 && !dialogShown) {
+      dialogShown = true;
+      Future.microtask(() {
+        showDialog(
+          context: ctx,
+          barrierDismissible: false,
+          builder: (dCtx) {
+
+
+
+            dialogContext = dCtx;
+            return AlertDialog(
+              
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: Text(AppLocalizations.of(context)!.plsReload),
+              content: Text(
+                '${AppLocalizations.of(context)!.balanceIs} ${Gv.currency} ${ab.toStringAsFixed(2)}.\n${AppLocalizations.of(context)!.plsReload}',
+                textAlign: TextAlign.left,
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(dCtx).pop();
+                    dialogShown = false;
+                    Navigator.of(ctx).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LandingPage()),
+                      (route) => false,
+                    );
+                  },
+                  child: const Text('Back'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(dCtx).pop();
+                    dialogShown = false;
+                    Navigator.of(ctx).push(
+                      MaterialPageRoute(builder: (_) => const DepositPage()),
+                    );
+                  },
+                  child: const Text('Reload'),
+                ),
+              ],
+            );
+          },
+        );
+      });
+    }
+
+    if (ab > 0 && dialogShown && dialogContext != null) {
+      Future.microtask(() {
+        Navigator.of(dialogContext!).pop();
+        dialogShown = false;
+        dialogContext = null;
+      });
+    }
+
+    return const SizedBox.shrink(); // Or your actual content
+  },
+);
+
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -122,139 +216,149 @@ class _FilterJobsOneStream2State extends State<FilterJobsOneStream2> {
 
     return Scaffold(
 
-    // appBar: AppBar(
-    //   leading: GestureDetector(
-    //     onTap: () {
-    //       // Navigator.pushReplacement(
-    //       //   context,
-    //       //   MaterialPageRoute(builder: (_) => LandingPage()),
-    //       // );
-    //       Navigator.pop(context);
+    appBar: AppBar(
+      leading: GestureDetector(
+        onTap: () {
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(builder: (_) => LandingPage()),
+          // );
+          Navigator.pop(context);
 
-    //     },
+        },
 
-    //     child: const Padding(
-    //   padding: EdgeInsets.symmetric(horizontal: 16),
-    //   child: Text('🔙', style: TextStyle(fontSize: 22)),
-    //     ),
-    //   ),
-    //   title: const Text('Jobs'),
-    //   centerTitle: true,
-    //   elevation: 1,
-    // ),
-
-
-      appBar: AppBar(
-        title: const Text('Nearby Buckets (One Stream) · v2'),
-        actions: [
-          IconButton(
-            tooltip: 'Dump ≤7.5km list',
-            icon: const Icon(Icons.bug_report),
-            onPressed: () => _dumpBucket4Jobs(reason: 'manual dump via AppBar'),
-          ),
-          if (_loadingRoad)
-            const Padding(
-              padding: EdgeInsets.only(right: 12),
-              child: Center(
-                child: SizedBox(
-                  width: 16, height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            ),
-          IconButton(
-            tooltip: 'Force server refresh',
-            icon: const Icon(Icons.refresh),
-            onPressed: _pokeServer,
-          ),
-        ],
+        child: const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Text('🔙', style: TextStyle(fontSize: 22)),
+        ),
       ),
+      title: const Text('Jobs'),
+      centerTitle: true,
+      elevation: 1,
+    ),
+
+
+      // appBar: AppBar(
+      //   title: const Text('Nearby Buckets (One Stream) · v2'),
+      //   actions: [
+      //     IconButton(
+      //       tooltip: 'Dump ≤7.5km list',
+      //       icon: const Icon(Icons.bug_report),
+      //       onPressed: () => _dumpBucket4Jobs(reason: 'manual dump via AppBar'),
+      //     ),
+      //     if (_loadingRoad)
+      //       const Padding(
+      //         padding: EdgeInsets.only(right: 12),
+      //         child: Center(
+      //           child: SizedBox(
+      //             width: 16, height: 16,
+      //             child: CircularProgressIndicator(strokeWidth: 2),
+      //           ),
+      //         ),
+      //       ),
+      //     IconButton(
+      //       tooltip: 'Force server refresh',
+      //       icon: const Icon(Icons.refresh),
+      //       onPressed: _pokeServer,
+      //     ),
+      //   ],
+      // ),
       
       // FIX: no Expanded directly under body
-      body: ListView.separated(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        separatorBuilder: (_, __) => const Divider(height: 1),
-        itemCount: rows.length,
-        itemBuilder: (context, idx) {
-          final r = rows[idx];
-          final i = r.index!;
-          return InkWell(
-            onTap: (r.count ?? 0) <= 0
-                ? null
-                : () {
-                    final Widget dest = (i <= 3)
-                        ? Bucket123b(bucketIndex: i)
-                        : Bucket414(bucketIndex: i);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => dest),
-                    );
-                  },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.06),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(_bucketMeta(i).icon, size: 20, color: Colors.black87),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(children: [
-                          Text(
-                            r.name!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          _pill(r.pill!, r.pillColor!),
-                        ]),
-                        const SizedBox(height: 2),
-                        Text(
-                          r.range!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color
-                                ?.withOpacity(0.8),
-                          ),
+      body: Stack
+      (
+        children: [
+          ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemCount: rows.length,
+            itemBuilder: (context, idx) {
+              final r = rows[idx];
+              final i = r.index!;
+              return InkWell(
+                onTap: (r.count ?? 0) <= 0
+                    ? null
+                    : () {
+                        final Widget dest = (i <= 3)
+                            ? Bucket123b(bucketIndex: i)
+                            : Bucket414(bucketIndex: i);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => dest),
+                        );
+                      },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.06),
+                          shape: BoxShape.circle,
                         ),
-                      ],
-                    ),
+                        child: Icon(_bucketMeta(i).icon, size: 20, color: Colors.black87),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Text(
+                                r.name!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              _pill(r.pill!, r.pillColor!),
+                            ]),
+                            const SizedBox(height: 2),
+                            Text(
+                              r.range!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.color
+                                    ?.withOpacity(0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          '${r.count ?? 0}',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      '${r.count ?? 0}',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+                ),
+              );
+            },
+          ),
+_negativeBalanceWatcher(),
+
+        ],
+
+
+
       ),
     );
   }
@@ -764,3 +868,6 @@ _BucketMeta _bucketMeta(int index) {
     icon,
   );
 }
+
+
+

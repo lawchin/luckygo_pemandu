@@ -363,6 +363,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Login here!'**
   String get loginHere;
+
+  /// No description provided for @plsReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Please reload your account'**
+  String get plsReload;
+
+  /// No description provided for @balanceIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Your balance is'**
+  String get balanceIs;
+
+  /// No description provided for @viewActiveJob.
+  ///
+  /// In en, this message translates to:
+  /// **'View Active Job'**
+  String get viewActiveJob;
 }
 
 class _AppLocalizationsDelegate

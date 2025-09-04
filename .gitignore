@@ -43,3 +43,48 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+# Android extra
+android/.gradle/
+android/app/build/
+*.apk
+*.aab
+
+# iOS extra
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+
+# Native libs & intermediates
+*.so
+*.bin
+
+# Keystore/keys
+*.keystore
+*.jks
+
+
+
+
+# Flutter build folders
+build/
+.dart_tool/
+android/app/build/
+android/.gradle/
+ios/Pods/
+windows/flutter/ephemeral/
+
+# APKs and binaries
+*.apk
+*.aab
+*.so
+*.bin
+*.map.json
+*.symbols
+
+# IDE clutter
+.idea/
+.vscode/
+*.log

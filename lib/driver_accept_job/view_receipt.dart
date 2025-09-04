@@ -15,8 +15,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-class ReceiptPage extends StatelessWidget {
-  const ReceiptPage({Key? key}) : super(key: key);
+class ViewReceipt extends StatelessWidget {
+  const ViewReceipt({Key? key}) : super(key: key);
 
   // ------------------------ PDF helpers ------------------------
   pw.Widget _divider() => pw.Divider(height: 14, thickness: 0.6);
@@ -306,15 +306,14 @@ class ReceiptPage extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  height: 60,
+                  height:60,
                 ),
                 Center(
                   child: Text(
-                    'Receipt',
+                    'Price Details',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-
                 ItemDetails(),
               ],
             ),
@@ -337,177 +336,16 @@ class ReceiptPage extends StatelessWidget {
                   ),
                   const Divider(thickness: 2, color: Colors.grey, height: 20),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Rate Passenger
-                      OutlinedButton.icon(
-                        icon: const Icon(Icons.star_rate),
-                        label: const Text('Rate Passenger'),
-                        onPressed: () async {
-                          final messenger = ScaffoldMessenger.of(context);
-
-                          int selected = 0; // 0..5
-                          String? error;
-                          String commentText = '';
-
-                          final result = await showDialog<Map<String, dynamic>>(
-                            context: context,
-                            useRootNavigator: true,
-                            barrierDismissible: false,
-                            builder: (dialogCtx) {
-                              return StatefulBuilder(
-                                builder: (ctx, setState) {
-                                  return AlertDialog(
-                                    scrollable: true,
-                                    insetPadding: const EdgeInsets.symmetric(
-                                        horizontal: 24, vertical: 24),
-                                    titlePadding:
-                                        const EdgeInsets.fromLTRB(20, 12, 8, 0),
-                                    contentPadding:
-                                        const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                                    actionsPadding:
-                                        const EdgeInsets.only(bottom: 12),
-                                    title: Row(
-                                      children: [
-                                        const Expanded(child: Text('Rate Passenger')),
-                                        IconButton(
-                                          tooltip: 'Close',
-                                          color: Colors.red,
-                                          onPressed: () =>
-                                              Navigator.of(dialogCtx, rootNavigator: true).pop(),
-                                          icon: const Icon(Icons.close),
-                                        ),
-                                      ],
-                                    ),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text('How was your passenger?'),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: List.generate(5, (i) {
-                                            final idx = i + 1;
-                                            final isOn = idx <= selected;
-                                            return IconButton(
-                                              iconSize: 32,
-                                              splashRadius: 22,
-                                              icon: Icon(Icons.star,
-                                                  color: isOn ? Colors.amber : Colors.grey),
-                                              onPressed: () {
-                                                setState(() {
-                                                  selected = idx;
-                                                  error = null;
-                                                });
-                                              },
-                                            );
-                                          }),
-                                        ),
-                                        if (error != null) ...[
-                                          const SizedBox(height: 4),
-                                          Text(error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
-                                        ],
-                                        const SizedBox(height: 12),
-                                        TextField(
-                                          maxLines: 3,
-                                          onChanged: (v) => commentText = v,
-                                          decoration: const InputDecoration(
-                                            labelText: 'Comment (optional)',
-                                            hintText: 'Add any feedback for the passenger',
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                      ],
-                                    ),
-                                    actionsAlignment: MainAxisAlignment.center,
-                                    actions: [
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          if (selected == 0) {
-                                            setState(() => error = 'Please select a star rating.');
-                                            return;
-                                          }
-
-                                          await FirebaseFirestore.instance
-                                              .collection(Gv.negara)
-                                              .doc(Gv.negeri)
-                                              .collection('passenger_account')
-                                              .doc(Gv.passengerPhone)
-                                              .collection('rating_history')
-                                              .add({
-                                            'rate_by_driver': '${Gv.userName} ${Gv.loggedUser}',
-                                            'rating': selected,
-                                            'comment': commentText.trim(),
-                                            'timestamp': FieldValue.serverTimestamp(),
-                                          });
-
-                                          await FirebaseFirestore.instance
-                                              .collection(Gv.negara)
-                                              .doc(Gv.negeri)
-                                              .collection('passenger_account')
-                                              .doc(Gv.passengerPhone)
-                                              .collection('notification_page') 
-                                              .add({
-                                            'notification_date': FieldValue.serverTimestamp(),
-                                            'notification_description':
-                                                'You have received $selected⭐ rating from ${Gv.userName}\n\nKeep up the good work!',
-                                            'notification_seen': false,
-                                          });
-
-                                          Navigator.of(dialogCtx, rootNavigator: true).pop({
-                                            'rating': selected,
-                                            'comment': commentText.trim(),
-                                          });
-                                        },
-                                        child: const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                                          child: Text('Submit'),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          );
-
-                          if (result != null) {
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'You gave ${result['rating']} star(s). Comment: "${result['comment']}"',
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-
-                      const SizedBox(width: 10),
-
-                      // Share PDF
-                      OutlinedButton.icon(
-                        onPressed: () => _sharePdf(context),
-                        icon: const Icon(Icons.share),
-                        label: const Text('Share PDF'),
-                      ),
-                    ],
-                  ),
-
                   const SizedBox(height: 12),
 
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        passengerPhone.value = '';
-                        Gv.liteJobId = '';
-                        Navigator.of(context).popUntil((route) => route.settings.name == 'FJOS2');
+                        // passengerPhone.value = '';
+                        // Gv.liteJobId = '';
+                        // Navigator.of(context).popUntil((route) => route.settings.name == 'FJOS2');
+                        Navigator.of(context).pop();
                       },
                       style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
                       child: const Text('CLOSE'),

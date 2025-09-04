@@ -141,4 +141,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginHere => 'Login here!';
+
+  @override
+  String get plsReload => 'Please reload your account';
+
+  @override
+  String get balanceIs => 'Your balance is';
+
+  @override
+  String get viewActiveJob => 'View Active Job';
 }

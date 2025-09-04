@@ -324,20 +324,40 @@ String _statusEmoji(String raw) {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       title: Text(_fmtDate(it.when)),
-subtitle: Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    const SizedBox(height: 4),
-    Text('Distance: ${it.totalKm.toStringAsFixed(1)} km'),
-    Row(
-      children: [
-        Text(_statusEmoji(it.status), style: const TextStyle(fontSize: 14)),
-        const SizedBox(width: 4),
-        Text(_fmtStatus(it.status)),
-      ],
-    ),
-  ],
-),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text('Distance: ${it.totalKm.toStringAsFixed(1)} km'),
+                          Row(
+                            children: [
+                              Text(_statusEmoji(it.status), style: const TextStyle(fontSize: 14)),
+                              const SizedBox(width: 4),
+                              // Text(_fmtStatus(it.status)),
+                          if (![
+                            'passenger create job',
+                            'driver_accepted_job',
+                            'driver_coming',
+                            'driver_arrived',
+                            'passenger_otw',
+                            'start_destination',
+                            'job_completed',
+                            'payment_received',
+                          ].contains(it.raw['order_status'] as String? ?? '')) ...[
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                it.raw['order_status'] as String? ?? '',
+                                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, height:1),
+                              ),
+                            ),
+                          ]
+
+
+                            ],
+                          ),
+                        ],
+                      ),
 
 trailing: Column(
   mainAxisAlignment: MainAxisAlignment.center,

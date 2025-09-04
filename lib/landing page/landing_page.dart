@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:luckygo_pemandu/driver_location_service.dart';
 import 'package:luckygo_pemandu/end_drawer/deposit_history.dart';
 import 'package:luckygo_pemandu/end_drawer/deposit_page.dart';
 import 'package:luckygo_pemandu/end_drawer/job_history.dart';
@@ -331,6 +332,7 @@ class _LandingPageState extends State<LandingPage> {
 @override
 void initState() {
   super.initState();
+  DriverLocationService.instance.start();
   if (_started) return;
   _started = true;
 
@@ -355,6 +357,7 @@ void initState() {
 }
 
 Future<void> _logout() async {
+  await DriverLocationService.instance.stop();
   final confirm = await showDialog<bool>(
     context: context,
     builder: (_) => AlertDialog(
@@ -665,24 +668,23 @@ body: Stack(
             child: Column(
               children: [
                 const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.work_outline),
-                  label: const Text('View Active Jobs'),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.work_outline),
+                    label: Text(t.viewActiveJob),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: 'FJOS2'),
+                          builder: (_) => const FilterJobsOneStream2(),
+                        ),
+                      );
+                    },
                   ),
-                  onPressed: () {
-                    // Navigator.of(context).push(
-                    //   // MaterialPageRoute(builder: (_) => const BucketsLauncherPage()),
-                    //   MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
-                    // );
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        settings: const RouteSettings(name: 'FJOS2'),
-                        builder: (_) => const FilterJobsOneStream2(),
-                      ),
-                    );
-                  },
                 ),
               ],
             ),
@@ -769,6 +771,8 @@ StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
     Gv.form2Completed = (data['form2_completed'] as bool?) ?? false;
     Gv.registrationApproved = (data['registration_approved'] as bool?) ?? false;
 
+    final ab = (data['account_balance'] ?? 0).toDouble();
+
     // Case 1: Not completed → go to CompleteRegistrationPage
     if (!Gv.form2Completed && !Gv.registrationApproved) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -818,6 +822,9 @@ showDialog(
       });
     }
 
+
+
+
     return const SizedBox.shrink();
   },
 )
@@ -858,3 +865,6 @@ showDialog(
     );
   }
 }
+
+
+

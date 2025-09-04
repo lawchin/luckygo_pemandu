@@ -43,7 +43,10 @@
   "female" : "Perempuan",
   "register" : "Daftar",
   "member" : "Sudah menjadi ahli?",
-  "loginHere" : "Log masuk di sini!"
+  "loginHere" : "Log masuk di sini!",
+  "plsReload" : "Sila tambah nilai akaun anda",
+  "balanceIs" : "Baki anda ialah",
+  "viewActiveJob" : "Lihat Kerja Aktif"
 
 
 

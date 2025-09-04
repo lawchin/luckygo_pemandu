@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// Use your DRIVER app global
+import 'package:intl/intl.dart';
 import 'package:luckygo_pemandu/global.dart';
 
 class TransactionHistory extends StatelessWidget {
@@ -8,8 +8,23 @@ class TransactionHistory extends StatelessWidget {
 
   String formatTimestamp(Timestamp timestamp) {
     final d = timestamp.toDate().toLocal();
-    String two(int x) => x.toString().padLeft(2, '0');
-    return '${two(d.day)}/${two(d.month)}/${d.year} ${two(d.hour)}:${two(d.minute)}';
+    return DateFormat('dd/MM/yyyy HH:mm').format(d);
+  }
+
+  String getGroupLabel(DateTime d) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    final dateOnly = DateTime(d.year, d.month, d.day);
+
+    if (dateOnly == today) {
+      return "Today";
+    } else if (dateOnly == yesterday) {
+      return "Yesterday";
+    } else {
+      return "Other days";
+    }
   }
 
   void showReceiptDialog(BuildContext context, String imageUrl) {
@@ -74,7 +89,7 @@ class TransactionHistory extends StatelessWidget {
         .collection('driver_account')
         .doc(Gv.loggedUser)
         .collection('transaction_history')
-        .orderBy('transaction_date', descending: false) // keep your sort choice
+        .orderBy('transaction_date', descending: true) // latest at top
         .snapshots();
 
     return Scaffold(
@@ -92,37 +107,38 @@ class TransactionHistory extends StatelessWidget {
           }
 
           final docs = snapshot.data!.docs;
+          String? currentGroup;
+
           return ListView.builder(
             itemCount: docs.length,
             itemBuilder: (context, index) {
               final data = docs[index].data() as Map<String, dynamic>;
-
               final ts = data['transaction_date'];
-              final dateText = ts is Timestamp ? formatTimestamp(ts) : '—';
+              if (ts is! Timestamp) return const SizedBox.shrink();
+
+              final date = ts.toDate().toLocal();
+              final groupLabel = getGroupLabel(date);
 
               final desc = (data['transaction_description'] ?? '-') as String;
               final isIn = (data['transaction_money_in'] ?? false) as bool;
 
-              // amount could be stored as string or number; normalize to string
               final amountRaw = data['transaction_amount'];
               final amountStr = amountRaw is num
                   ? amountRaw.toStringAsFixed(2)
                   : (amountRaw?.toString() ?? '0.00');
 
-              return Card(
+              final card = Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: ListTile(
-                  title: Text('Date: $dateText'),
+                  title: Text('Date: ${formatTimestamp(ts)}'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Text('📝: $desc'),
-                          const Spacer(),
+                          Expanded(child: Text('📝: $desc')),
                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
                                 Gv.currency,
@@ -147,10 +163,30 @@ class TransactionHistory extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // If later you store a receipt URL per transaction, you can:
-                  // onTap: () => showReceiptDialog(context, data['receipt_image_url']),
                 ),
               );
+
+              // Add header if group changes
+              if (groupLabel != currentGroup) {
+                currentGroup = groupLabel;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      color: Colors.grey.shade300,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      child: Text(
+                        groupLabel,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    card,
+                  ],
+                );
+              } else {
+                return card;
+              }
             },
           );
         },

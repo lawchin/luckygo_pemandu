@@ -40,6 +40,7 @@ class Gv {
   static String kawasan = '';
   static String bahasa = '';
 
+  static String? currentSosId;  // <-- add this if not present
   // Current location
   static GeoPoint driverGp = const GeoPoint(0.0, 0.0);
   static double driverLat = 0.0;
@@ -171,3 +172,12 @@ class Gv {
 
 final GlobalKey<NavigatorState> rootNavKey = GlobalKey<NavigatorState>();
 BuildContext? get rootContext => rootNavKey.currentContext;
+
+String buildSosIdOnce() {
+  // If already set, reuse. Else create once.
+  return Gv.currentSosId ??= '${Gv.loggedUser}_${DateTime.now().millisecondsSinceEpoch}';
+}
+
+void clearSosId() {
+  Gv.currentSosId = null;
+}

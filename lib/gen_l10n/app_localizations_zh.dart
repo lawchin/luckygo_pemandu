@@ -140,4 +140,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get loginHere => '在这里登录！';
+
+  @override
+  String get plsReload => '请充值您的账户';
+
+  @override
+  String get balanceIs => '您的余额是';
+
+  @override
+  String get viewActiveJob => '查看当前任务';
 }

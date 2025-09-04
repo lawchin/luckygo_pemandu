@@ -141,4 +141,13 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get loginHere => 'Log masuk di sini!';
+
+  @override
+  String get plsReload => 'Sila tambah nilai akaun anda';
+
+  @override
+  String get balanceIs => 'Baki anda ialah';
+
+  @override
+  String get viewActiveJob => 'Lihat Kerja Aktif';
 }
