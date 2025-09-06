@@ -15,6 +15,7 @@ import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
 import 'package:luckygo_pemandu/landing page/disclosure_accepted_page.dart';
+import 'package:luckygo_pemandu/landing%20page/help_center.dart';
 import 'package:luckygo_pemandu/landing%20page/pending_review_page.dart';
 import 'package:luckygo_pemandu/landing%20page/presenter_page.dart';
 import 'package:luckygo_pemandu/loginRegister/complete_registration_page.dart';
@@ -488,7 +489,10 @@ Future<void> _logout() async {
               icon: const Icon(Icons.support_agent, color: Colors.white),
               tooltip: 'Driver Live Help Center',
               onPressed: () {
-                // TODO: Handle driver help center button press
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HelpCenter()),
+                );
               },
             ),
 

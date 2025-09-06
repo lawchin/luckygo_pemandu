@@ -149,4 +149,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get viewActiveJob => '查看当前任务';
+
+  @override
+  String get noJob => '该任务已不再可用';
 }

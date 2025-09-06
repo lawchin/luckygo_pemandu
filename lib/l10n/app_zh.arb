@@ -46,7 +46,8 @@
   "loginHere" : "在这里登录！",
   "plsReload" : "请充值您的账户",
   "balanceIs" : "您的余额是",
-  "viewActiveJob" : "查看当前任务"
+  "viewActiveJob" : "查看当前任务",
+  "noJob" : "该任务已不再可用"
 
 
 

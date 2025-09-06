@@ -150,4 +150,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewActiveJob => 'View Active Job';
+
+  @override
+  String get noJob => 'The job is no longer available';
 }

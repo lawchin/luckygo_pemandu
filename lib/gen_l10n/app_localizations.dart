@@ -381,6 +381,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Active Job'**
   String get viewActiveJob;
+
+  /// No description provided for @noJob.
+  ///
+  /// In en, this message translates to:
+  /// **'The job is no longer available'**
+  String get noJob;
 }
 
 class _AppLocalizationsDelegate

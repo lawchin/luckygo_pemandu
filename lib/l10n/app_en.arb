@@ -46,7 +46,8 @@
   "loginHere" : "Login here!",
   "plsReload" : "Please reload your account",
   "balanceIs" : "Your balance is",
-  "viewActiveJob" : "View Active Job"
+  "viewActiveJob" : "View Active Job",
+  "noJob" : "The job is no longer available"
 
 
 

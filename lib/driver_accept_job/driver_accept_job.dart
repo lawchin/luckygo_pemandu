@@ -6,6 +6,7 @@ import 'package:luckygo_pemandu/driver_accept_job/receipt_page.dart';
 import 'package:luckygo_pemandu/driver_accept_job/tell_others.dart';
 import 'package:luckygo_pemandu/driver_accept_job/view_receipt.dart';
 import 'package:luckygo_pemandu/driver_location_service.dart';
+import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/geo_fencing/geofencing_controller.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
@@ -103,6 +104,7 @@ class _DAJState extends State<DAJ> {
               child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                 stream: docRef.snapshots(),
                 builder: (context, snap) {
+                  final loc = AppLocalizations.of(context)!;
                   if (snap.connectionState == ConnectionState.waiting) {
                     _d('Stream waiting… phone=$phone');
                     return const Center(
@@ -122,25 +124,60 @@ class _DAJState extends State<DAJ> {
                     );
                   }
 
-                  if (!snap.hasData || !snap.data!.exists) {
-                    _d('No active job doc for $phone → schedule redirect to FilterJobsOneStream2');
-                    // schedule navigation after 5000ms
-                    Future.delayed(const Duration(milliseconds: 5000), () {
-                      if (context.mounted) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
-                        );
-                      }
-                    });
+                  // if (!snap.hasData || !snap.data!.exists) {
+                  //   _d('No active job doc for $phone → schedule redirect to FilterJobsOneStream2');
+                  //   Future.delayed(const Duration(milliseconds: 3000), () {
+                  //     if (context.mounted) {
+                  //       Navigator.of(context).pushReplacement(
+                  //         MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+                  //       );
+                  //     }
+                  //   });
 
-                    return _paddedCard(
-                      child: const Center(
-                        child: Text(
-                          "The job has been cancelled, either by the passenger or by Admin due to a technical issue.",
-                        ),
-                      ),
-                    );
-                  }
+                  //   return _paddedCard(
+                  //     child: Center(
+                  //       child: Text(
+                  //         loc.noJob,
+                  //       ),
+                  //     ),
+                  //   );
+                  // }
+
+
+if (!snap.hasData || !snap.data!.exists) {
+  _d('No active job doc for $phone → redirect in 3s');
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
+
+      Navigator.of(context, rootNavigator: true).pushReplacement(
+        MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+      );
+    });
+  });
+
+  return _paddedCard(
+    child: Center(
+      child: Column(
+        children: [
+          Text(loc.noJob),
+            const SizedBox(height: 16),
+            ElevatedButton(
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pushReplacement(
+              MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+              );
+            },
+            child: const Text('Close'),
+            ),
+        ],
+      ),
+    ),
+  );
+}
+
+
 
                   final data = snap.data!.data() ?? {};
                   // ✅ Fill your globals for map usage

@@ -150,4 +150,7 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get viewActiveJob => 'Lihat Kerja Aktif';
+
+  @override
+  String get noJob => 'Kerja tidak lagi tersedia';
 }
