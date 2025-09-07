@@ -97,7 +97,6 @@ class _RegisterPageState extends State<RegisterPage> {
       'account_balance': 0,
       'area': area,
       'country': country,
-      'created_at': DateTime.now().toIso8601String(),
       'com_fixed_or_percentage': false, // ← store commission type
       'commission_percentage': 10, // ← store commission percentage
       'commission_fixed': 1,
@@ -109,6 +108,9 @@ class _RegisterPageState extends State<RegisterPage> {
       'language': language,
       'must_exit_block_zone': false,
       'registration_approved': false,
+      'registration_date': FieldValue.serverTimestamp(),
+      'registration_remark': '-',
+
       'state': state,
     };
     try {

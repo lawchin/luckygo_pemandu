@@ -772,8 +772,10 @@ StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
     }
 
     final data = snapshot.data!.data()!;
-    Gv.form2Completed = (data['form2_completed'] as bool?) ?? false;
-    Gv.registrationApproved = (data['registration_approved'] as bool?) ?? false;
+    Gv.form2Completed =
+        (data['form2_completed'] as bool?) ?? false;
+    Gv.registrationApproved =
+        (data['registration_approved'] as bool?) ?? false;
 
     final ab = (data['account_balance'] ?? 0).toDouble();
 
@@ -782,56 +784,88 @@ StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CompleteRegistrationPage()),
+          MaterialPageRoute(
+            builder: (_) => const CompleteRegistrationPage(),
+          ),
         );
       });
       return const SizedBox.shrink();
     }
 
-    // Case 2: Completed but not approved → show dialog only once
+    // Case 2: Completed but not approved → show CARD in center
     if (Gv.form2Completed && !Gv.registrationApproved) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!context.mounted) return;
-        if (!_dialogShown) {
-          _dialogShown = true; // prevent multiple dialogs
-showDialog(
-  context: context,
-  barrierDismissible: false,
-  builder: (ctx) {
-    final loc = AppLocalizations.of(ctx)!;
-    return AlertDialog(
-      title: Text(loc.pendingReview),
-      content: Text(
-        loc.pendingReviewText,
-        textAlign: TextAlign.left, // classic dialogs usually left-align
-      ),
-      actions: [
+      final loc = AppLocalizations.of(context)!;
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Material(
+            elevation: 12,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              width: 320, // dialog-like width
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.pendingReview,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    loc.pendingReviewText,
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 6),
+                  Center(
+  child: (data['registration_remark'] != null &&
+          (data['registration_remark'] as String).isNotEmpty)
+      ? Text(
+          'Admin Remark',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        )
+      : const SizedBox.shrink(),
+),
 
-      ],
-    );
-  },
-);
-        }
-      });
-      return const SizedBox.shrink();
+                  const SizedBox(height: 6),
+                  Text(
+                    data['registration_remark'],
+                    textAlign: TextAlign.left,
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
-    // Case 3: Approved → close dialog if still open
+    // Case 3: Approved → ensure nothing is shown
     if (Gv.registrationApproved && _dialogShown) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (Navigator.canPop(context)) {
-          Navigator.of(context).pop();
-        }
         _dialogShown = false;
       });
     }
 
-
-
-
     return const SizedBox.shrink();
   },
-)
+),
 
 
 
