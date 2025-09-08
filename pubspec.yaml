@@ -30,6 +30,7 @@ dependencies:
   share_plus: ^11.1.0
   pdf: ^3.11.3
   printing: ^5.14.2
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -114,3 +115,11 @@ flutter:
     - assets/images/bsn_logo.png
     - assets/images/geofencing.png
     - assets/images/nearest_exit.png
+    - assets/images/luckygo_icon.png
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/luckygo_icon.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/images/luckygo_icon.png"

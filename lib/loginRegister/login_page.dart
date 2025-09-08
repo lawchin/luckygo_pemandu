@@ -381,6 +381,14 @@ return FirebaseAuth.instance.currentUser?.email ?? authEmail;
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Center(
+              child: Image.asset(
+                'assets/images/luckygo_logo.png',
+                height: 120,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 24),
             if (header != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),

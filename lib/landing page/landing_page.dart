@@ -8,7 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:luckygo_pemandu/driver_location_service.dart';
 import 'package:luckygo_pemandu/end_drawer/deposit_history.dart';
 import 'package:luckygo_pemandu/end_drawer/deposit_page.dart';
+import 'package:luckygo_pemandu/end_drawer/driver_rating_star.dart';
 import 'package:luckygo_pemandu/end_drawer/job_history.dart';
+import 'package:luckygo_pemandu/end_drawer/my_profile.dart';
 import 'package:luckygo_pemandu/end_drawer/transaction_history.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
@@ -574,58 +576,131 @@ Future<void> _logout() async {
         child: SafeArea(
           child: Column(
             children: [
-              UserAccountsDrawerHeader(
-                margin: EdgeInsets.zero,
-                currentAccountPicture: CircleAvatar(
-                  child: Text(
-                    (Gv.userName.isNotEmpty ? Gv.userName[0] : 'D').toUpperCase(),
-                  ),
+
+SizedBox(
+  height: 140,
+  child: DrawerHeader(
+    margin: EdgeInsets.zero,
+    padding: const EdgeInsets.all(0),
+    decoration: const BoxDecoration(color: Colors.blue),
+    child: Row(
+      children: [
+        const SizedBox(width: 16),
+        CircleAvatar(
+          radius: 40,
+          child: Text(
+            (Gv.userName.isNotEmpty ? Gv.userName[0] : 'D').toUpperCase(),
+            style: const TextStyle(fontSize: 20),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              
+                         
+              
+              
+
+
+const DriverRatingStars(),
+
+
+
+
+
+
+              Text(
+                Gv.userName,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.2,
                 ),
-                accountName: Text(Gv.userName),
-                accountEmail: Text(Gv.loggedUser.isNotEmpty
-                    ? Gv.loggedUser
-                    : 'Not signed in'),
               ),
-            ListTile(
-                leading: const Icon(Icons.account_balance_wallet, color: Colors.amber),
-              title: const Text('Deposit', style: TextStyle(color: Colors.black87)),
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => DepositPage()),
-                );
-              },
-            ),
-            ListTile(// deposit history
-                leading: const Icon(Icons.receipt_long, color: Colors.blueAccent),
-              title: const Text('Deposit History', style: TextStyle(color: Colors.black87)),
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => DepositHistory()),
-                );
-              },
-            ),
-            ListTile(// transaction history                
-                leading: const Icon(Icons.history, color: Colors.blueAccent),
-              title: const Text('Transaction History', style: TextStyle(color: Colors.black87)),
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => TransactionHistory()),
-                );
-              },
-            ),
-            ListTile(// transaction history                
-                leading: const Icon(Icons.history, color: Colors.blueAccent),
-              title: const Text('Job History', style: TextStyle(color: Colors.black87)),
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => JobHistory()),
-                );
-              },
-            ),
+              Text(
+                Gv.loggedUser.isNotEmpty ? Gv.loggedUser : 'Not signed in',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.white70,
+                  height: 1.2,
+                ),
+              ),
+              const SizedBox(height: 4),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => MyProfile()),
+                  );
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.white),
+                    const Text(
+                      'My Profile',
+                      style: TextStyle(fontSize: 12, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+
+
+
+
+
+            ],
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+
+
+              ListTile(
+                  leading: const Icon(Icons.account_balance_wallet, color: Colors.amber),
+                title: const Text('Deposit', style: TextStyle(color: Colors.black87)),
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => DepositPage()),
+                  );
+                },
+              ),
+              ListTile(// deposit history
+                  leading: const Icon(Icons.receipt_long, color: Colors.blueAccent),
+                title: const Text('Deposit History', style: TextStyle(color: Colors.black87)),
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => DepositHistory()),
+                  );
+                },
+              ),
+              ListTile(// transaction history                
+                  leading: const Icon(Icons.history, color: Colors.blueAccent),
+                title: const Text('Transaction History', style: TextStyle(color: Colors.black87)),
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => TransactionHistory()),
+                  );
+                },
+              ),
+              ListTile(// transaction history                
+                  leading: const Icon(Icons.history, color: Colors.blueAccent),
+                title: const Text('Job History', style: TextStyle(color: Colors.black87)),
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => JobHistory()),
+                  );
+                },
+              ),
 
               const Spacer(),
               Padding(
