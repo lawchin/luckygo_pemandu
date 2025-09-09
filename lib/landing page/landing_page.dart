@@ -11,6 +11,8 @@ import 'package:luckygo_pemandu/end_drawer/deposit_page.dart';
 import 'package:luckygo_pemandu/end_drawer/driver_rating_star.dart';
 import 'package:luckygo_pemandu/end_drawer/job_history.dart';
 import 'package:luckygo_pemandu/end_drawer/my_profile.dart';
+import 'package:luckygo_pemandu/end_drawer/qr_code.dart';
+import 'package:luckygo_pemandu/end_drawer/rating_history.dart';
 import 'package:luckygo_pemandu/end_drawer/transaction_history.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
@@ -605,8 +607,15 @@ SizedBox(
               
 
 
-const DriverRatingStars(),
-
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => RatingHistory()),
+                        );
+                      },
+                      child: const DriverRatingStars(),
+                    ),
 
 
 
@@ -702,6 +711,15 @@ const DriverRatingStars(),
                 },
               ),
 
+
+              // QR code
+              ListTile(
+                leading: const Icon(Icons.qr_code, color: Colors.blueAccent),
+                title: const Text('QR Code', ),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => QR()));
+                },
+              ),
               const Spacer(),
               Padding(
                 padding: const EdgeInsets.all(12.0),
