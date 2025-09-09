@@ -328,6 +328,7 @@ class View15 extends StatelessWidget {
                                   'x_driver_eta_to_source': Gv.roadEta,
                                   'x_driver_name': Gv.userName,
                                   'x_driver_geopoint': GeoPoint(Gv.driverLat, Gv.driverLng),
+                                  'x_driver_rating' : Gv.ratingCount,
                                   'x_driver_selfie': Gv.driverSelfie,
                                   'x_driver_vehicle_details' : Gv.driverVehicleDetails
                                 });

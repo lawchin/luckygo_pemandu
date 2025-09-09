@@ -11,6 +11,7 @@ import 'package:luckygo_pemandu/geo_fencing/geofencing_controller.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
 import 'package:luckygo_pemandu/landing%20page/landing_page.dart';
+import 'package:luckygo_pemandu/live_share_service/share_ride_button.dart';
 import 'package:luckygo_pemandu/view15/item_details.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -46,6 +47,45 @@ class _DAJState extends State<DAJ> {
 
   bool _paymentDone = false; // marks that "Payment Received" was pressed
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +101,7 @@ class _DAJState extends State<DAJ> {
     }
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -185,9 +226,43 @@ if (!snap.hasData || !snap.data!.exists) {
                       ? data['z_source'] as GeoPoint
                       : const GeoPoint(0.0, 0.0);
 
+                  Gv.destinationCount = (data['total_destination'] as int?) ?? 0;
+
                   Gv.driverGp = data['x_driver_geopoint'] is GeoPoint
                       ? data['x_driver_geopoint'] as GeoPoint
                       : const GeoPoint(0.0, 0.0);
+
+                  Gv.passengerGp = data['z_source'] is GeoPoint
+                      ? data['z_source'] as GeoPoint
+                      : const GeoPoint(0.0, 0.0);
+
+                  if (Gv.destinationCount == 1){
+                    Gv.destinationGp = data['z_d01'] is GeoPoint
+                        ? data['z_d01'] as GeoPoint
+                        : const GeoPoint(0.0, 0.0);
+                  } else if (Gv.destinationCount == 2){
+                    Gv.destinationGp = data['z_d02'] is GeoPoint
+                        ? data['z_d02'] as GeoPoint
+                        : const GeoPoint(0.0, 0.0);
+                  } else if (Gv.destinationCount == 3){
+                    Gv.destinationGp = data['z_d03'] is GeoPoint
+                        ? data['z_d03'] as GeoPoint
+                        : const GeoPoint(0.0, 0.0);
+                  } else if (Gv.destinationCount == 4){
+                    Gv.destinationGp = data['z_d04'] is GeoPoint
+                        ? data['z_d04'] as GeoPoint
+                        : const GeoPoint(0.0, 0.0);
+                  } else if (Gv.destinationCount == 5){
+                    Gv.destinationGp = data['z_d05'] is GeoPoint
+                        ? data['z_d05'] as GeoPoint
+                        : const GeoPoint(0.0, 0.0);
+                  } else if (Gv.destinationCount == 6){
+                    Gv.destinationGp = data['z_d06'] is GeoPoint
+                        ? data['z_d06'] as GeoPoint
+                        : const GeoPoint(0.0, 0.0);
+                  } else {
+                    Gv.destinationGp = const GeoPoint(0.0, 0.0);
+                  }
 
                   _d('Updated globals from Firestore: '
                       'driver=(${Gv.driverGp.latitude}, ${Gv.driverGp.longitude}), '
@@ -204,6 +279,8 @@ if (!snap.hasData || !snap.data!.exists) {
                   Gv.passengerName = (data['job_creator_name'] as String?) ?? pPhone;
                   Gv.passengerPhone = (data['job_created_by'] as String?) ?? '';
                   Gv.grandTotal = (data['total_price'] as num?)?.toDouble() ?? 0.0;
+                  Gv.driverSelfie = (data['y_driver_selfie'] as String?) ?? '';
+                  Gv.passengerSelfie = (data['y_passenger_selfie'] as String?) ?? '';
 
 
 
@@ -330,6 +407,24 @@ if (!snap.hasData || !snap.data!.exists) {
                                                 child: Column(
                                                   mainAxisSize: MainAxisSize.min,
                                                   children: [
+
+
+
+
+
+ShareRideButton(),
+
+
+
+
+
+
+
+
+
+
+
+                                                    
                                                     ElevatedButton(
                                                       onPressed: () {
                                                         Navigator.of(context).push(

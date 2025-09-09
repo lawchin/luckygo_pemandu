@@ -107,9 +107,10 @@ class _RegisterPageState extends State<RegisterPage> {
       'group_capability': 3,
       'language': language,
       'must_exit_block_zone': false,
+      'rating_count': 5.00,
       'registration_approved': false,
       'registration_date': FieldValue.serverTimestamp(),
-      'registration_remark': '-',
+      'registration_remark': '',
 
       'state': state,
     };

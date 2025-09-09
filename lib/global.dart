@@ -46,6 +46,8 @@ class Gv {
   static double driverLat = 0.0;
   static double driverLng = 0.0;
   static GeoPoint passengerGp = const GeoPoint(0.0, 0.0);
+  static GeoPoint destinationGp = const GeoPoint(0.0, 0.0);
+  static int destinationCount = 0;
 
   static int totalEta = 0;
   // Lite job core details
@@ -138,6 +140,7 @@ class Gv {
   static String liteJobData = '';
   // static Map<String, dynamic>? liteJobData;
   static String driverSelfie = '';
+  static String passengerSelfie = '';
   static String currency = '';
   // static String orderStatus = '';
   
@@ -165,6 +168,7 @@ class Gv {
   static bool commissionFixedOrPercentage = false;
   static int commissionPercentage = 0;
   static int commissionFixed = 0;
+  static double ratingCount = 0.00;
 
 
 }

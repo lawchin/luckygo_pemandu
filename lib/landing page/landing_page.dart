@@ -81,6 +81,7 @@ class _LandingPageState extends State<LandingPage> {
           .get();
 
       final accepted = (snap.data()?['disclosureAccepted'] as bool?) ?? false;
+      Gv.driverSelfie = (snap.data()?['reg_selfie_image_url'] as String?) ?? '';
       if (!accepted && mounted) {
         debugPrint("🚪 disclosureAccepted=false → navigating to DisclosureAcceptedPage");
         await Navigator.pushReplacement(
@@ -590,10 +591,16 @@ SizedBox(
         const SizedBox(width: 16),
         CircleAvatar(
           radius: 40,
-          child: Text(
+          backgroundColor: Colors.white,
+          backgroundImage: (Gv.driverSelfie != null && Gv.driverSelfie!.isNotEmpty)
+              ? NetworkImage(Gv.driverSelfie!)
+              : null,
+          child: (Gv.driverSelfie == null || Gv.driverSelfie!.isEmpty)
+              ? Text(
             (Gv.userName.isNotEmpty ? Gv.userName[0] : 'D').toUpperCase(),
-            style: const TextStyle(fontSize: 20),
-          ),
+            style: const TextStyle(fontSize: 20, color: Colors.black),
+          )
+              : null,
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -872,6 +879,9 @@ StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
 
     final ab = (data['account_balance'] ?? 0).toDouble();
 
+
+    Gv.ratingCount = (data['rating_count'] ?? 0).toDouble();
+
     // Case 1: Not completed → go to CompleteRegistrationPage
     if (!Gv.form2Completed && !Gv.registrationApproved) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -888,65 +898,81 @@ StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
     // Case 2: Completed but not approved → show CARD in center
     if (Gv.form2Completed && !Gv.registrationApproved) {
       final loc = AppLocalizations.of(context)!;
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Material(
-            elevation: 12,
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              width: 320, // dialog-like width
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    loc.pendingReview,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    loc.pendingReviewText,
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: 6),
-                  Center(
-  child: (data['registration_remark'] != null &&
-          (data['registration_remark'] as String).isNotEmpty)
-      ? Text(
-          'Admin Remark',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.grey,
-          ),
-        )
-      : const SizedBox.shrink(),
-),
+      return 
+      
+Stack(
+  children: [
+    // Fullscreen transparent layer that absorbs taps
+    Positioned.fill(
+      child: GestureDetector(
+        onTap: () {}, // absorb taps, do nothing
+        behavior: HitTestBehavior.opaque, // ensures it catches all taps
+        child: Container(
+          color: Colors.black.withOpacity(0.5), // optional dimming
+        ),
+      ),
+    ),
 
-                  const SizedBox(height: 6),
-                  Text(
-                    data['registration_remark'],
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(
-                      color: Colors.redAccent,
+    // Your dialog widget
+    Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Material(
+          elevation: 12,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            width: 320,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  loc.pendingReview,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  loc.pendingReviewText,
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(height: 6),
+                if (data['registration_remark'] != null &&
+                    (data['registration_remark'] as String).isNotEmpty)
+                  Center(
+                    child: Text(
+                      'Admin Remark',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                ],
-              ),
+                const SizedBox(height: 6),
+                Text(
+                  data['registration_remark'] ?? '',
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(
+                    color: Colors.redAccent,
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    ),
+  ],
+);
+    
     }
 
     // Case 3: Approved → ensure nothing is shown
