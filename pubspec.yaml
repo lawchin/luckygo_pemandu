@@ -120,8 +120,8 @@ flutter:
     - assets/images/luckygo_icon.png
 
 flutter_icons:
-  android: true
+  android: "ic_launcher"
   ios: true
-  image_path: "assets/images/luckygo_icon.png"
-  adaptive_icon_background: "#ffffff"
-  adaptive_icon_foreground: "assets/images/luckygo_icon.png"
+  image_path: assets/images/luckygo_icon.png
+  remove_alpha_ios: true
+  min_sdk_android: 21

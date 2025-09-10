@@ -14,6 +14,7 @@ import 'package:luckygo_pemandu/end_drawer/my_profile.dart';
 import 'package:luckygo_pemandu/end_drawer/qr_code.dart';
 import 'package:luckygo_pemandu/end_drawer/rating_history.dart';
 import 'package:luckygo_pemandu/end_drawer/transaction_history.dart';
+import 'package:luckygo_pemandu/end_drawer/whatsapp_group_page.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
@@ -334,6 +335,10 @@ class _LandingPageState extends State<LandingPage> {
 
     print("✅ Seeded ${jobsMap.length} jobs (≈70% within 1–50 km of driver)");
   }
+
+
+
+
 
 @override
 void initState() {
@@ -718,6 +723,16 @@ SizedBox(
                 },
               ),
 
+              ListTile(// transaction history                
+                  leading: const Icon(Icons.history, color: Colors.blueAccent),
+                title: const Text('Join Whatsapp', style: TextStyle(color: Colors.black87)),
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => WhatsappGroupPage()),
+                  );
+                },
+              ),
 
               // QR code
               ListTile(
@@ -881,6 +896,7 @@ StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
 
 
     Gv.ratingCount = (data['rating_count'] ?? 0).toDouble();
+    Gv.vehicleCapacity = (data['vehicle_capacity'] ?? 0).toInt();
 
     // Case 1: Not completed → go to CompleteRegistrationPage
     if (!Gv.form2Completed && !Gv.registrationApproved) {

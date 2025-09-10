@@ -169,6 +169,8 @@ class Gv {
   static int commissionPercentage = 0;
   static int commissionFixed = 0;
   static double ratingCount = 0.00;
+  // static bool jobAuto= false;
+  static int vehicleCapacity = 0;
 
 
 }

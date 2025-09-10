@@ -189,8 +189,21 @@ if (!snap.hasData || !snap.data!.exists) {
   _d('No active job doc for $phone → redirect in 3s');
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () async{
       if (!mounted) return;
+
+      await FirebaseFirestore.instance
+          .collection(Gv.negara)
+          .doc(Gv.negeri)
+          .collection('driver_account')
+          .doc(Gv.loggedUser)
+          .update({
+        'job_auto': false,
+        'driver_is_on_a_job': false,
+        'current_job_id': '',
+        'current_job_at': '',
+      });
+
 
       Navigator.of(context, rootNavigator: true).pushReplacement(
         MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
@@ -205,7 +218,20 @@ if (!snap.hasData || !snap.data!.exists) {
           Text(loc.noJob),
             const SizedBox(height: 16),
             ElevatedButton(
-            onPressed: () {
+            onPressed: () async{
+
+              await FirebaseFirestore.instance
+                  .collection(Gv.negara)
+                  .doc(Gv.negeri)
+                  .collection('driver_account')
+                  .doc(Gv.loggedUser)
+                  .update({
+                'job_auto': false,
+                'driver_is_on_a_job': false,
+                'current_job_id': '',
+                'current_job_at': '',
+              });
+
               Navigator.of(context, rootNavigator: true).pushReplacement(
               MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
               );
@@ -407,24 +433,7 @@ if (!snap.hasData || !snap.data!.exists) {
                                                 child: Column(
                                                   mainAxisSize: MainAxisSize.min,
                                                   children: [
-
-
-
-
-
-ShareRideButton(),
-
-
-
-
-
-
-
-
-
-
-
-                                                    
+                                                    ShareRideButton(),                                                    
                                                     ElevatedButton(
                                                       onPressed: () {
                                                         Navigator.of(context).push(
@@ -459,166 +468,175 @@ ShareRideButton(),
                                                       ),
 
                                                     ),
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (context) {
+                                                            String? selectedReason;
+                                                            TextEditingController optionalController = TextEditingController();
 
-ElevatedButton(
-  onPressed: () {
-    showDialog(
-      context: context,
-      builder: (context) {
-        String? selectedReason;
-        TextEditingController optionalController = TextEditingController();
+                                                            return StatefulBuilder(
+                                                              builder: (context, setState) {
+                                                                return Dialog(
+                                                                  insetPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 24),
+                                                                  child: Container(
+                                                                    width: double.infinity,
+                                                                    padding: const EdgeInsets.all(20),
+                                                                    child: SingleChildScrollView(
+                                                                      child: Column(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          const Text(
+                                                                            'End Trip',
+                                                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                                                          ),
+                                                                          const SizedBox(height: 16),
+                                                                          DropdownButtonFormField<String>(
+                                                                            decoration: const InputDecoration(
+                                                                              labelText: 'End Trip Reason',
+                                                                              border: OutlineInputBorder(),
+                                                                            ),
+                                                                            value: selectedReason,
+                                                                            isExpanded: true,
+                                                                            hint: const Text('Select reason'),
+                                                                            items: [
+                                                                              'Passenger not paying',
+                                                                              'Passenger request to end trip',
+                                                                              'Quarrel',
+                                                                              'Passenger family emergency',
+                                                                              'Driver family emergency',
+                                                                            ].map((reason) {
+                                                                              return DropdownMenuItem(
+                                                                                value: reason,
+                                                                                child: Text(reason),
+                                                                              );
+                                                                            }).toList(),
+                                                                            onChanged: (value) {
+                                                                              setState(() {
+                                                                                selectedReason = value;
+                                                                              });
+                                                                            },
+                                                                          ),
+                                                                          const SizedBox(height: 12),
+                                                                          TextField(
+                                                                            controller: optionalController,
+                                                                            decoration: const InputDecoration(
+                                                                              labelText: 'Additional Notes (Optional)',
+                                                                              border: OutlineInputBorder(),
+                                                                            ),
+                                                                            maxLines: 2,
+                                                                          ),
+                                                                          const SizedBox(height: 20),
+                                                                          Row(
+                                                                            mainAxisAlignment: MainAxisAlignment.end,
+                                                                            children: [
+                                                                              TextButton(
+                                                                                onPressed: () => Navigator.pop(context),
+                                                                                child: const Text('Close'),
+                                                                              ),
+                                                                              const SizedBox(width: 8),
+                                                    ElevatedButton(
+                                                      onPressed: () async {
+                                                        final finalReason = selectedReason ?? '';
+                                                        final extraNotes = optionalController.text;
 
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Dialog(
-              insetPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 24),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'End Trip',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: 'End Trip Reason',
-                          border: OutlineInputBorder(),
-                        ),
-                        value: selectedReason,
-                        isExpanded: true,
-                        hint: const Text('Select reason'),
-                        items: [
-                          'Passenger not paying',
-                          'Passenger request to end trip',
-                          'Quarrel',
-                          'Passenger family emergency',
-                          'Driver family emergency',
-                        ].map((reason) {
-                          return DropdownMenuItem(
-                            value: reason,
-                            child: Text(reason),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedReason = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: optionalController,
-                        decoration: const InputDecoration(
-                          labelText: 'Additional Notes (Optional)',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 2,
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Close'),
-                          ),
-                          const SizedBox(width: 8),
-ElevatedButton(
-  onPressed: () async {
-    final finalReason = selectedReason ?? '';
-    final extraNotes = optionalController.text;
+                                                        final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+                                                        final passengerActiveJobRef = firestore
+                                                          .collection(Gv.negara)
+                                                          .doc(Gv.negeri)
+                                                          .collection('passenger_account')
+                                                          .doc(Gv.passengerPhone)
+                                                          .collection('my_active_job')
+                                                          .doc(Gv.passengerPhone);
 
-    final passengerActiveJobRef = firestore
-      .collection(Gv.negara)
-      .doc(Gv.negeri)
-      .collection('passenger_account')
-      .doc(Gv.passengerPhone)
-      .collection('my_active_job')
-      .doc(Gv.passengerPhone);
+                                                        final formattedDate = getFormattedDate(); // e.g. '2025-09-04'
 
-    final formattedDate = getFormattedDate(); // e.g. '2025-09-04'
+                                                        final passengerHistoryRef = firestore
+                                                          .collection(Gv.negara)
+                                                          .doc(Gv.negeri)
+                                                          .collection('passenger_account')
+                                                          .doc(Gv.passengerPhone)
+                                                          .collection('ride_history')
+                                                          .doc('$formattedDate(${Gv.passengerPhone})');
 
-    final passengerHistoryRef = firestore
-      .collection(Gv.negara)
-      .doc(Gv.negeri)
-      .collection('passenger_account')
-      .doc(Gv.passengerPhone)
-      .collection('ride_history')
-      .doc('$formattedDate(${Gv.passengerPhone})');
+                                                        final driverHistoryRef = firestore
+                                                          .collection(Gv.negara)
+                                                          .doc(Gv.negeri)
+                                                          .collection('driver_account')
+                                                          .doc(Gv.loggedUser)
+                                                          .collection('job_history')
+                                                          .doc('$formattedDate(${Gv.loggedUser})');
 
-    final driverHistoryRef = firestore
-      .collection(Gv.negara)
-      .doc(Gv.negeri)
-      .collection('driver_account')
-      .doc(Gv.loggedUser)
-      .collection('job_history')
-      .doc('$formattedDate(${Gv.loggedUser})');
+                                                        final driverAccRef = firestore
+                                                          .collection(Gv.negara)
+                                                          .doc(Gv.negeri)
+                                                          .collection('driver_account')
+                                                          .doc(Gv.loggedUser);
 
-    try {
-      // Step 1: Update order status
-      await passengerActiveJobRef.update({
-        'order_status': '$finalReason\n$extraNotes',
-      });
+                                                        try {
+                                                          // Step 1: Update order status
+                                                          await passengerActiveJobRef.update({
+                                                            'order_status': '$finalReason\n$extraNotes',
+                                                          });
 
-      //HELP ME UPDATE WHERE ON PASSENGER ride_history WE ONLY UPDATE THE ORDER STATUS USING $finalReason only
-      // in driver job_history then we show $finalReason\n$extraNotes
+                                                          //HELP ME UPDATE WHERE ON PASSENGER ride_history WE ONLY UPDATE THE ORDER STATUS USING $finalReason only
+                                                          // in driver job_history then we show $finalReason\n$extraNotes
 
-      // Step 2: Read full active job data
-      final activeJobSnapshot = await passengerActiveJobRef.get();
-      final jobData = activeJobSnapshot.data();
+                                                          // Step 2: Read full active job data
+                                                          final activeJobSnapshot = await passengerActiveJobRef.get();
+                                                          final jobData = activeJobSnapshot.data();
 
-      if (jobData != null) {
-        // Step 3: Write to passenger ride history
-        await passengerHistoryRef.set(jobData);
+                                                          if (jobData != null) {
+                                                            // Step 3: Write to passenger ride history
+                                                            await passengerHistoryRef.set(jobData);
 
-        // Step 4: Write to driver job history
-        await driverHistoryRef.set(jobData);
-      }
+                                                            // Step 4: Write to driver job history
+                                                            await driverHistoryRef.set(jobData);
 
-      // Step 5: Delete active job
-      await passengerActiveJobRef.delete();
+                                                            await driverAccRef.update({
+                                                              'driver_is_on_a_job': false,
+                                                              'current_job_id': ''  ,
+                                                              'current_job_at': '',
+                                                            });
+                                                          }
 
-      Navigator.pop(context);
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LandingPage()),
-        (route) => false,
-      );
-    } catch (e) {
-      // Handle error (e.g. show a snackbar or log)
-      print('Error ending trip: $e');
-    }
-  },
-  child: const Text('Submit'),
-),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  },
-  child: SizedBox(
-    width: 140,
-    child: Center(
-      child: const Text('End Trip'),
-    ),
-  ),
-),
+                                                          // Step 5: Delete active job
+                                                          await passengerActiveJobRef.delete();
 
-
+                                                          Navigator.pop(context);
+                                                          Navigator.of(context).pushAndRemoveUntil(
+                                                            MaterialPageRoute(builder: (_) => const LandingPage()),
+                                                            (route) => false,
+                                                          );
+                                                        } catch (e) {
+                                                          // Handle error (e.g. show a snackbar or log)
+                                                          print('Error ending trip: $e');
+                                                        }
+                                                      },
+                                                      child: const Text('Submit'),
+                                                    ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                      child: SizedBox(
+                                                        width: 140,
+                                                        child: Center(
+                                                          child: const Text('End Trip'),
+                                                        ),
+                                                      ),
+                                                    ),
                                                     ElevatedButton(// blank
                                                       onPressed: () {}, 
                                                       child: SizedBox(

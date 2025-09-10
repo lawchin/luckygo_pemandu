@@ -101,10 +101,12 @@ class _RegisterPageState extends State<RegisterPage> {
       'commission_percentage': 10, // ← store commission percentage
       'commission_fixed': 1,
       'disclosureAccepted': false,
+      'driver_is_on_a_job': false,
       'email': email,
       'fullname': name,
       'gender': gender, // ← store gender
       'group_capability': 3,
+      'job_auto': false,
       'language': language,
       'must_exit_block_zone': false,
       'rating_count': 5.00,

@@ -69,7 +69,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="luckygo_pemandu">
+        android:label="Driver">
 
         <!-- Google Maps API Key -->
         <meta-data
