@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:luckygo_pemandu/driver_accept_job/driver_sos_location_tracker.dart';
 import 'package:luckygo_pemandu/driver_accept_job/job_status_updater.dart';
 import 'package:luckygo_pemandu/driver_accept_job/receipt_page.dart';
+import 'package:luckygo_pemandu/driver_accept_job/show_emergency_call_dialog.dart';
 import 'package:luckygo_pemandu/driver_accept_job/tell_others.dart';
 import 'package:luckygo_pemandu/driver_accept_job/view_receipt.dart';
 import 'package:luckygo_pemandu/driver_location_service.dart';
@@ -353,57 +354,82 @@ if (!snap.hasData || !snap.data!.exists) {
                                     IconButton(// SOS
                                       icon: const Icon(Icons.sos, color: Colors.red, size: 32),
                                       onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          barrierDismissible: false,
-                                          builder: (ctx2) {
-                                            return AlertDialog(
-                                              title: const Text('Are you sure you want to proceed with this SOS emergency?'),
-                                              content: const Text(
-                                                'This method will alert Admin to call both driver & passenger for further details',
-                                                style: TextStyle(color: Colors.redAccent),
+
+
+                                      showEmergencyCallDialog(
+                                        context,
+                                        eContact1: Gv.emergencyContact1,
+                                        eContact2: Gv.emergencyContact2,
+                                        hotline: '999',
+                                        onSosTriggered: () {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Admin has been alerted. If this is during office hours, our team will respond promptly. For after-hours or late-night emergencies, response times may vary, but your safety is our priority.'
                                               ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.of(ctx2).pop(),
-                                                  child: const Text('No'),
-                                                ),
-                                                ElevatedButton(
-                                                  onPressed: () async {
-                                                    Navigator.of(ctx2).pop();
-
-                                                    // 1) Build & keep a stable ID for this SOS session
-                                                    final String sosId = Gv.currentSosId ??= '${getFormattedDate()}(${Gv.loggedUser})';
-
-                                                    // 2) Start live tracking (similar to passenger version but for driver)
-                                                    await DriverSosLocationTracker.instance.start(sosId: sosId);
+                                              backgroundColor: Colors.red,
+                                              duration: Duration(seconds: 10),
+                                            ),
+                                          );
+                                        },
+                                      );
 
 
-                                                    // 3) Add driver-specific SOS details into the same doc
-                                                    final doc = FirebaseFirestore.instance
-                                                        .collection(Gv.negara)
-                                                        .doc(Gv.negeri)
-                                                        .collection('help_center')
-                                                        .doc('SOS')
-                                                        .collection('sos_data')
-                                                        .doc(sosId);
+                                        // showDialog(
+                                        //   context: context,
+                                        //   barrierDismissible: false,
+                                        //   builder: (ctx2) {
+                                        //     return AlertDialog(
+                                        //       title: const Text('Are you sure you want to proceed with this SOS emergency?'),
+                                        //       content: const Text(
+                                        //         'This method will alert Admin to call both driver & passenger for further details',
+                                        //         style: TextStyle(color: Colors.redAccent),
+                                        //       ),
+                                        //       actions: [
+                                        //         TextButton(
+                                        //           onPressed: () => Navigator.of(ctx2).pop(),
+                                        //           child: const Text('No'),
+                                        //         ),
+                                        //         ElevatedButton(
+                                        //           onPressed: () async {
+                                        //             Navigator.of(ctx2).pop();
 
-                                                    await doc.set({
-                                                      'driverName': Gv.userName,
-                                                      'driverPhone': Gv.loggedUser,
-                                                      'trigger_by': 'driver',
-                                                      'trigger_time': FieldValue.serverTimestamp(),
-                                                      'status': 'active',
-                                                      'driver_vehicle_details': Gv.driverVehicleDetails,
-                                                    }, SetOptions(merge: true));
-                                                  },
-                                                  child: const Text('Yes'),
-                                                ),
+                                        //             // 1) Build & keep a stable ID for this SOS session
+                                        //             final String sosId = Gv.currentSosId ??= '${getFormattedDate()}(${Gv.loggedUser})';
 
-                                              ],
-                                            );
-                                          },
-                                        );
+                                        //             // 2) Start live tracking (similar to passenger version but for driver)
+                                        //             await DriverSosLocationTracker.instance.start(sosId: sosId);
+
+
+                                        //             // 3) Add driver-specific SOS details into the same doc
+                                        //             final doc = FirebaseFirestore.instance
+                                        //                 .collection(Gv.negara)
+                                        //                 .doc(Gv.negeri)
+                                        //                 .collection('help_center')
+                                        //                 .doc('SOS')
+                                        //                 .collection('sos_data')
+                                        //                 .doc(sosId);
+
+                                        //             await doc.set({
+                                        //               'driverName': Gv.userName,
+                                        //               'driverPhone': Gv.loggedUser,
+                                        //               'trigger_by': 'driver',
+                                        //               'trigger_time': FieldValue.serverTimestamp(),
+                                        //               'status': 'active',
+                                        //               'driver_vehicle_details': Gv.driverVehicleDetails,
+                                        //             }, SetOptions(merge: true));
+                                        //           },
+                                        //           child: const Text('Yes'),
+                                        //         ),
+
+                                        //       ],
+                                        //     );
+                                        //   },
+                                        // );
+                                      
+                                      
+                                      
+                                      
                                       },
 
 

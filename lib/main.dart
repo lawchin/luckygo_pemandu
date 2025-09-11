@@ -1,3 +1,4 @@
+import 'dart:io'; // ✅ for Platform check (Photo Picker)
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,15 +11,27 @@ import 'loginRegister/session_manager.dart';
 
 // localization
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
-// If you have a mapper from language name -> Locale, import it and use it.
-// import 'package:luckygo_pemandu/translate_bahasa.dart';
 
-// 👇 added for global navigator + app-wide listener
+// 👇 global navigator + app-wide listener
 import 'app_wide_stream_listener.dart';
+
+// ✅ force Android system Photo Picker (no READ_MEDIA_* permission needed)
+import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _enableAndroidPhotoPicker(); // <- important for Play policy compliance
   runApp(const MyApp());
+}
+
+void _enableAndroidPhotoPicker() {
+  if (!Platform.isAndroid) return;
+  final impl = ImagePickerPlatform.instance;
+  if (impl is ImagePickerAndroid) {
+    impl.useAndroidPhotoPicker = true; // ✅ ensures system picker is used
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -35,7 +48,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   Locale? _locale;
   bool _ready = false;
   Object? _error;
@@ -53,16 +65,15 @@ class _MyAppState extends State<MyApp> {
       Gv.kawasan = (prefs.getString('area')     ?? '').trim();
       Gv.bahasa  = (prefs.getString('language') ?? '').trim();
 
-      if (Gv.negara == 'Malaysia'){
+      if (Gv.negara == 'Malaysia') {
         Gv.currency = 'MYR';
-      } else if (Gv.negara == 'Timor-Leste'){
+      } else if (Gv.negara == 'Timor-Leste') {
         Gv.currency = 'USD';
-      } else if (Gv.negara == 'Indonesia'){
+      } else if (Gv.negara == 'Indonesia') {
         Gv.currency = 'IDR';
       } else {
         Gv.currency = 'RM';
       }
-
     } catch (e) {
       debugPrint('fetchLocalData error: $e');
       // do not rethrow; allow app to continue with defaults
@@ -82,20 +93,33 @@ class _MyAppState extends State<MyApp> {
       if (docSnapshot.exists) {
         final data = docSnapshot.data();
         Gv.groupCapability = data?['group_capability'] as int? ?? 0;
-        final brand = data?['reg_vehicle_brand'] ?? '';
-        final color = data?['reg_vehicle_color'] ?? '';
-        final model = data?['reg_vehicle_model'] ?? '';
-        final plate = data?['reg_vehicle_plate'] ?? '';
-        Gv.driverVehicleDetails = '$brand $model $color $plate';
-        Gv.commissionFixedOrPercentage = data?['commission_fixed_or_percentage'] ?? false;
-        Gv.commissionPercentage = data?['commission_percentage'] ?? 0;
-        Gv.commissionFixed = data?['commission_fixed'] ?? 0;
 
+        final brand = (data?['reg_vehicle_brand'] ?? '').toString();
+        final color = (data?['reg_vehicle_color'] ?? '').toString();
+        final model = (data?['reg_vehicle_model'] ?? '').toString();
+        final plate = (data?['reg_vehicle_plate'] ?? '').toString();
+        Gv.driverVehicleDetails = '$brand $model $color $plate'.trim();
 
-        print('Document does not exist.');
+        // commission flags/values (keep your existing field names)
+        Gv.commissionFixedOrPercentage =
+            (data?['commission_fixed_or_percentage'] ??
+             data?['com_fixed_or_percentage'] ??
+             false) as bool;
+
+        Gv.commissionPercentage =
+            (data?['commission_percentage'] ?? 0) is int
+                ? (data?['commission_percentage'] ?? 0) as int
+                : ((data?['commission_percentage'] ?? 0) as num).toInt();
+
+        Gv.commissionFixed =
+            (data?['commission_fixed'] ?? 0) is int
+                ? (data?['commission_fixed'] ?? 0) as int
+                : ((data?['commission_fixed'] ?? 0) as num).toInt();
+      } else {
+        debugPrint('Driver document does not exist.');
       }
     } catch (e) {
-      print('Error fetching user data: $e');
+      debugPrint('Error fetching user data: $e');
     }
   }
 
@@ -205,7 +229,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
 
-      // 👇 added: global navigator key for showing dialogs anywhere
+      // 👇 global navigator key for showing dialogs anywhere
       navigatorKey: rootNavKey,
 
       // After bootstrap is done, hand off to AuthGate wrapped by app-wide listener
@@ -231,6 +255,9 @@ class _MyAppState extends State<MyApp> {
 // import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 // // If you have a mapper from language name -> Locale, import it and use it.
 // // import 'package:luckygo_pemandu/translate_bahasa.dart';
+
+// // 👇 added for global navigator + app-wide listener
+// import 'app_wide_stream_listener.dart';
 
 // void main() async {
 //   WidgetsFlutterBinding.ensureInitialized();
@@ -285,32 +312,35 @@ class _MyAppState extends State<MyApp> {
 //     }
 //   }
 
-// Future<void> fetchAndUpdateGroupCapability() async {
-//   try {
-//     final docRef = FirebaseFirestore.instance
-//         .collection(Gv.negara)
-//         .doc(Gv.negeri)
-//         .collection('driver_account')
-//         .doc(Gv.loggedUser);
+//   Future<void> fetchAndUpdateGroupCapability() async {
+//     try {
+//       final docRef = FirebaseFirestore.instance
+//           .collection(Gv.negara)
+//           .doc(Gv.negeri)
+//           .collection('driver_account')
+//           .doc(Gv.loggedUser);
 
-//     final docSnapshot = await docRef.get();
+//       final docSnapshot = await docRef.get();
 
-//     if (docSnapshot.exists) {
-//       final data = docSnapshot.data();
-//       Gv.groupCapability = data?['group_capability'] as int? ?? 0;
-//       final brand = data?['reg_vehicle_brand'] ?? '';
-//       final color = data?['reg_vehicle_color'] ?? '';
-//       final model = data?['reg_vehicle_model'] ?? '';
-//       final plate = data?['reg_vehicle_plate'] ?? '';
-//       Gv.driverVehicleDetails = '$brand $model $color $plate';
+//       if (docSnapshot.exists) {
+//         final data = docSnapshot.data();
+//         Gv.groupCapability = data?['group_capability'] as int? ?? 0;
+//         final brand = data?['reg_vehicle_brand'] ?? '';
+//         final color = data?['reg_vehicle_color'] ?? '';
+//         final model = data?['reg_vehicle_model'] ?? '';
+//         final plate = data?['reg_vehicle_plate'] ?? '';
+//         Gv.driverVehicleDetails = '$brand $model $color $plate';
+//         Gv.commissionFixedOrPercentage = data?['commission_fixed_or_percentage'] ?? false;
+//         Gv.commissionPercentage = data?['commission_percentage'] ?? 0;
+//         Gv.commissionFixed = data?['commission_fixed'] ?? 0;
 
-//       print('Document does not exist.');
+
+//         print('Document does not exist.');
+//       }
+//     } catch (e) {
+//       print('Error fetching user data: $e');
 //     }
-//   } catch (e) {
-//     print('Error fetching user data: $e');
 //   }
-// }
-
 
 //   Future<void> _bootstrap() async {
 //     try {
@@ -342,15 +372,11 @@ class _MyAppState extends State<MyApp> {
 //     }
 //   }
 
-
 //   @override
 //   void initState() {
 //     super.initState();
 //     _bootstrap(); // do all init work here, then show AuthGate()
 //   }
-
-
-
 
 //   @override
 //   Widget build(BuildContext context) {
@@ -422,8 +448,13 @@ class _MyAppState extends State<MyApp> {
 //         useMaterial3: true,
 //       ),
 
-//       // After bootstrap is done, hand off to AuthGate
-//       home: const AuthGate(),
+//       // 👇 added: global navigator key for showing dialogs anywhere
+//       navigatorKey: rootNavKey,
+
+//       // After bootstrap is done, hand off to AuthGate wrapped by app-wide listener
+//       home: AppWideStreamListener(
+//         child: const AuthGate(),
+//       ),
 //     );
 //   }
 // }

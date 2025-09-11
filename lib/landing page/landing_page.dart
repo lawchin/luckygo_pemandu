@@ -83,6 +83,8 @@ class _LandingPageState extends State<LandingPage> {
 
       final accepted = (snap.data()?['disclosureAccepted'] as bool?) ?? false;
       Gv.driverSelfie = (snap.data()?['reg_selfie_image_url'] as String?) ?? '';
+      Gv.emergencyContact1 = (snap.data()?['emergency_contact1'] as String?) ?? '';
+      Gv.emergencyContact2 = (snap.data()?['emergency_contact2'] as String?) ?? '';
       if (!accepted && mounted) {
         debugPrint("🚪 disclosureAccepted=false → navigating to DisclosureAcceptedPage");
         await Navigator.pushReplacement(
@@ -723,7 +725,7 @@ SizedBox(
                 },
               ),
 
-              ListTile(// transaction history                
+              ListTile(// whatsapp group                
                   leading: const Icon(Icons.history, color: Colors.blueAccent),
                 title: const Text('Join Whatsapp', style: TextStyle(color: Colors.black87)),
                 onTap: () async {

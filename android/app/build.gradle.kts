@@ -33,8 +33,8 @@ android {
         applicationId = "com.bbkk.luckygo_pemandu"
         minSdk = 23
         targetSdk = 35
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = 4
+        versionName = "1.0.3"
     }
 
     signingConfigs {

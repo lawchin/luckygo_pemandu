@@ -172,6 +172,8 @@ class Gv {
   // static bool jobAuto= false;
   static int vehicleCapacity = 0;
 
+  static String emergencyContact1 = '';
+  static String emergencyContact2 = '';
 
 }
 

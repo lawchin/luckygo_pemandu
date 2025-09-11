@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.bbkk.luckygo_pemandu">
 
     <!-- ===================== Permissions ===================== -->
-    <!-- Network / Internet (required for Flutter, Firebase, Jitsi) -->
+    <!-- Network / Internet (required for Flutter, Firebase, etc.) -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-    <!-- Location (your existing map features) -->
+    <!-- Location (maps/features you already use) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
-    <!-- Camera & Mic (Jitsi: mic for voice; camera is optional) -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Camera & Mic (for capture / calls) -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
-    <!-- Audio routing & Bluetooth for headsets (Jitsi calls) -->
+    <!-- Audio routing & Bluetooth for headsets (calls) -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <!-- Legacy Bluetooth (pre-Android 12) -->
     <uses-permission android:name="android.permission.BLUETOOTH"/>
@@ -25,15 +26,13 @@
     <!-- Keep CPU awake during an ongoing call if needed -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
-    <!-- Android 13+ media permission (you had this already) -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <!-- ===== Play policy compliance: REMOVE broad media read permissions ===== -->
+    <!-- Ensure these are NOT present in the merged manifest -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
 
-    <!-- Legacy external storage read (limit to API <= 32) -->
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"/>
-
-    <!-- Declare that camera/microphone hardware are optional, not required to install -->
+    <!-- Declare that camera/microphone hardware are optional (installable on devices without them) -->
     <uses-feature android:name="android.hardware.camera.any" android:required="false"/>
     <uses-feature android:name="android.hardware.microphone" android:required="false"/>
 
