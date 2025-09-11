@@ -10,7 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
-import 'package:luckygo_pemandu/landing%20page/pending_review_page.dart';
+import 'package:luckygo_pemandu/landing%20page/landing_page.dart';
 
 // Permissions
 import 'package:permission_handler/permission_handler.dart';
@@ -449,7 +449,7 @@ class _CompleteRegistrationPageState extends State<CompleteRegistrationPage> {
 
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const PandingReview()),
+        MaterialPageRoute(builder: (_) => const LandingPage()),
         (route) => false,
       );
     } catch (e) {

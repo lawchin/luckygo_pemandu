@@ -21,9 +21,9 @@ import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
 import 'package:luckygo_pemandu/landing page/disclosure_accepted_page.dart';
 import 'package:luckygo_pemandu/landing%20page/help_center.dart';
-import 'package:luckygo_pemandu/landing%20page/pending_review_page.dart';
 import 'package:luckygo_pemandu/landing%20page/presenter_page.dart';
 import 'package:luckygo_pemandu/loginRegister/complete_registration_page.dart';
+import 'package:luckygo_pemandu/loginRegister/complete_registration_page2.dart';
 import 'package:luckygo_pemandu/loginRegister/login_page.dart';
 import 'package:luckygo_pemandu/main.dart';
 import 'package:luckygo_pemandu/notification_page.dart';
@@ -981,6 +981,45 @@ Stack(
                     color: Colors.redAccent,
                   ),
                 ),
+                
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                                    if (data['registration_remark'] != null &&
+                    (data['registration_remark'] as String).isNotEmpty)
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const CompleteRegistrationPage2(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.blueAccent,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        children: [
+                          Text('Complete your', style: const TextStyle(height: 1, fontSize: 10, color: Colors.white)),
+                          Text('registration here', style: const TextStyle(height: 1, fontSize: 10, color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  )
+                  ],
+                ),
+
+
+
+
+
+
+
+
                 const SizedBox(height: 20),
               ],
             ),

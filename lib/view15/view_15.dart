@@ -108,42 +108,26 @@ class View15 extends StatelessWidget {
 
 
 
-                              onPressed: () async {
-                                countdownKey.currentState?.cancel();
+onPressed: () async {
+  countdownKey.currentState?.cancel();
 
+  await FirebaseFirestore.instance
+      .collection(Gv.negara)
+      .doc(Gv.negeri)
+      .collection('active_job')
+      .doc('active_job_lite')
+      .set({Gv.liteJobId: Gv.liteJobData}, SetOptions(merge: true));
 
-                                            await FirebaseFirestore.instance
-                                                .collection(Gv.negara)
-                                                .doc(Gv.negeri)
-                                                .collection('active_job')
-                                                .doc('active_job_lite')
-                                                .set({Gv.liteJobId: Gv.liteJobData}, SetOptions(merge: true));
-                                            // if (context.mounted) Navigator.of(context).pop();
-
-
-
-                                // await FirebaseFirestore.instance
-                                //     .collection(Gv.negara)
-                                //     .doc(Gv.negeri)
-                                //     .collection('passenger_account')
-                                //     .doc('${passengerPhone.value}')
-                                //     .collection('my_active_job')
-                                //     .doc('${passengerPhone.value}')
-                                //     .update({
-                                //   'found_a_driver': true,
-                                //   'lite_job_id': Gv.liteJobId,
-                                //   'job_is_available': false,
-                                //   'job_is_taken_by': Gv.loggedUser,
-                                //   'order_status': 'driver_accepted_job',
-                                //   'x_driver_selfie': Gv.driverSelfie,
-                                //   'x_driver_geopoint': GeoPoint(Gv.driverGp!.latitude, Gv.driverGp!.longitude),
-                                // });
-                                if (context.mounted) {
-                                  Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
-                                );}                      
-
-                              },
+  if (context.mounted) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+    );
+  }
+},
+                            
+                            
+                            
+                            
                             ),
                           ],
                         ),
