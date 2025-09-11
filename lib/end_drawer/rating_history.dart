@@ -47,7 +47,7 @@ class RatingHistory extends StatelessWidget {
           final docs = snap.data?.docs ?? const [];
           // Counters
           int star1 = 0, star2 = 0, star3 = 0, star4 = 0, star5 = 0;
-          int good = 0, average = 0, bad = 0;
+          int excellent = 0, good = 0, bad = 0;
 
           for (final d in docs) {
             final m = d.data();
@@ -80,9 +80,9 @@ class RatingHistory extends StatelessWidget {
 
             // Comment status by rating
             if (r >= 4.5) {
-              good++;
+              excellent++;
             } else if (r >= 3.0) {
-              average++;
+              good++;
             } else {
               bad++;
             }
@@ -196,9 +196,9 @@ class RatingHistory extends StatelessWidget {
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      row('Positive', '0'),
-                      row('Negative', '0'),
-                      row('Violation', '0'),
+                      row('Excellent', excellent.toString()),
+                      row('Good', good.toString()),
+                      row('Bad', bad.toString()),
                     ],
                   ),
                 ),

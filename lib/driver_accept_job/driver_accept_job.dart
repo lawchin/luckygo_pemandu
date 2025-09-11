@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:luckygo_pemandu/driver_accept_job/driver_sos_location_tracker.dart';
 import 'package:luckygo_pemandu/driver_accept_job/job_status_updater.dart';
 import 'package:luckygo_pemandu/driver_accept_job/receipt_page.dart';
@@ -47,6 +48,131 @@ class _DAJState extends State<DAJ> {
   static const String _TAG = '[DAJ]';
 
   bool _paymentDone = false; // marks that "Payment Received" was pressed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void _showRouteOptions(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (BuildContext ctx) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.directions_car),
+              label: const Text('Driver - Pickup'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2F69FE),
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _d('Driver - Pickup tapped');
+                _openDriverToPickupInGoogleMaps(context);
+              },
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.location_on),
+              label: const Text('Pickup - Destination'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2F69FE),
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _d('Pickup - Destination tapped');
+                _openPickupToDestinationInGoogleMaps(context);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+
+
+void _openPickupToDestinationInGoogleMaps(BuildContext context) {
+  // Replace these with your actual coordinates or logic
+  final pickupLatLng = LatLng(Gv.passengerGp.latitude, Gv.passengerGp.longitude);
+  final destinationLatLng = LatLng(Gv.destinationGp.latitude, Gv.destinationGp.longitude);
+
+  final url = Uri.parse(
+    'https://www.google.com/maps/dir/?api=1'
+    '&origin=${pickupLatLng.latitude},${pickupLatLng.longitude}'
+    '&destination=${destinationLatLng.latitude},${destinationLatLng.longitude}'
+    '&travelmode=driving',
+  );
+
+  launchUrl(url, mode: LaunchMode.externalApplication);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -373,61 +499,7 @@ if (!snap.hasData || !snap.data!.exists) {
                                           );
                                         },
                                       );
-
-
-                                        // showDialog(
-                                        //   context: context,
-                                        //   barrierDismissible: false,
-                                        //   builder: (ctx2) {
-                                        //     return AlertDialog(
-                                        //       title: const Text('Are you sure you want to proceed with this SOS emergency?'),
-                                        //       content: const Text(
-                                        //         'This method will alert Admin to call both driver & passenger for further details',
-                                        //         style: TextStyle(color: Colors.redAccent),
-                                        //       ),
-                                        //       actions: [
-                                        //         TextButton(
-                                        //           onPressed: () => Navigator.of(ctx2).pop(),
-                                        //           child: const Text('No'),
-                                        //         ),
-                                        //         ElevatedButton(
-                                        //           onPressed: () async {
-                                        //             Navigator.of(ctx2).pop();
-
-                                        //             // 1) Build & keep a stable ID for this SOS session
-                                        //             final String sosId = Gv.currentSosId ??= '${getFormattedDate()}(${Gv.loggedUser})';
-
-                                        //             // 2) Start live tracking (similar to passenger version but for driver)
-                                        //             await DriverSosLocationTracker.instance.start(sosId: sosId);
-
-
-                                        //             // 3) Add driver-specific SOS details into the same doc
-                                        //             final doc = FirebaseFirestore.instance
-                                        //                 .collection(Gv.negara)
-                                        //                 .doc(Gv.negeri)
-                                        //                 .collection('help_center')
-                                        //                 .doc('SOS')
-                                        //                 .collection('sos_data')
-                                        //                 .doc(sosId);
-
-                                        //             await doc.set({
-                                        //               'driverName': Gv.userName,
-                                        //               'driverPhone': Gv.loggedUser,
-                                        //               'trigger_by': 'driver',
-                                        //               'trigger_time': FieldValue.serverTimestamp(),
-                                        //               'status': 'active',
-                                        //               'driver_vehicle_details': Gv.driverVehicleDetails,
-                                        //             }, SetOptions(merge: true));
-                                        //           },
-                                        //           child: const Text('Yes'),
-                                        //         ),
-
-                                        //       ],
-                                        //     );
-                                        //   },
-                                        // );
-                                      
-                                      
+                                   
                                       
                                       
                                       },
@@ -775,7 +847,8 @@ if (!snap.hasData || !snap.data!.exists) {
                                 color: const Color(0xFF2F69FE),
                                 onTap: () {
                                   _d('Map button tapped');
-                                  _openDriverToPickupInGoogleMaps(context);
+                                  // _openDriverToPickupInGoogleMaps(context);
+                                  _showRouteOptions(context);
                                 },
                               ),
                               const SizedBox(width: 10),

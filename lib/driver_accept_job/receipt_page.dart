@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:luckygo_pemandu/driver_accept_job/rate_passenger_button.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
 import 'package:luckygo_pemandu/view15/global_variables_for_view15.dart';
@@ -340,153 +341,237 @@ class ReceiptPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Rate Passenger
-                      OutlinedButton.icon(
-                        icon: const Icon(Icons.star_rate),
-                        label: const Text('Rate Passenger'),
-                        onPressed: () async {
-                          final messenger = ScaffoldMessenger.of(context);
+//                       // Rate Passenger
+//                       OutlinedButton.icon(
+//                         icon: const Icon(Icons.star_rate),
+//                         label: const Text('Rate Passenger'),
+//                         onPressed: () async {
+//                           final messenger = ScaffoldMessenger.of(context);
 
-                          int selected = 0; // 0..5
-                          String? error;
-                          String commentText = '';
+//                           int selected = 0; // 0..5
+//                           String? error;
+//                           String commentText = '';
+//                           String commentLevel = '';
 
-                          final result = await showDialog<Map<String, dynamic>>(
-                            context: context,
-                            useRootNavigator: true,
-                            barrierDismissible: false,
-                            builder: (dialogCtx) {
-                              return StatefulBuilder(
-                                builder: (ctx, setState) {
-                                  return AlertDialog(
-                                    scrollable: true,
-                                    insetPadding: const EdgeInsets.symmetric(
-                                        horizontal: 24, vertical: 24),
-                                    titlePadding:
-                                        const EdgeInsets.fromLTRB(20, 12, 8, 0),
-                                    contentPadding:
-                                        const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                                    actionsPadding:
-                                        const EdgeInsets.only(bottom: 12),
-                                    title: Row(
-                                      children: [
-                                        const Expanded(child: Text('Rate Passenger')),
-                                        IconButton(
-                                          tooltip: 'Close',
-                                          color: Colors.red,
-                                          onPressed: () =>
-                                              Navigator.of(dialogCtx, rootNavigator: true).pop(),
-                                          icon: const Icon(Icons.close),
-                                        ),
-                                      ],
-                                    ),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text('How was your passenger?'),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: List.generate(5, (i) {
-                                            final idx = i + 1;
-                                            final isOn = idx <= selected;
-                                            return IconButton(
-                                              iconSize: 32,
-                                              splashRadius: 22,
-                                              icon: Icon(Icons.star,
-                                                  color: isOn ? Colors.amber : Colors.grey),
-                                              onPressed: () {
-                                                setState(() {
-                                                  selected = idx;
-                                                  error = null;
-                                                });
-                                              },
-                                            );
-                                          }),
-                                        ),
-                                        if (error != null) ...[
-                                          const SizedBox(height: 4),
-                                          Text(error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
-                                        ],
-                                        const SizedBox(height: 12),
-                                        TextField(
-                                          maxLines: 3,
-                                          onChanged: (v) => commentText = v,
-                                          decoration: const InputDecoration(
-                                            labelText: 'Comment (optional)',
-                                            hintText: 'Add any feedback for the passenger',
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                      ],
-                                    ),
-                                    actionsAlignment: MainAxisAlignment.center,
-                                    actions: [
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          if (selected == 0) {
-                                            setState(() => error = 'Please select a star rating.');
-                                            return;
-                                          }
 
-                                          await FirebaseFirestore.instance
-                                              .collection(Gv.negara)
-                                              .doc(Gv.negeri)
-                                              .collection('passenger_account')
-                                              .doc(Gv.passengerPhone)
-                                              .collection('rating_history')
-                                              .add({
-                                            'rate_by_driver': '${Gv.userName} ${Gv.loggedUser}',
-                                            'rating': selected,
-                                            'comment': commentText.trim(),
-                                            'timestamp': FieldValue.serverTimestamp(),
-                                          });
 
-                                          await FirebaseFirestore.instance
-                                              .collection(Gv.negara)
-                                              .doc(Gv.negeri)
-                                              .collection('passenger_account')
-                                              .doc(Gv.passengerPhone)
-                                              .collection('notification_page') 
-                                              .add({
-                                            'notification_date': FieldValue.serverTimestamp(),
-                                            'notification_description':
-                                                'You have received $selected⭐ rating from ${Gv.userName}\n\nKeep up the good work!',
-                                            'notification_seen': false,
-                                          });
+const RatePassengerButton(),
 
-                                          Navigator.of(dialogCtx, rootNavigator: true).pop({
-                                            'rating': selected,
-                                            'comment': commentText.trim(),
-                                          });
-                                        },
-                                        child: const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                                          child: Text('Submit'),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          );
 
-                          if (result != null) {
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'You gave ${result['rating']} star(s). Comment: "${result['comment']}"',
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+
+
+
+
+
+
+
+
+
+
+
+
+// // int selected = 0;
+// // String? error;
+// // String commentText = '';
+// // String commentLevel = '';
+
+// final result = await showDialog<Map<String, dynamic>>(
+//   context: context,
+//   useRootNavigator: true,
+//   barrierDismissible: false,
+//   builder: (dialogCtx) {
+//     return StatefulBuilder(
+//       builder: (ctx, setState) {
+//         bool commentEnabled;
+//         if (selected >= 5) {
+//           commentLevel = 'Excellent';
+//           commentEnabled = false;
+//         } else if (selected == 4) {
+//           commentLevel = 'Good';
+//           commentEnabled = false;
+//         } else if (selected > 0) {
+//           commentLevel = 'Bad';
+//           commentEnabled = true;
+//         } else {
+//           commentLevel = '';
+//           commentEnabled = true;
+//         }
+
+//         return AlertDialog(
+//           scrollable: true,
+//           insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+//           titlePadding: const EdgeInsets.fromLTRB(20, 12, 8, 0),
+//           contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+//           actionsPadding: const EdgeInsets.only(bottom: 12),
+//           title: Row(
+//             children: [
+//               const Expanded(child: Text('Rate Passenger')),
+//               IconButton(
+//                 tooltip: 'Close',
+//                 color: Colors.red,
+//                 onPressed: () => Navigator.of(dialogCtx, rootNavigator: true).pop(),
+//                 icon: const Icon(Icons.close),
+//               ),
+//             ],
+//           ),
+//           content: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             children: [
+//               const Align(
+//                 alignment: Alignment.centerLeft,
+//                 child: Text('How was your passenger?'),
+//               ),
+//               const SizedBox(height: 12),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: List.generate(5, (i) {
+//                   final idx = i + 1;
+//                   final isOn = idx <= selected;
+//                   return IconButton(
+//                     iconSize: 32,
+//                     splashRadius: 22,
+//                     icon: Icon(Icons.star, color: isOn ? Colors.amber : Colors.grey),
+//                     onPressed: () {
+//                       setState(() {
+//                         selected = idx;
+//                         error = null;
+//                         // reset typed comment automatically for 4–5 so we don't save stale text
+//                         if (selected >= 4) commentText = '';
+//                       });
+//                     },
+//                   );
+//                 }),
+//               ),
+//               if (error != null) ...[
+//                 const SizedBox(height: 4),
+//                 Text(error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+//               ],
+//               if (commentLevel.isNotEmpty) ...[
+//                 const SizedBox(height: 8),
+//                 Align(
+//                   alignment: Alignment.centerLeft,
+//                   child: Text(
+//                     'Level: $commentLevel',
+//                     style: const TextStyle(fontWeight: FontWeight.w600),
+//                   ),
+//                 ),
+//               ],
+//               const SizedBox(height: 8),
+//               TextField(
+//                 enabled: commentEnabled, // ← disabled for 4–5 stars
+//                 maxLines: 3,
+//                 onChanged: (v) => commentText = v,
+//                 decoration: InputDecoration(
+//                   labelText: 'Comment',
+//                   hintText: commentEnabled
+//                       ? 'Add any feedback for the passenger'
+//                       : 'Disabled for 4–5★',
+//                   border: const OutlineInputBorder(),
+//                 ),
+//               ),
+//               const SizedBox(height: 10),
+//             ],
+//           ),
+//           actionsAlignment: MainAxisAlignment.center,
+//           actions: [
+//             ElevatedButton(
+//               onPressed: () async {
+//                 if (selected == 0) {
+//                   setState(() => error = 'Please select a star rating.');
+//                   return;
+//                 }
+
+//                 final level = (selected >= 5)
+//                     ? 'Excellent'
+//                     : (selected == 4)
+//                         ? 'Good'
+//                         : 'Bad';
+//                 final saveComment = (selected <= 3) ? commentText.trim() : '';
+
+//                 await FirebaseFirestore.instance
+//                     .collection(Gv.negara)
+//                     .doc(Gv.negeri)
+//                     .collection('passenger_account')
+//                     .doc(Gv.passengerPhone)
+//                     .collection('rating_history')
+//                     .add({
+//                   'rate_by_driver': '${Gv.userName} ${Gv.loggedUser}',
+//                   'rating': selected,
+//                   'comment': saveComment,
+//                   'comment_level': level,
+//                   'timestamp': FieldValue.serverTimestamp(),
+//                 });
+
+//                 await FirebaseFirestore.instance
+//                     .collection(Gv.negara)
+//                     .doc(Gv.negeri)
+//                     .collection('passenger_account')
+//                     .doc(Gv.passengerPhone)
+//                     .collection('notification_page')
+//                     .add({
+//                   'notification_date': FieldValue.serverTimestamp(),
+//                   'notification_description':
+//                       'You have received $selected⭐ rating from ${Gv.userName}\n\nKeep up the good work!',
+//                   'notification_seen': false,
+//                 });
+
+//                 Navigator.of(dialogCtx, rootNavigator: true).pop({
+//                   'rating': selected,
+//                   'comment': saveComment,
+//                   'comment_level': level,
+//                 });
+//               },
+//               child: const Padding(
+//                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+//                 child: Text('Submit'),
+//               ),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   },
+// );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//                           if (result != null) {
+//                             messenger.showSnackBar(
+//                               SnackBar(
+//                                 content: Text(
+//                                   'You gave ${result['rating']} star(s). Comment: "${result['comment']}"',
+//                                 ),
+//                               ),
+//                             );
+//                           }
+//                         },
+//                       ),
 
                       const SizedBox(width: 10),
 
