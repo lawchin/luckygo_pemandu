@@ -18,7 +18,7 @@ import 'package:luckygo_pemandu/end_drawer/whatsapp_group_page.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
-import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
+import 'package:luckygo_pemandu/job_view/job_category_view.dart';
 import 'package:luckygo_pemandu/landing page/disclosure_accepted_page.dart';
 import 'package:luckygo_pemandu/landing%20page/help_center.dart';
 import 'package:luckygo_pemandu/landing%20page/presenter_page.dart';
@@ -798,10 +798,16 @@ body: Stack(
                       minimumSize: const Size.fromHeight(48),
                     ),
                     onPressed: () {
+                      // Navigator.of(context).push(
+                      //   MaterialPageRoute(
+                      //     settings: const RouteSettings(name: 'FJOS2'),
+                      //     builder: (_) => const FilterJobsOneStream(),
+                      //   ),
+                      // );
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          settings: const RouteSettings(name: 'FJOS2'),
-                          builder: (_) => const FilterJobsOneStream2(),
+                          settings: const RouteSettings(name: 'JCV'),
+                          builder: (_) => JCV(),
                         ),
                       );
                     },
@@ -898,7 +904,7 @@ StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
 
 
     Gv.ratingCount = (data['rating_count'] ?? 0).toDouble();
-    Gv.vehicleCapacity = (data['vehicle_capacity'] ?? 0).toInt();
+    Gv.vehicleCapacity = (data['reg_vehicle_capacity'] ?? 0).toInt();
 
     // Case 1: Not completed → go to CompleteRegistrationPage
     if (!Gv.form2Completed && !Gv.registrationApproved) {

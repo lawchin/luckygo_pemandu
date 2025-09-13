@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:luckygo_pemandu/driver_accept_job/driver_accept_job.dart';
 import 'package:luckygo_pemandu/global.dart';
-import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream2.dart';
+import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
 import 'package:luckygo_pemandu/view15/countdown_text.dart';
 import 'package:luckygo_pemandu/view15/global_variables_for_view15.dart';
 import 'package:luckygo_pemandu/view15/item_details.dart';
@@ -120,11 +120,23 @@ onPressed: () async {
 
   if (context.mounted) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+      MaterialPageRoute(builder: (_) => const FilterJobsOneStream()),
     );
   }
+
+
+// Navigator.pushAndRemoveUntil(
+//   context,
+//   MaterialPageRoute(builder: (_) => const View15()),
+//   (Route<dynamic> route) => false,
+// );
+// THIS WILL CAUSE BLACK SCREEN
+
+
 },
-                            
+
+
+
                             
                             
                             
@@ -376,7 +388,7 @@ onPressed: () async {
 
                                             if (context.mounted) {
                                               Navigator.of(context).push(
-                                              MaterialPageRoute(builder: (_) => const FilterJobsOneStream2()),
+                                              MaterialPageRoute(builder: (_) => const FilterJobsOneStream()),
                                             );}
 
                                           },

@@ -99,6 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
     // Save user data to Firestore
     final data = {
       'account_balance': 0,
+      'account_active': true,
       'area': area,
       'country': country,
       'com_fixed_or_percentage': false, // ← store commission type
@@ -107,7 +108,6 @@ class _RegisterPageState extends State<RegisterPage> {
       'disclosureAccepted': false,
       'driver_is_on_a_job': false,
       'email': email,
-      'emer'
       'fullname': name,
       'gender': gender, // ← store gender
       'group_capability': 3,
