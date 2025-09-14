@@ -47,7 +47,17 @@
   "plsReload" : "Please reload your account",
   "balanceIs" : "Your balance is",
   "viewActiveJob" : "View Active Job",
-  "noJob" : "The job is no longer available"
+  "noJob" : "The job is no longer available",
+  "nextToYou" : "Next to you",
+  "veryNear" : "Very Near",
+  "quiteNear" : "Quite Near",
+  "stillReachable" : "Still Reachable",
+  "nearbyZone" : "Nearby Zone",
+  "below" : "• 1.5km and below",
+  "oneFive" : "• 1.5km - 3km",
+  "three" : "• 3km - 5km",
+  "five" : "• 5km - 7.5km (Fly)",
+  "seven" : "• 7.5km - 10km (Fly)"
 
 
 

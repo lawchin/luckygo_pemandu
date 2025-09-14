@@ -47,7 +47,17 @@
   "plsReload" : "Sila tambah nilai akaun anda",
   "balanceIs" : "Baki anda ialah",
   "viewActiveJob" : "Lihat Kerja Aktif",
-  "noJob" : "Kerja tidak lagi tersedia"
+  "noJob" : "Kerja tidak lagi tersedia",
+  "nextToYou" : "Berhampiran dengan anda",
+  "veryNear" : "Sangat dekat",
+  "quiteNear" : "Agak dekat",
+  "stillReachable" : "Masih boleh dicapai",
+  "nearbyZone" : "Zon Berdekatan",
+  "below" : "• 1.5km dan ke bawah",
+  "oneFive" : "• 1.5km - 3km",
+  "three" : "• 3km - 5km",
+  "five" : "• 5km - 7.5km (Terbang)",
+  "seven" : "• 7.5km - 10km (Terbang)"
 
 
 

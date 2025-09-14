@@ -18,7 +18,7 @@ import 'package:luckygo_pemandu/end_drawer/whatsapp_group_page.dart';
 import 'package:luckygo_pemandu/gen_l10n/app_localizations.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
-import 'package:luckygo_pemandu/job_view/job_category_view.dart';
+import 'package:luckygo_pemandu/Job_Caterogy_View/job_category_view.dart';
 import 'package:luckygo_pemandu/landing page/disclosure_accepted_page.dart';
 import 'package:luckygo_pemandu/landing%20page/help_center.dart';
 import 'package:luckygo_pemandu/landing%20page/presenter_page.dart';

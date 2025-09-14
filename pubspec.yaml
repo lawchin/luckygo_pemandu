@@ -122,7 +122,7 @@ flutter:
     - assets/images/geofencing.png
     - assets/images/nearest_exit.png
     - assets/images/luckygo_icon.png
-    - assets/images/shopping.png
+    - assets/images/jcv_bg.png
 
 flutter_icons:
   android: "ic_launcher"

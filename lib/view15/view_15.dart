@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:luckygo_pemandu/Job_Caterogy_View/job_category_view.dart';
 import 'package:luckygo_pemandu/driver_accept_job/driver_accept_job.dart';
 import 'package:luckygo_pemandu/global.dart';
 import 'package:luckygo_pemandu/jobFilter/filter_job_one_stream.dart';
@@ -66,7 +67,7 @@ class View15 extends StatelessWidget {
                 final data = snap.data!.data()!;
                 passengerName.value   = (data['job_creator_name'] ?? '') as String;
                 passengerPhone.value  = (data['job_created_by'] ?? '') as String;
-                passengerSelfie.value = (data['passenger_selfie'] ?? '') as String;
+                passengerSelfie.value = (data['y_passenger_selfie'] ?? '') as String;
                 
                 Gv.passengerGp = data['z_source'] is GeoPoint
                     ? data['z_source'] as GeoPoint
@@ -107,35 +108,53 @@ class View15 extends StatelessWidget {
                                 icon: const Icon(Icons.close, color: Colors.red),
 
 
-
 onPressed: () async {
   countdownKey.currentState?.cancel();
 
-  await FirebaseFirestore.instance
+  final docRef = FirebaseFirestore.instance
       .collection(Gv.negara)
       .doc(Gv.negeri)
       .collection('active_job')
-      .doc('active_job_lite')
-      .set({Gv.liteJobId: Gv.liteJobData}, SetOptions(merge: true));
+      .doc('active_job_lite');
 
-  if (context.mounted) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const FilterJobsOneStream()),
+  try {
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      final data = snapshot.data();
+
+      if (data == null) return;
+
+      final claimed = Map<String, dynamic>.from(data['claimed_jobs'] ?? {});
+      final jobValue = claimed[Gv.liteJobId];
+
+      if (jobValue == null) return;
+
+      // Restore job to available
+      transaction.update(docRef, {Gv.liteJobId: jobValue});
+
+      // Remove from claimed_jobs
+      claimed.remove(Gv.liteJobId);
+      transaction.update(docRef, {'claimed_jobs': claimed});
+    });
+
+    // ✅ Add to ignore list
+    if (!ignoredLiteJobIds.contains(Gv.liteJobId)) {
+      ignoredLiteJobIds.add(Gv.liteJobId);
+      print('Added to ignore list: ${Gv.liteJobId}');
+    }
+
+    if (context.mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const JCV()),
+      );
+    }
+  } catch (e) {
+    print('Failed to restore job: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to restore job. Please try again.')),
     );
   }
-
-
-// Navigator.pushAndRemoveUntil(
-//   context,
-//   MaterialPageRoute(builder: (_) => const View15()),
-//   (Route<dynamic> route) => false,
-// );
-// THIS WILL CAUSE BLACK SCREEN
-
-
 },
-
-
 
                             
                             
@@ -318,51 +337,131 @@ onPressed: () async {
                                 ),
                                 textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                               ),
-                              onPressed: () async {
-                                countdownKey.currentState?.cancel();
-                                await FirebaseFirestore.instance
-                                    .collection(Gv.negara)
-                                    .doc(Gv.negeri)
-                                    .collection('passenger_account')
-                                    .doc('${passengerPhone.value}')
-                                    .collection('my_active_job')
-                                    .doc('${passengerPhone.value}')
-                                    .update({
-                                  'found_a_driver': true,
-                                  'job_is_available': false,
-                                  'job_is_taken_by': Gv.loggedUser,
-                                  'lite_job_id': Gv.liteJobId,
-                                  'order_status': 'driver_accepted_job',
-                                  'x_driver_distance_to_source': Gv.roadKm,
-                                  'x_driver_eta_to_source': Gv.roadEta,
-                                  'x_driver_name': Gv.userName,
-                                  'x_driver_geopoint': GeoPoint(Gv.driverLat, Gv.driverLng),
-                                  'x_driver_rating' : Gv.ratingCount,
-                                  'x_driver_selfie': Gv.driverSelfie,
-                                  'x_driver_vehicle_details' : Gv.driverVehicleDetails
-                                });
+
+                              // onPressed: () async {
+                              //   countdownKey.currentState?.cancel();
+                              //   await FirebaseFirestore.instance
+                              //       .collection(Gv.negara)
+                              //       .doc(Gv.negeri)
+                              //       .collection('passenger_account')
+                              //       .doc('${passengerPhone.value}')
+                              //       .collection('my_active_job')
+                              //       .doc('${passengerPhone.value}')
+                              //       .update({
+                              //     'found_a_driver': true,
+                              //     'job_is_available': false,
+                              //     'job_is_taken_by': Gv.loggedUser,
+                              //     'lite_job_id': Gv.liteJobId,
+                              //     'order_status': 'driver_accepted_job',
+                              //     'x_driver_distance_to_source': Gv.roadKm,
+                              //     'x_driver_eta_to_source': Gv.roadEta,
+                              //     'x_driver_name': Gv.userName,
+                              //     'x_driver_geopoint': GeoPoint(Gv.driverLat, Gv.driverLng),
+                              //     'x_driver_rating' : Gv.ratingCount,
+                              //     'x_driver_selfie': Gv.driverSelfie,
+                              //     'x_driver_vehicle_details' : Gv.driverVehicleDetails
+                              //   });
 
 
-                                await FirebaseFirestore.instance
-                                        .collection(Gv.negara)
-                                        .doc(Gv.negeri)
-                                        .collection('driver_account')
-                                        .doc(Gv.loggedUser)
-                                        .update({
-                                          'driver_is_on_a_job': true,
-                                          'current_job_id': Gv.liteJobId  ,
-                                          'current_job_at': FieldValue.serverTimestamp(),
-                                        });
+                              //   await FirebaseFirestore.instance
+                              //           .collection(Gv.negara)
+                              //           .doc(Gv.negeri)
+                              //           .collection('driver_account')
+                              //           .doc(Gv.loggedUser)
+                              //           .update({
+                              //             'driver_is_on_a_job': true,
+                              //             'current_job_id': Gv.liteJobId  ,
+                              //             'current_job_at': FieldValue.serverTimestamp(),
+                              //           });
 
 
-                                if (context.mounted) {
-                                  countdownKey.currentState?.cancel();
-                                  Navigator.of(context).pop(); // close this page
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(builder: (_) => const DAJ()),
-                                  );
-                                }
-                              },
+                              //   if (context.mounted) {
+                              //     countdownKey.currentState?.cancel();
+                              //     Navigator.of(context).pop(); // close this page
+                              //     Navigator.of(context).push(
+                              //       MaterialPageRoute(builder: (_) => const DAJ()),
+                              //     );
+                              //   }
+                              // },
+
+
+
+onPressed: () async {
+  countdownKey.currentState?.cancel();
+
+  // ✅ Update passenger job status
+  await FirebaseFirestore.instance
+      .collection(Gv.negara)
+      .doc(Gv.negeri)
+      .collection('passenger_account')
+      .doc('${passengerPhone.value}')
+      .collection('my_active_job')
+      .doc('${passengerPhone.value}')
+      .update({
+    'found_a_driver': true,
+    'job_is_available': false,
+    'job_is_taken_by': Gv.loggedUser,
+    'lite_job_id': Gv.liteJobId,
+    'order_status': 'driver_accepted_job',
+    'x_driver_distance_to_source': Gv.roadKm,
+    'x_driver_eta_to_source': Gv.roadEta,
+    'x_driver_name': Gv.userName,
+    'x_driver_geopoint': GeoPoint(Gv.driverLat, Gv.driverLng),
+    'x_driver_rating': Gv.ratingCount,
+    'x_driver_selfie': Gv.driverSelfie,
+    'x_driver_vehicle_details': Gv.driverVehicleDetails,
+  });
+
+  // ✅ Update driver status
+  await FirebaseFirestore.instance
+      .collection(Gv.negara)
+      .doc(Gv.negeri)
+      .collection('driver_account')
+      .doc(Gv.loggedUser)
+      .update({
+    'driver_is_on_a_job': true,
+    'current_job_id': Gv.liteJobId,
+    'current_job_at': FieldValue.serverTimestamp(),
+  });
+
+  // ✅ Remove from claimed_jobs if matched
+  final docRef = FirebaseFirestore.instance
+      .collection(Gv.negara)
+      .doc(Gv.negeri)
+      .collection('active_job')
+      .doc('active_job_lite');
+
+  try {
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      final data = snapshot.data();
+
+      if (data == null) return;
+
+      final claimed = Map<String, dynamic>.from(data['claimed_jobs'] ?? {});
+      if (claimed.containsKey(Gv.liteJobId)) {
+        claimed.remove(Gv.liteJobId);
+        transaction.update(docRef, {'claimed_jobs': claimed});
+        print('✅ Removed ${Gv.liteJobId} from claimed_jobs');
+      }
+    });
+  } catch (e) {
+    print('❌ Failed to remove from claimed_jobs: $e');
+  }
+
+  // ✅ Navigate to DAJ
+  if (context.mounted) {
+    countdownKey.currentState?.cancel();
+    Navigator.of(context).pop(); // close this page
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const DAJ()),
+    );
+  }
+},
+
+
+
+
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
@@ -377,21 +476,81 @@ onPressed: () async {
                                       child: Builder(
                                         builder: (ctx) => CountdownText(
                                           key: countdownKey,
-                                          onFinished: () async {
-                                            // only called if not cancelled
-                                            await FirebaseFirestore.instance
-                                                .collection(Gv.negara)
-                                                .doc(Gv.negeri)
-                                                .collection('active_job')
-                                                .doc('active_job_lite')
-                                                .set({Gv.liteJobId: Gv.liteJobData}, SetOptions(merge: true));                          
+                                          // onFinished: () async {
+                                          //   // only called if not cancelled
+                                          //   await FirebaseFirestore.instance
+                                          //       .collection(Gv.negara)
+                                          //       .doc(Gv.negeri)
+                                          //       .collection('active_job')
+                                          //       .doc('active_job_lite')
+                                          //       .set({Gv.liteJobId: Gv.liteJobData}, SetOptions(merge: true));                          
 
-                                            if (context.mounted) {
-                                              Navigator.of(context).push(
-                                              MaterialPageRoute(builder: (_) => const FilterJobsOneStream()),
-                                            );}
+                                          //   if (context.mounted) {
+                                          //     Navigator.of(context).push(
+                                          //     MaterialPageRoute(builder: (_) => const FilterJobsOneStream()),
+                                          //   );}
 
-                                          },
+                                          // },
+
+
+onFinished: () async {
+  // only called if not cancelled
+  final docRef = FirebaseFirestore.instance
+      .collection(Gv.negara)
+      .doc(Gv.negeri)
+      .collection('active_job')
+      .doc('active_job_lite');
+
+  try {
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      final data = snapshot.data();
+
+      // ✅ Restore job to available
+      transaction.set(docRef, {Gv.liteJobId: Gv.liteJobData}, SetOptions(merge: true));
+
+      // ✅ Remove from claimed_jobs if matched
+      if (data != null && data.containsKey('claimed_jobs')) {
+        final claimed = Map<String, dynamic>.from(data['claimed_jobs']);
+        if (claimed.containsKey(Gv.liteJobId)) {
+          claimed.remove(Gv.liteJobId);
+          transaction.update(docRef, {'claimed_jobs': claimed});
+          print('✅ Removed ${Gv.liteJobId} from claimed_jobs');
+        }
+      }
+    });
+
+    // ✅ Add to ignore list
+    if (!ignoredLiteJobIds.contains(Gv.liteJobId)) {
+      ignoredLiteJobIds.add(Gv.liteJobId);
+      print('✅ Added ${Gv.liteJobId} to ignoredLiteJobIds');
+    }
+
+    // if (context.mounted) {
+    //   Navigator.of(context).push(
+    //     MaterialPageRoute(builder: (_) => const JCV()),
+    //   );
+    // }
+    
+    if (context.mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const JCV()),
+      );
+    }
+
+
+
+
+  } catch (e) {
+    print('❌ Failed to restore and clean up job: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to finalize job. Please try again.')),
+    );
+  }
+},
+
+
+
                                         ),
                                       ),
                                     ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:luckygo_pemandu/job_view/tips_widget.dart';// adjust path as needed
+import 'package:luckygo_pemandu/view_job_details/tips_widget.dart';// adjust path as needed
 
 class TipsColumn extends StatelessWidget {
   final String tip1;

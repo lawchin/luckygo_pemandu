@@ -189,3 +189,6 @@ String buildSosIdOnce() {
 void clearSosId() {
   Gv.currentSosId = null;
 }
+
+
+List<String> ignoredLiteJobIds = [];

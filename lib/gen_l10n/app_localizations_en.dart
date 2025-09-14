@@ -153,4 +153,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noJob => 'The job is no longer available';
+
+  @override
+  String get nextToYou => 'Next to you';
+
+  @override
+  String get veryNear => 'Very Near';
+
+  @override
+  String get quiteNear => 'Quite Near';
+
+  @override
+  String get stillReachable => 'Still Reachable';
+
+  @override
+  String get nearbyZone => 'Nearby Zone';
+
+  @override
+  String get below => '• 1.5km and below';
+
+  @override
+  String get oneFive => '• 1.5km - 3km';
+
+  @override
+  String get three => '• 3km - 5km';
+
+  @override
+  String get five => '• 5km - 7.5km (Fly)';
+
+  @override
+  String get seven => '• 7.5km - 10km (Fly)';
 }

@@ -387,6 +387,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The job is no longer available'**
   String get noJob;
+
+  /// No description provided for @nextToYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Next to you'**
+  String get nextToYou;
+
+  /// No description provided for @veryNear.
+  ///
+  /// In en, this message translates to:
+  /// **'Very Near'**
+  String get veryNear;
+
+  /// No description provided for @quiteNear.
+  ///
+  /// In en, this message translates to:
+  /// **'Quite Near'**
+  String get quiteNear;
+
+  /// No description provided for @stillReachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Still Reachable'**
+  String get stillReachable;
+
+  /// No description provided for @nearbyZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby Zone'**
+  String get nearbyZone;
+
+  /// No description provided for @below.
+  ///
+  /// In en, this message translates to:
+  /// **'• 1.5km and below'**
+  String get below;
+
+  /// No description provided for @oneFive.
+  ///
+  /// In en, this message translates to:
+  /// **'• 1.5km - 3km'**
+  String get oneFive;
+
+  /// No description provided for @three.
+  ///
+  /// In en, this message translates to:
+  /// **'• 3km - 5km'**
+  String get three;
+
+  /// No description provided for @five.
+  ///
+  /// In en, this message translates to:
+  /// **'• 5km - 7.5km (Fly)'**
+  String get five;
+
+  /// No description provided for @seven.
+  ///
+  /// In en, this message translates to:
+  /// **'• 7.5km - 10km (Fly)'**
+  String get seven;
 }
 
 class _AppLocalizationsDelegate

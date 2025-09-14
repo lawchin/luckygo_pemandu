@@ -153,4 +153,34 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get noJob => 'Kerja tidak lagi tersedia';
+
+  @override
+  String get nextToYou => 'Berhampiran dengan anda';
+
+  @override
+  String get veryNear => 'Sangat dekat';
+
+  @override
+  String get quiteNear => 'Agak dekat';
+
+  @override
+  String get stillReachable => 'Masih boleh dicapai';
+
+  @override
+  String get nearbyZone => 'Zon Berdekatan';
+
+  @override
+  String get below => '• 1.5km dan ke bawah';
+
+  @override
+  String get oneFive => '• 1.5km - 3km';
+
+  @override
+  String get three => '• 3km - 5km';
+
+  @override
+  String get five => '• 5km - 7.5km (Terbang)';
+
+  @override
+  String get seven => '• 7.5km - 10km (Terbang)';
 }

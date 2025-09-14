@@ -47,7 +47,17 @@
   "plsReload" : "请充值您的账户",
   "balanceIs" : "您的余额是",
   "viewActiveJob" : "查看当前任务",
-  "noJob" : "该任务已不再可用"
+  "noJob" : "该任务已不再可用",
+  "nextToYou" : "在您附近",
+  "veryNear" : "非常接近",
+  "quiteNear" : "相当接近",
+  "stillReachable" : "仍然可达",
+  "nearbyZone" : "附近区域",
+  "below" : "• 1.5公里及以下",
+  "oneFive" : "• 1.5公里 - 3公里",
+  "three" : "• 3公里 - 5公里",
+  "five" : "• 5公里 - 7.5公里（飞行）",
+  "seven" : "• 7.5公里 - 10公里（飞行）"
 
 
 

@@ -152,4 +152,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noJob => '该任务已不再可用';
+
+  @override
+  String get nextToYou => '在您附近';
+
+  @override
+  String get veryNear => '非常接近';
+
+  @override
+  String get quiteNear => '相当接近';
+
+  @override
+  String get stillReachable => '仍然可达';
+
+  @override
+  String get nearbyZone => '附近区域';
+
+  @override
+  String get below => '• 1.5公里及以下';
+
+  @override
+  String get oneFive => '• 1.5公里 - 3公里';
+
+  @override
+  String get three => '• 3公里 - 5公里';
+
+  @override
+  String get five => '• 5公里 - 7.5公里（飞行）';
+
+  @override
+  String get seven => '• 7.5公里 - 10公里（飞行）';
 }
